@@ -15,7 +15,7 @@
 import dimod
 import numpy as np
 
-def avg_kink_density(sampleset):
+def avg_kink_density(sampleset, j_sign="+"):
     """
     Calculate the average kink density for the sampleset. 
 
@@ -31,4 +31,10 @@ def avg_kink_density(sampleset):
     samples_array = sampleset.record.sample
     sign_switches = np.diff(samples_array, prepend=samples_array[:,-1].reshape(len(samples_array),1))
     switches_per_sample = np.count_nonzero(sign_switches, 1)
-    return np.mean(switches_per_sample)/sampleset.record.sample.shape[1]
+    kink_density = np.mean(switches_per_sample)/sampleset.record.sample.shape[1]
+    if j_sign == "-":
+        return 1 - kink_density
+    else: 
+        return kink_density 
+    
+    raise ValueError('J_sign must be "+" or "-" only')
