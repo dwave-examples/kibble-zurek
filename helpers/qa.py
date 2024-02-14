@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 import dimod
+import minorminer
 
 def create_bqm(num_spins=500, coupling_strength=-1):
     """
@@ -30,3 +31,26 @@ def create_bqm(num_spins=500, coupling_strength=-1):
     for spin in range(num_spins):
         bqm.add_quadratic(spin, (spin + 1) % num_spins, coupling_strength)
     return bqm
+
+def find_one_to_one_embedding(ising_chain_length, sampler_edgelist):
+    """
+    Find an embedding of chain_length=1. 
+
+    Args:
+        ising_chain_length: Length of chain
+
+        sampler_edgelist: sampler.edgelist
+
+    Returns:
+        embedding  
+    """
+    bqm = create_bqm(ising_chain_length)
+    for tries in range(3):
+        print(f"Attempt {tries + 1} to find an embedding...")
+        embedding = minorminer.find_embedding(bqm.quadratic, sampler_edgelist)  # Currently using simple minorminer `find_embedding` function
+        if max(len(val) for val in embedding.values()) == 1:
+            print("Found an embedding.")
+            return embedding
+        
+    raise ValueError("Failed to find a good embedding in 3 tries")
+    
