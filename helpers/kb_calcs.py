@@ -20,7 +20,7 @@ import pandas as pd
 schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
 
 A = schedule['A(s) (GHz)']
-B1 = schedule['B(s) (GHz)']
+B1 = schedule['B(s) (GHz)']         # B for J=1 ? 
 C = schedule['C (normalized)']
 
 def theoretical_kink_density(annealing_times_ns, J):
