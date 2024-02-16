@@ -20,7 +20,7 @@ import pandas as pd
 schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
 
 A = schedule['A(s) (GHz)']
-B1 = schedule['B(s) (GHz)']         # B for J=1 ? 
+B = schedule['B(s) (GHz)']         
 C = schedule['C (normalized)']
 
 def theoretical_kink_density(annealing_times_ns, J):
@@ -35,13 +35,12 @@ def theoretical_kink_density(annealing_times_ns, J):
     Returns:
         n(ta).  
     """
-    B = B1*J
     A_tag = A.diff()/C.diff()
     B_tag = B.diff()/C.diff()
 
-    sc_indx = abs(A - B).idxmin()
+    sc_indx = abs(A - B*abs(J)).idxmin()
 
-    b_top = (A[sc_indx]*1e9)*2*np.pi
+    b_top = (A[sc_indx]*0.5*1e9)*2*np.pi
     b_bottom = (B_tag[sc_indx]/B[sc_indx]) - (A_tag[sc_indx]/A[sc_indx])
     b = b_top/b_bottom
 
@@ -64,12 +63,13 @@ def avg_kink_density(sampleset, J):
     """
     samples_array = sampleset.record.sample
     sign_switches = np.diff(samples_array, prepend=samples_array[:,-1].reshape(len(samples_array),1))
-    switches_per_sample = np.count_nonzero(sign_switches, 1)
     
-    kink_density = np.mean(switches_per_sample)/sampleset.record.sample.shape[1]
-
-    if J >= 0:
-        return 1 - kink_density
-    else: 
-        return kink_density 
+    if J < 0:
+        switches_per_sample = np.count_nonzero(sign_switches, 1)
+        kink_density = np.mean(switches_per_sample)/sampleset.record.sample.shape[1]
+    else:
+        non_switches_per_sample = np.count_nonzero(sign_switches==0, 1)
+        kink_density = np.mean(non_switches_per_sample)/sampleset.record.sample.shape[1]
+    
+    return kink_density
     
