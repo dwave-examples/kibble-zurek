@@ -35,6 +35,17 @@ from helpers.kb_calcs import *
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+job_bar = {"READY": [0, "link"],
+#          "WAITING": [0, "dark"],     Placeholder, to remember the color
+           "NO_SOLVER": [100, "danger"],
+           "SUBMITTED": [10, "info"],
+           "PENDING": [50, "warning"],
+           "IN_PROGRESS": [75 ,"primary"],
+           "COMPLETED": [100, "success"],
+           "CANCELLED": [100, "light"],
+           "FAILED": [100, "danger"], }
+
+
 # Problem-submission card
 solver_card = dbc.Card([
     html.H4("Job Submission", className="card-title",
@@ -174,6 +185,28 @@ def update_output(value):
     return f"J={value}"
 
 @app.callback(
+    Output("sample_vs_theory", "figure"),
+    Input("coupling_strength", "value"),
+    State("anneal_duration", "min"),
+    State("anneal_duration", "max"))
+def display_graphics_left(J, ta_min, ta_max):
+    """Generate graphics for theory and samples."""
+
+    trigger = dash.callback_context.triggered
+    trigger_id = trigger[0]["prop_id"].split(".")[0]
+
+    if trigger_id == "coupling_strength":
+        
+        samples = {(J, ta_min): np.NaN, (J, ta_max): np.NaN}
+        fig = plot_kink_densities(samples, [J])
+
+        return fig
+    
+    samples = {(J, ta_min): np.NaN, (J, ta_max): np.NaN}
+    fig = plot_kink_densities(samples, [J])
+    return fig
+
+@app.callback(
     Output("anneal_duration", "disabled"),
     Output("coupling_strength", "disabled") ,
     Output("chain_length", "options"),
@@ -205,7 +238,6 @@ def disable_buttons(job_submit_state, chain_length_options):
 
     else:
         return dash.no_update, dash.no_update, dash.no_update
-
 
 if __name__ == "__main__":
     app.run_server(debug=True)
