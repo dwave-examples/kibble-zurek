@@ -45,6 +45,27 @@ job_bar = {"READY": [0, "link"],
            "CANCELLED": [100, "light"],
            "FAILED": [100, "danger"], }
 
+try:
+    client = Client.from_config(client="qpu")
+    qpus = client.get_solvers(anneal_schedule=True)     # TODO: change to "fast_anneal_time_range"
+    if len(qpus) < 1:
+        client.close()
+        init_job_status = "NO_SOLVER"
+        job_status_color = dict(color="red")
+    else:
+        client = qpus[0]
+        init_job_status = "READY"
+        job_status_color = dict()
+except Exception as client_err:
+    client = None
+    init_job_status = "NO_SOLVER"
+    job_status_color = dict(color="red")
+
+qpu_names = [qpu.name for qpu in qpus]
+config_qpu_selection = Dropdown(
+    id="qpu_selection",
+    options=qpu_names,
+    value=qpu_names[0])
 
 # Problem-submission card
 solver_card = dbc.Card([
@@ -177,6 +198,21 @@ server = app.server
 app.config["suppress_callback_exceptions"] = True
 
 # Callbacks Section
+
+@app.callback(
+    Output("solver_modal", "is_open"),
+    Input("btn_solve_cqm", "n_clicks"),)
+def alert_no_solver(btn_solve_cqm):
+    """Notify if no Leap hybrid CQM solver is accessible."""
+
+    trigger = dash.callback_context.triggered
+    trigger_id = trigger[0]["prop_id"].split(".")[0]
+
+    if trigger_id == "btn_solve_cqm":
+        if not client:
+            return True
+
+    return False
 
 @app.callback(
     Output('coupling_strength_display', 'children'), 
