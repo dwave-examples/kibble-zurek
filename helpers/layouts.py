@@ -35,24 +35,10 @@ config_chain_length = RadioItems(
     {"label": "512", "value": 512, "disabled": False},
     {"label": "1024", "value": 1024, "disabled": False },
     {"label": "2048", "value": 2048, "disabled": False},],
-    value=1024,
+    value=512,
     inline=True,
     inputStyle={"margin-right": "10px", "margin-bottom": "10px"},
     labelStyle={"color": "white", "font-size": 12, "display": "flex"})
-
-# config_coupling_strength = daq.Knob(
-#     id="coupling_strength",
-#     theme = {'dark': True, 'primary': 'red', 'secondary': 'green',},
-#     size=50,
-#     scale={"custom": {0: {"label": "-2", "style": {"color": "blue", "fontSize": 20}}, 
-#                         2: {"label": "0", "style": {"color": "blue", "fontSize": 20}}, 
-#                         3: {"label": "1", "style": {"color": "blue", "fontSize": 20}}}, 
-#             },
-#     min=0,
-#     max=3,
-#     value=1.4,
-#     color={"gradient":True,"ranges":{"red":[0,1.95], "green": [1.95, 2.05], "blue":[2.05,3]}},
-#     style={"backgroundColor": "black", "marginBottom": 5, "marginTop": 5, "marginRight": 5})
 
 config_coupling_strength = html.Div([
     daq.Knob(
