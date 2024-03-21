@@ -167,5 +167,11 @@ app.config["suppress_callback_exceptions"] = True
 
 # Callbacks Section
 
+@app.callback(
+    Output('coupling_strength_display', 'children'), 
+    Input('coupling_strength', 'value'))
+def update_output(value):
+    return f"J={value}"
+
 if __name__ == "__main__":
     app.run_server(debug=True)
