@@ -26,3 +26,21 @@ config_anneal_duration = Input(
     value=7,
     style={"max-width": "95%"})
 
+config_coupling_strength = html.Div([
+    daq.Knob(
+        id="coupling_strength",
+        color={"default": "rgb(243, 120, 32)"},
+        size=50,
+        scale={"custom": {0: {"label": "-2", "style": {"color": "blue", "fontSize": 20}}, 
+                            2: {"label": "0", "style": {"fontColor": "blue", "fontSize": 20}}, 
+                            3: {"label": "1", "style": {"fontColor": "blue", "fontSize": 20}}}, 
+                },
+        style={"marginBottom": 0},
+        min=0,
+        max=3,
+        value=1.4),
+    html.Div(
+    id='coupling_strength_display',
+    style={'width': '100%', "color": "white", "marginLeft": 40, "marginTop": 0}
+    )
+])
