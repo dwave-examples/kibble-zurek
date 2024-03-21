@@ -173,5 +173,39 @@ app.config["suppress_callback_exceptions"] = True
 def update_output(value):
     return f"J={value}"
 
+@app.callback(
+    Output("anneal_duration", "disabled"),
+    Output("coupling_strength", "disabled") ,
+    Output("chain_length", "options"),
+    Input("job_submit_state", "children"),
+    State("chain_length", "options"))
+def disable_buttons(job_submit_state, chain_length_options):
+    """Disable user input during job submissions."""
+
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+
+    if trigger_id !="job_submit_state":
+        return dash.no_update, dash.no_update, dash.no_update
+
+    if any(job_submit_state == status for status in ["SUBMITTED", "PENDING", "IN_PROGRESS"]):
+        
+        chain_length_disable = chain_length_options
+        for inx, option in enumerate(chain_length_disable): 
+            chain_length_disable[inx]['disabled'] = True
+        
+        return  True, True, chain_length_disable
+
+    elif any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
+
+        chain_length_enable = chain_length_options
+        for inx, option in enumerate(chain_length_enable): 
+            chain_length_enable[inx]['disabled'] = False
+        
+        return False, False, chain_length_enable
+
+    else:
+        return dash.no_update, dash.no_update, dash.no_update
+
+
 if __name__ == "__main__":
     app.run_server(debug=True)
