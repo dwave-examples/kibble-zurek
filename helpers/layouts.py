@@ -14,11 +14,11 @@
 
 from dash.dcc import Dropdown, Input, Link, Slider, RadioItems
 import dash_bootstrap_components as dbc
-from dash import html
+from dash import dcc, html
 import dash_daq as daq
 
 __all__ = ["config_anneal_duration", "config_chain_length", 
-    "config_coupling_strength"]#, "config_qpu_selection"]
+    "config_coupling_strength", "status_solver"]
 
 config_anneal_duration = Input(
     id="anneal_duration",
@@ -57,4 +57,27 @@ config_coupling_strength = html.Div([
     id='coupling_strength_display',
     style={'width': '100%', "color": "white", "marginLeft": 40, "marginTop": 0}
     )
+])
+
+status_solver = dbc.Row([
+    dbc.Col([
+        dcc.Checklist([
+        {"label": html.Div(["512"],),
+        "value": True,},], 
+        value=[True], 
+        id=f"512_cached",
+        style={"color": "white"}),
+        dcc.Checklist([
+        {"label": html.Div(["1024"],),
+        "value": True,},], 
+        value=[True], 
+        id=f"1024_cached", 
+        style={"color": "white"}),
+        dcc.Checklist([
+        {"label": html.Div(["2048"],),
+        "value": True,},], 
+        value=[True], 
+        id=f"2048_cached",
+        style={"color": "white"})
+    ])
 ])

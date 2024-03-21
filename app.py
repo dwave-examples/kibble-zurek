@@ -30,6 +30,7 @@ from helpers.tooltips import tool_tips
 from helpers.layouts import *
 from helpers.plots import *
 from helpers.kb_calcs import *
+from helpers.cached_embeddings import cached_embeddings
 
 #from kz import (build_bqm)
 
@@ -61,18 +62,17 @@ except Exception as client_err:
     init_job_status = "NO_SOLVER"
     job_status_color = dict(color="red")
 
-qpu_names = [qpu.name for qpu in qpus]
 config_qpu_selection = Dropdown(
     id="qpu_selection",
-    options=qpu_names,
-    value=qpu_names[0])
+    options=[{"label": qpu.name, "value": indx} for indx, qpu in enumerate(qpus)],
+    placeholder="Select a quantum computer")
 
 # Problem-submission card
 solver_card = dbc.Card([
-    html.H4("Job Submission", className="card-title",
+    html.H4("Simulation", className="card-title",
         style={"color":"rgb(243, 120, 32)"}),
     dbc.Col([
-        dbc.Button("Send", id="btn_solve_cqm", color="primary", className="me-1",
+        dbc.Button("Simulate", id="btn_solve_cqm", color="primary", className="me-1",
             style={"marginBottom":"5px"}),
         dcc.Interval(id="wd_job", interval=None, n_intervals=0, disabled=True, max_intervals=1),
         dbc.Progress(id="bar_job_status", value=job_bar[init_job_status][0],
@@ -80,6 +80,7 @@ solver_card = dbc.Card([
             style={"width": "60%"}),
         html.P(id="job_submit_state", children=f"Status: {init_job_status}",
             style={"color": "white", "fontSize": 12}),
+        status_solver,
         html.P(id="job_submit_time", children="", style = dict(display="none")),
         html.P(id="job_id", children="", style = dict(display="none"))],
         width=12)],
@@ -99,7 +100,8 @@ kz_config = dbc.Card([
                 style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
                 ), 
             html.Div([
-                config_qpu_selection
+                config_qpu_selection,
+                html.P(id="embedding", children="")#, style = dict(display="none"))
                 ]), 
         ], width=9),
         dbc.Col([
@@ -161,7 +163,7 @@ app_layout = [
                     solver_card
                 ])
             ]),
-        ], width=3),
+        ], width=5),
     ], justify="left"),
     dbc.Row([
         dbc.Col(
@@ -215,9 +217,20 @@ def alert_no_solver(btn_solve_cqm):
     return False
 
 @app.callback(
+    Output('embedding', 'children'), 
+    Input('qpu_selection', 'value'))
+def select_qpu(qpus_indx):
+    """Ensure embeddings and schedules"""
+
+    if qpus_indx and qpus[qpus_indx].name in cached_embeddings.keys():
+        embedding_lengths =  list(cached_embeddings[qpus[qpus_indx].name].keys())       
+    
+        return str(embedding_lengths)
+
+@app.callback(
     Output('coupling_strength_display', 'children'), 
     Input('coupling_strength', 'value'))
-def update_output(value):
+def update_j_output(value):
     return f"J={value}"
 
 @app.callback(
