@@ -52,7 +52,7 @@ config_coupling_strength = html.Div([
         style={"marginBottom": 0},
         min=0,
         max=3,
-        value=1.4),
+        value=-1.4+2),
     html.Div(
     id='coupling_strength_display',
     style={'width': '100%', "color": "white", "marginLeft": 40, "marginTop": 0}
@@ -61,23 +61,17 @@ config_coupling_strength = html.Div([
 
 status_solver = dbc.Row([
     dbc.Col([
+        html.P(f"Cached Embeddings",
+            style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
+            ),
         dcc.Checklist([
-        {"label": html.Div(["512"],),
-        "value": True,},], 
-        value=[True], 
-        id=f"512_cached",
-        style={"color": "white"}),
-        dcc.Checklist([
-        {"label": html.Div(["1024"],),
-        "value": True,},], 
-        value=[True], 
-        id=f"1024_cached", 
-        style={"color": "white"}),
-        dcc.Checklist([
-        {"label": html.Div(["2048"],),
-        "value": True,},], 
-        value=[True], 
-        id=f"2048_cached",
-        style={"color": "white"})
+            {"label": html.Div(["512"], style={'color': 'white', 'font-size': 10, "marginRight": 10}), "value": 512,},
+            {"label": html.Div(["1024"], style={'color': 'white', 'font-size': 10, "marginRight": 10}), "value": 1024,},
+            {"label": html.Div(["2048"], style={'color': 'white', 'font-size': 10, "marginRight": 10}), "value": 2048,}], 
+            value=[], 
+            id=f"embedding_is_cached",
+            style={"color": "white"},
+            inline=True
+        ),
     ])
 ])

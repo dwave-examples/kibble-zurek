@@ -105,7 +105,7 @@ kz_config = dbc.Card([
                 ]), 
         ], width=9),
         dbc.Col([
-            html.P(f"Chain Length",
+            html.P(f"Spins",
                 style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
                 ), 
             html.Div([
@@ -217,7 +217,7 @@ def alert_no_solver(btn_solve_cqm):
     return False
 
 @app.callback(
-    Output('embedding', 'children'), 
+    Output('embedding_is_cached', 'value'), 
     Input('qpu_selection', 'value'))
 def select_qpu(qpus_indx):
     """Ensure embeddings and schedules"""
@@ -225,13 +225,16 @@ def select_qpu(qpus_indx):
     if qpus_indx and qpus[qpus_indx].name in cached_embeddings.keys():
         embedding_lengths =  list(cached_embeddings[qpus[qpus_indx].name].keys())       
     
-        return str(embedding_lengths)
+        return embedding_lengths
+
+    return []
 
 @app.callback(
     Output('coupling_strength_display', 'children'), 
     Input('coupling_strength', 'value'))
 def update_j_output(value):
-    return f"J={value}"
+    J = value - 2
+    return f"J={J:.1f}"
 
 @app.callback(
     Output("sample_vs_theory", "figure"),
