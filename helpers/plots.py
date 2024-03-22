@@ -76,7 +76,7 @@ def plot_kink_densities_bg(time_range, coupling_strength):
 
     layout = go.Layout(
         title='Kink Density: Theory Vs. QPU Simulation',
-        xaxis=dict(title='Quench Time [ns]', type="log", range=[0, 2]),
+        xaxis=dict(title='Quench Time [ns]', type="log", range=[0, 2]),     # exponents for log
         yaxis=dict(title='Kink Density', type="log"),
         yaxis2=dict(title='Energy [Joule]',  overlaying='y', side='right', type="log", range=[-23, -25]),
         legend=dict(x=0, y=1)

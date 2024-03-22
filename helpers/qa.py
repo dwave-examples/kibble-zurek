@@ -12,8 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from dwave.cloud.api import exceptions, Problems
 import dimod
 import minorminer
+
+__all__ = ["create_bqm", "find_one_to_one_embedding", "get_job_status"]
 
 def create_bqm(num_spins=500, coupling_strength=-1):
     """
@@ -53,4 +56,19 @@ def find_one_to_one_embedding(ising_chain_length, sampler_edgelist):
             return embedding
         
     raise ValueError("Failed to find a good embedding in 3 tries")
+
+def get_job_status(client, job_id, job_submit_time):
+    """Return status of submitted job."""
+
+    p = Problems.from_config(client.config)
+    try:
+        status = p.get_problem_status(job_id)
+        label_time = dict(status)["label"].split("submitted: ")[1]
+        if label_time == job_submit_time:
+            return status.status.value
+        else:
+            return None
+    except exceptions.ResourceNotFoundError as err:
+        return None
+
     

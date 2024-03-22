@@ -25,12 +25,15 @@ import numpy as np
 import os
 
 from dwave.cloud import Client
+from dwave.embedding import embed_bqm, unembed_sampleset
+from dwave.system import DWaveSampler
 
 from helpers.tooltips import tool_tips
 from helpers.layouts import *
 from helpers.plots import *
 from helpers.kb_calcs import *
 from helpers.cached_embeddings import cached_embeddings
+from helpers.qa import *
 #from kz import build_bqm
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -68,7 +71,7 @@ simulation_card = dbc.Card([
     dbc.Col([
         dbc.Button(
             "Simulate", 
-            id="btn_solve_cqm", 
+            id="btn_simulate", 
             color="primary", 
             className="me-1",
             style={"marginBottom":"5px"}
@@ -82,8 +85,8 @@ simulation_card = dbc.Card([
         ),
         dbc.Progress(
             id="bar_job_status", 
-            value=job_bar[init_job_status][0],
-            color=job_bar[init_job_status][1], 
+            value=0,
+            color="link", 
             className="mb-3",
             style={"width": "60%"}
         ),
@@ -92,12 +95,12 @@ simulation_card = dbc.Card([
             children=f"Status: {init_job_status}",
             style={"color": "white", "fontSize": 12}
         ),
-        status_solver,
         html.P(
             id="job_submit_time", 
             children="", 
             style = dict(display="none")
         ),
+        status_solver,
         html.P(
             id="job_id", 
             children="", 
@@ -132,7 +135,8 @@ kz_config = dbc.Card([
                 config_qpu_selection(qpus),
                 html.P(
                     id="embedding", 
-                    children=""     #, style = dict(display="none"))
+                    children="", 
+                    style = dict(display="none")
                 )
             ]), 
         ], 
@@ -280,14 +284,14 @@ app.config["suppress_callback_exceptions"] = True
 
 @app.callback(
     Output("solver_modal", "is_open"),
-    Input("btn_solve_cqm", "n_clicks"),)
-def alert_no_solver(btn_solve_cqm):
+    Input("btn_simulate", "n_clicks"),)
+def alert_no_solver(btn_simulate):
     """Notify if no Leap hybrid CQM solver is accessible."""
 
     trigger = dash.callback_context.triggered
     trigger_id = trigger[0]["prop_id"].split(".")[0]
 
-    if trigger_id == "btn_solve_cqm":
+    if trigger_id == "btn_simulate":
         if not client:
             return True
 
@@ -303,8 +307,10 @@ def select_qpu(qpu_name):
     """Ensure embeddings and schedules"""
 
     if qpu_name and (qpu_name in cached_embeddings.keys()):
+        
         embedding_lengths =  list(cached_embeddings[qpu_name].keys()) 
-        options = [
+
+        options = [     # Display checklist for cached embeddings
             {"label": 
                 html.Div([f"{length}"], 
                 style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
@@ -313,13 +319,15 @@ def select_qpu(qpu_name):
             }
             for length in ring_lengths 
         ]
-        if qpu_name in schedule_name:
+
+        if qpu_name in schedule_name:   # Red if old version of schedule 
             style = {"color": "white", "fontSize": 12} 
         else:
-           style = {"color": "red", "fontSize": 12}    
+           style = {"color": "red", "fontSize": 12}  
+
         return options, embedding_lengths, best_schedules[qpu_name], style
 
-    options = [
+    options = [     # Default: disable embeddings for all lengths
             {"label": 
                 html.Div([f"{length}"], 
                 style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
@@ -363,7 +371,7 @@ def display_graphics_left(J, ta_min, ta_max):
     Output("chain_length", "options"),
     Input("job_submit_state", "children"),
     State("chain_length", "options"))
-def disable_buttons(job_submit_state, chain_length_options):
+def disable_buttons(job_submit_state, chain_length_options):        # Add cached embeddings
     """Disable user input during job submissions."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -371,7 +379,7 @@ def disable_buttons(job_submit_state, chain_length_options):
     if trigger_id !="job_submit_state":
         return dash.no_update, dash.no_update, dash.no_update
 
-    if any(job_submit_state == status for status in ["SUBMITTED", "PENDING", "IN_PROGRESS"]):
+    if any(job_submit_state == status for status in ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
         
         chain_length_disable = chain_length_options
         for inx, option in enumerate(chain_length_disable): 
@@ -389,6 +397,117 @@ def disable_buttons(job_submit_state, chain_length_options):
 
     else:
         return dash.no_update, dash.no_update, dash.no_update
+
+@app.callback(
+    Output("job_id", "children"),
+    Input("job_submit_time", "children"),
+    State('qpu_selection', 'value'),
+    State('chain_length', 'value'),
+    State('coupling_strength', 'value'),)
+def submit_job(job_submit_time, qpu_name, spins, J):
+    """Submit job and provide job ID."""
+
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+
+    if trigger_id =="job_submit_time":
+
+        solver = qpus[qpu_name]
+
+        bqm = create_bqm(num_spins=spins, coupling_strength=J)
+
+        embedding = cached_embeddings[qpu_name][spins]
+        bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
+
+        computation = solver.sample_bqm(bqm_embedded,
+                    label=f"Examples - KZ Simulation, submitted: {job_submit_time}",
+                    auto_scale=False,
+                    num_reads=100)      # Need final SAPI interface
+
+        return computation.wait_id()
+
+    return dash.no_update
+
+@app.callback(
+    Output("btn_simulate", "disabled"),
+    Output("wd_job", "disabled"),
+    Output("wd_job", "interval"),
+    Output("wd_job", "n_intervals"),
+    Output("job_submit_state", "children"),
+    Output("job_submit_time", "children"),
+    Input("btn_simulate", "n_clicks"),
+    Input("wd_job", "n_intervals"),
+    State("job_id", "children"),
+    State("job_submit_state", "children"),
+    State("job_submit_time", "children"),)
+def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time):
+    """Manage simulation: embedding, job submission."""
+
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+
+    if not any(trigger_id == input for input in ["btn_simulate", "wd_job"]):
+        return dash.no_update, dash.no_update, dash.no_update, \
+            dash.no_update, dash.no_update, dash.no_update
+
+    if trigger_id == "btn_simulate":
+
+        submit_time = datetime.datetime.now().strftime("%c")
+        disable_btn = True
+        disable_watchdog = False
+
+        return disable_btn, disable_watchdog, 0.5*1000, 0, "EMBEDDING", submit_time
+    
+    # if job_submit_state == "EMBEDDING":
+
+    #     return True, False, 0.2*1000, 0, job_submit_state, dash.no_update
+
+    if any(job_submit_state == status for status in
+        ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
+
+        job_submit_state = get_job_status(client, job_id, job_submit_time)
+        if not job_submit_state:
+            job_submit_state = "SUBMITTED"
+            wd_time = 0.2*1000
+        else:
+            wd_time = 1*1000
+
+        return True, False, wd_time, 0, job_submit_state, dash.no_update
+
+    if any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
+
+        disable_btn = False
+        disable_watchdog = True
+
+        return disable_btn, disable_watchdog, 0.1*1000, 0, dash.no_update, dash.no_update
+
+    else:   # Exception state: should only ever happen in testing
+        return False, True, 0, 0, formatting.job_status_to_display("ERROR"), dash.no_update, \
+            "Please restart"
+
+job_bar_display = {
+    "READY": [0, "link"],
+    "EMBEDDING": [0, "dark"],     
+    "NO_SOLVER": [100, "danger"],
+    "SUBMITTED": [10, "info"],
+    "PENDING": [50, "warning"],
+    "IN_PROGRESS": [75 ,"primary"],
+    "COMPLETED": [100, "success"],
+    "CANCELLED": [100, "light"],
+    "FAILED": [100, "danger"], }
+
+@app.callback(
+    Output("bar_job_status", "value"),
+    Output("bar_job_status", "color"),
+    Input("job_submit_state", "children"),)
+def set_progress_bar(job_submit_state):
+    """Update progress bar for job submissions."""
+
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+
+    if trigger_id != "job_submit_state":
+        return job_bar_display["READY"][0], job_bar_display["READY"][1]
+    else:
+        state = job_submit_state
+        return job_bar_display[state][0], job_bar_display[state][1]
 
 if __name__ == "__main__":
     app.run_server(debug=True)
