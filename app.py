@@ -294,18 +294,41 @@ def alert_no_solver(btn_solve_cqm):
     return False
 
 @app.callback(
-    Output('embedding_is_cached', 'value'), 
+    Output('embedding_is_cached', 'options'), 
+    Output('embedding_is_cached', 'value'),
     Output('quench_schedule_filename', 'children'),
+    Output('quench_schedule_filename', 'style'),
     Input('qpu_selection', 'value'))
 def select_qpu(qpu_name):
     """Ensure embeddings and schedules"""
 
     if qpu_name and (qpu_name in cached_embeddings.keys()):
-        embedding_lengths =  list(cached_embeddings[qpu_name].keys())       
-    
-        return embedding_lengths, best_schedules[qpu_name]
+        embedding_lengths =  list(cached_embeddings[qpu_name].keys()) 
+        options = [
+            {"label": 
+                html.Div([f"{length}"], 
+                style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
+            "value": length,
+            "disabled": length not in embedding_lengths
+            }
+            for length in ring_lengths 
+        ]
+        if qpu_name in schedule_name:
+            style = {"color": "white", "fontSize": 12} 
+        else:
+           style = {"color": "red", "fontSize": 12}    
+        return options, embedding_lengths, best_schedules[qpu_name], style
 
-    return [], ""
+    options = [
+            {"label": 
+                html.Div([f"{length}"], 
+                style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
+            "value": length,
+            "disabled": True
+            }
+            for length in ring_lengths  
+        ]
+    return options, [], "", dash.no_update
 
 @app.callback(
     Output('coupling_strength_display', 'children'), 

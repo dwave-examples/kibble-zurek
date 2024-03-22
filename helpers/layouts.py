@@ -19,7 +19,9 @@ from dash import dcc, html
 
 __all__ = ["config_anneal_duration", "config_chain_length", 
     "config_coupling_strength", "config_qpu_selection", "job_bar",
-    "status_solver",]
+    "ring_lengths", "status_solver",]
+
+ring_lengths = [512, 1024, 2048]
 
 config_anneal_duration = Input(
     id="anneal_duration",
@@ -38,7 +40,7 @@ config_chain_length = RadioItems(
             "label": f"{length}", 
             "value": length, 
             "disabled": False
-        } for length in [512, 1024, 2048]
+        } for length in ring_lengths
     ],
     value=512,
     inline=True,
@@ -86,19 +88,20 @@ job_bar = {"READY": [0, "link"],
     "FAILED": [100, "danger"], 
     }
 
-style_status = {'color': 'white', 'font-size': 10, "marginRight": 10}
 status_solver = dbc.Row([
     dbc.Col([
         html.P(
             "Cached Embeddings",
             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
         ),
-        dcc.Checklist([
-            {
-                "label": html.Div([f"{length}"], style=style_status), 
+        dcc.Checklist(
+            options=[{
+                "label": 
+                    html.Div([f"{length}"], 
+                    style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
                 "value": length,
-            } for length in [512, 1024, 2048]   
-        ], 
+                "disabled": True} for length in ring_lengths   
+            ], 
             value=[], 
             id=f"embedding_is_cached",
             style={"color": "white"},
