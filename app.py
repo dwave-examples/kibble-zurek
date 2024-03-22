@@ -23,6 +23,7 @@ import plotly.graph_objects as go
 import datetime
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from dwave.cloud import Client
 
@@ -61,6 +62,13 @@ except Exception as client_err:
     client = None
     init_job_status = "NO_SOLVER"
     job_status_color = dict(color="red")
+
+schedules = [file for file in os.listdir('helpers') if ".csv" in file]
+best_schedules = {}
+for inx, qpu_name in [(inx, name.name) for inx, name in enumerate(qpus)]:
+    for schedule_name in schedules:
+        if qpu_name.split(".")[0] in schedule_name:
+            best_schedules[inx] = schedule_name
 
 config_qpu_selection = Dropdown(
     id="qpu_selection",
@@ -218,16 +226,17 @@ def alert_no_solver(btn_solve_cqm):
 
 @app.callback(
     Output('embedding_is_cached', 'value'), 
+    Output('quench_schedule_filename', 'children'),
     Input('qpu_selection', 'value'))
 def select_qpu(qpus_indx):
     """Ensure embeddings and schedules"""
 
-    if qpus_indx and qpus[qpus_indx].name in cached_embeddings.keys():
+    if qpus_indx and (qpus[qpus_indx].name in cached_embeddings.keys()):
         embedding_lengths =  list(cached_embeddings[qpus[qpus_indx].name].keys())       
     
-        return embedding_lengths
+        return embedding_lengths, best_schedules[qpus_indx]
 
-    return []
+    return [], ""
 
 @app.callback(
     Output('coupling_strength_display', 'children'), 
