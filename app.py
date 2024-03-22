@@ -21,7 +21,6 @@ from dash.dcc import Dropdown
 import plotly.graph_objects as go
 
 import datetime
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 
@@ -32,30 +31,19 @@ from helpers.layouts import *
 from helpers.plots import *
 from helpers.kb_calcs import *
 from helpers.cached_embeddings import cached_embeddings
-
-#from kz import (build_bqm)
+#from kz import build_bqm
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-job_bar = {"READY": [0, "link"],
-#          "WAITING": [0, "dark"],     Placeholder, to remember the color
-           "NO_SOLVER": [100, "danger"],
-           "SUBMITTED": [10, "info"],
-           "PENDING": [50, "warning"],
-           "IN_PROGRESS": [75 ,"primary"],
-           "COMPLETED": [100, "success"],
-           "CANCELLED": [100, "light"],
-           "FAILED": [100, "danger"], }
-
 try:
     client = Client.from_config(client="qpu")
-    qpus = client.get_solvers(anneal_schedule=True)     # TODO: change to "fast_anneal_time_range"
+    # TODO: change to "fast_anneal_time_range"
+    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedule=True)}     
     if len(qpus) < 1:
         client.close()
         init_job_status = "NO_SOLVER"
         job_status_color = dict(color="red")
     else:
-        client = qpus[0]
         init_job_status = "READY"
         job_status_color = dict()
 except Exception as client_err:
@@ -65,65 +53,107 @@ except Exception as client_err:
 
 schedules = [file for file in os.listdir('helpers') if ".csv" in file]
 best_schedules = {}
-for inx, qpu_name in [(inx, name.name) for inx, name in enumerate(qpus)]:
+for qpu_name in qpus:
     for schedule_name in schedules:
         if qpu_name.split(".")[0] in schedule_name:
-            best_schedules[inx] = schedule_name
+            best_schedules[qpu_name] = schedule_name
 
-config_qpu_selection = Dropdown(
-    id="qpu_selection",
-    options=[{"label": qpu.name, "value": indx} for indx, qpu in enumerate(qpus)],
-    placeholder="Select a quantum computer")
-
-# Problem-submission card
-solver_card = dbc.Card([
-    html.H4("Simulation", className="card-title",
-        style={"color":"rgb(243, 120, 32)"}),
+# Simulation panel
+simulation_card = dbc.Card([
+    html.H4(
+        "Simulation", 
+        className="card-title",
+        style={"color":"rgb(243, 120, 32)"}
+    ),
     dbc.Col([
-        dbc.Button("Simulate", id="btn_solve_cqm", color="primary", className="me-1",
-            style={"marginBottom":"5px"}),
-        dcc.Interval(id="wd_job", interval=None, n_intervals=0, disabled=True, max_intervals=1),
-        dbc.Progress(id="bar_job_status", value=job_bar[init_job_status][0],
-            color=job_bar[init_job_status][1], className="mb-3",
-            style={"width": "60%"}),
-        html.P(id="job_submit_state", children=f"Status: {init_job_status}",
-            style={"color": "white", "fontSize": 12}),
+        dbc.Button(
+            "Simulate", 
+            id="btn_solve_cqm", 
+            color="primary", 
+            className="me-1",
+            style={"marginBottom":"5px"}
+        ),
+        dcc.Interval(
+            id="wd_job", 
+            interval=None, 
+            n_intervals=0, 
+            disabled=True, 
+            max_intervals=1
+        ),
+        dbc.Progress(
+            id="bar_job_status", 
+            value=job_bar[init_job_status][0],
+            color=job_bar[init_job_status][1], 
+            className="mb-3",
+            style={"width": "60%"}
+        ),
+        html.P(
+            id="job_submit_state", 
+            children=f"Status: {init_job_status}",
+            style={"color": "white", "fontSize": 12}
+        ),
         status_solver,
-        html.P(id="job_submit_time", children="", style = dict(display="none")),
-        html.P(id="job_id", children="", style = dict(display="none"))],
-        width=12)],
-    color="dark", body=True)
+        html.P(
+            id="job_submit_time", 
+            children="", 
+            style = dict(display="none")
+        ),
+        html.P(
+            id="job_id", 
+            children="", 
+            style = dict(display="none")
+        )
+    ],
+        width=12)
+],
+    color="dark", body=True
+)
 
-# Configuration section
+# Configuration panel
 kz_config = dbc.Card([
     dbc.Row([
         dbc.Col([
-            html.H4("Configuration", className="card-title",
-                style={"color": "rgb(243, 120, 32)"})
-            ])
-            ],id="tour_settings_row"),
+            html.H4(
+                "Configuration", 
+                className="card-title",
+                style={"color": "rgb(243, 120, 32)"}
+            )
+        ])
+    ],
+        id="tour_settings_row"
+    ),
     dbc.Row([
         dbc.Col([
-            html.P(f"QPU",
+            html.P(
+                "QPU",
                 style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-                ), 
+            ), 
             html.Div([
-                config_qpu_selection,
-                html.P(id="embedding", children="")#, style = dict(display="none"))
-                ]), 
-        ], width=9),
+                config_qpu_selection(qpus),
+                html.P(
+                    id="embedding", 
+                    children=""     #, style = dict(display="none"))
+                )
+            ]), 
+        ], 
+            width=9
+        ),
         dbc.Col([
-            html.P(f"Spins",
+            html.P(
+                "Spins",
                 style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-                ), 
+            ), 
             html.Div([
                 config_chain_length
-                ]), 
-        ], width=3),
+            ]), 
+        ], 
+            width=3
+        ),
     ]),
     dbc.Row([
         dbc.Col([
-            html.P(f"Coupling Strength",
+            html.P(
+                "Coupling Strength",
                 style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
             ), 
             html.Div([
@@ -131,7 +161,8 @@ kz_config = dbc.Card([
             ]),
         ]),
         dbc.Col([
-            html.P(f"Anneal Duration [ns]",
+            html.P(
+                "Anneal Duration [ns]",
                 style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
             ),
             html.Div([
@@ -140,69 +171,107 @@ kz_config = dbc.Card([
             ]), 
         ]),
     ]),
-], body=True, color="dark")
+], 
+    body=True, 
+    color="dark"
+)
 
-
-# Graph section
+# Graph panel
 graphs = dbc.Card([
     dbc.Row([
         dbc.Col([
-            dcc.Graph(id="sample_vs_theory", figure=go.Figure())
-        ], width=6),
+            dcc.Graph(
+                id="sample_vs_theory", 
+                figure=go.Figure()
+            )
+        ], 
+            width=6
+        ),
         dbc.Col([
-            dcc.Graph(id=f"sample_kinks")
-        ], width=6),
+            dcc.Graph(
+                id="sample_kinks"
+            )
+        ], 
+            width=6
+        ),
     ]),
-], color="dark"),
-    
-
+], 
+    color="dark"
+)
 
 # Page-layout section
-
 app_layout = [
     dbc.Row([
         dbc.Col(
             kz_config,
             width=6
-            ),
+        ),
         dbc.Col([
             dbc.Row([
                 dbc.Col([
-                    solver_card
+                    simulation_card
                 ])
             ]),
-        ], width=5),
-    ], justify="left"),
+        ], 
+            width=5
+        ),
+    ], 
+        justify="left"
+    ),
     dbc.Row([
         dbc.Col(
-        graphs,   
-        width=12),
-    ], justify="left"),
-    ]
+            graphs,   
+            width=12
+        ),
+    ], 
+        justify="left"
+    ),
+]
 
 # tips = [dbc.Tooltip(
 #             message, target=target, id=f"tooltip_{target}", style = dict())
 #             for target, message in tool_tips.items()]
 # app_layout.extend(tips)
 
-
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
-            html.H1("Coherent Annealing: KZ Simulation", style={"textAlign": "left", "color": "white"})],
-            width=9),
+            html.H1(
+                "Coherent Annealing: KZ Simulation", 
+                style={"textAlign": "left", "color": "white"}
+            )
+        ],
+            width=9
+        ),
         dbc.Col([
-            html.Img(src="assets/dwave_logo.png", height="25px",
-                style={"textAlign": "left"})],
-            width=3)]),
-    dbc.Container(app_layout, fluid=True,
+            html.Img(
+                src="assets/dwave_logo.png", 
+                height="25px",
+                style={"textAlign": "left"}
+            )
+        ],
+            width=3
+        )
+    ]),
+    dbc.Container(
+        app_layout, 
+        fluid=True,
         style={"color": "rgb(3, 184, 255)",
-            "paddingLeft": 10, "paddingRight": 10})],
-    style={"backgroundColor": "black",
+                "paddingLeft": 10, 
+                "paddingRight": 10}
+    )
+],
+    style={
+        "backgroundColor": "black",
         "background-image": "url('assets/electric_squids.png')",
         "background-size": "cover",
-        "paddingLeft": 100, "paddingRight": 100,
-        "paddingTop": 25, "paddingBottom": 50}, fluid=True)
+        "paddingLeft": 100, 
+        "paddingRight": 100,
+        "paddingTop": 25, 
+        "paddingBottom": 50
+    }, 
+    fluid=True
+)
 
 server = app.server
 app.config["suppress_callback_exceptions"] = True
@@ -228,13 +297,13 @@ def alert_no_solver(btn_solve_cqm):
     Output('embedding_is_cached', 'value'), 
     Output('quench_schedule_filename', 'children'),
     Input('qpu_selection', 'value'))
-def select_qpu(qpus_indx):
+def select_qpu(qpu_name):
     """Ensure embeddings and schedules"""
 
-    if qpus_indx and (qpus[qpus_indx].name in cached_embeddings.keys()):
-        embedding_lengths =  list(cached_embeddings[qpus[qpus_indx].name].keys())       
+    if qpu_name and (qpu_name in cached_embeddings.keys()):
+        embedding_lengths =  list(cached_embeddings[qpu_name].keys())       
     
-        return embedding_lengths, best_schedules[qpus_indx]
+        return embedding_lengths, best_schedules[qpu_name]
 
     return [], ""
 
