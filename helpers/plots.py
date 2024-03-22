@@ -12,42 +12,76 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import plotly.graph_objects as go
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
 from helpers.kb_calcs import theoretical_kink_density
 
-__all__ = ["plot_kink_densities"]
+# Temporarily using the standard schedule
+schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
 
-def plot_kink_densities(kink_densities, coupling_strengths):
+A = schedule['A(s) (GHz)']
+B = schedule['B(s) (GHz)']         
+C = schedule['C (normalized)']
+
+# Display in Joule
+a = A/1.5092E24     
+b = B/1.5092E24
+
+__all__ = ["plot_kink_densities_bg"]
+
+def plot_kink_densities_bg(time_range, coupling_strength):
     """
-    Plot found densities versus theory. 
+    Plot density based on theory and energy scales. 
 
     Args:
-        densities: Length of chain
+        time_range: max and min quench times
 
-        coupling_strengths: value of J
+        coupling_strength: value of J
 
     """
     fig = go.Figure()
-    for J in sorted(set(j for (j,ta) in kink_densities.keys())):
-        kink_densities_j = [(ta, val) for (j, ta), val in kink_densities.items() if j==J]
-        n = theoretical_kink_density([ta for (ta, kink) in kink_densities_j], J)
-        fig.add_trace(
-            go.Scatter(
-                x=np.asarray([ta for (ta, kink) in kink_densities_j]), 
-                y=np.asarray(n),
-                mode='lines',
-                name='lines'
-            )
-        )
 
-    fig.update_layout(
-        title='Kink Density: Theory Vs. QPU Samples',
-        xaxis_title='Anneal Time [ns]',
-        yaxis_title='Kink Density',
-        xaxis_type = "log", 
-        yaxis_type = "log"
+    n = theoretical_kink_density(time_range, coupling_strength)
+    
+    trace1 = go.Scatter(
+            x=np.asarray(time_range), 
+            y=np.asarray(n),
+            mode='lines',
+            name='Theory',
+            yaxis="y1",
+            line_color='lightgrey', 
+            line_width=10)
+    
+    trace2 = go.Scatter(
+        x=time_range[1]*C,   # C=1 --> MAX(t_a)     
+        y=a, 
+        mode='lines',
+        name="A(C(s))", 
+        yaxis='y2',
+        line_color='blue',
+        opacity=0.4)
+
+    trace3 = go.Scatter(
+        x=100*C,        
+        y=abs(coupling_strength)*b, 
+        mode='lines',
+        name="B(C(s))", 
+        yaxis='y2',
+        line_color='red',
+        opacity=0.4)
+
+    layout = go.Layout(
+        title='Kink Density: Theory Vs. QPU Simulation',
+        xaxis=dict(title='Quench Time [ns]', type="log", range=[0, 2]),
+        yaxis=dict(title='Kink Density', type="log"),
+        yaxis2=dict(title='Energy [Joule]',  overlaying='y', side='right', type="log", range=[-23, -25]),
+        legend=dict(x=0, y=1)
     )
 
+    fig=go.Figure(data=[trace1, trace2, trace3], layout=layout)
+ 
     return fig

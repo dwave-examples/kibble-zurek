@@ -162,7 +162,7 @@ kz_config = dbc.Card([
         ]),
         dbc.Col([
             html.P(
-                "Anneal Duration [ns]",
+                "Quench Duration [ns]",
                 style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
             ),
             html.Div([
@@ -350,13 +350,11 @@ def display_graphics_left(J, ta_min, ta_max):
 
     if trigger_id == "coupling_strength":
         
-        samples = {(J, ta_min): np.NaN, (J, ta_max): np.NaN}
-        fig = plot_kink_densities(samples, [J])
+        fig = plot_kink_densities_bg([ta_min, ta_max], J)
 
         return fig
     
-    samples = {(J, ta_min): np.NaN, (J, ta_max): np.NaN}
-    fig = plot_kink_densities(samples, [J])
+    fig = plot_kink_densities_bg([ta_min, ta_max], J)
     return fig
 
 @app.callback(
