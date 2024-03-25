@@ -36,6 +36,8 @@ from helpers.cached_embeddings import cached_embeddings
 from helpers.qa import *
 #from kz import build_bqm
 
+from zzz_TMP import placeholder_params      # TEMPORARY UNTIL SAPI ADDS FEATURE PARAMS
+
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 try:
@@ -55,7 +57,7 @@ except Exception as client_err:
     job_status_color = dict(color="red")
 
 schedules = [file for file in os.listdir('helpers') if ".csv" in file]
-best_schedules = {}
+best_schedules = {"NO SCHEDULE FOUND: Using generic schedule": "FALLBACK_SCHEDULE.csv"}
 for qpu_name in qpus:
     for schedule_name in schedules:
         if qpu_name.split(".")[0] in schedule_name:
@@ -322,10 +324,12 @@ def select_qpu(qpu_name):
 
         if qpu_name in schedule_name:   # Red if old version of schedule 
             style = {"color": "white", "fontSize": 12} 
+            schedule = best_schedules[qpu_name]
         else:
-           style = {"color": "red", "fontSize": 12}  
+           style = {"color": "red", "fontSize": 12} 
+           schedule = next(iter(best_schedules)) 
 
-        return options, embedding_lengths, best_schedules[qpu_name], style
+        return options, embedding_lengths, schedule, style
 
     options = [     # Default: disable embeddings for all lengths
             {"label": 
@@ -348,9 +352,15 @@ def update_j_output(value):
 @app.callback(
     Output("sample_vs_theory", "figure"),
     Input("coupling_strength", "value"),
+    Input("job_submit_state", "children"),
+    State("job_id", "children"),
     State("anneal_duration", "min"),
-    State("anneal_duration", "max"))
-def display_graphics_left(J, ta_min, ta_max):
+    State("anneal_duration", "max"),
+    State("anneal_duration", "value"),
+    State('qpu_selection', 'value'),
+    State('chain_length', 'value'),
+    State("sample_vs_theory", "figure"),)
+def display_graphics_left(J, job_submit_state, job_id, ta_min, ta_max, ta, qpu_name, spins, figure):
     """Generate graphics for theory and samples."""
 
     trigger = dash.callback_context.triggered
@@ -362,6 +372,25 @@ def display_graphics_left(J, ta_min, ta_max):
 
         return fig
     
+    if trigger_id == "job_submit_state":
+
+        if job_submit_state == "COMPLETED":
+            
+            sampleset = client.retrieve_answer(job_id).sampleset
+            
+            bqm = create_bqm(num_spins=spins, coupling_strength=J)
+            embedding = cached_embeddings[qpu_name][spins]
+            sampleset_unembedded = unembed_sampleset(sampleset, embedding, bqm)
+            
+            kink_density = avg_kink_density(sampleset_unembedded, J)
+            
+            fig = plot_kink_density(figure, kink_density, ta)
+
+            return fig
+        
+        else:
+            return dash.no_update
+        
     fig = plot_kink_densities_bg([ta_min, ta_max], J)
     return fig
 
@@ -403,8 +432,9 @@ def disable_buttons(job_submit_state, chain_length_options):        # Add cached
     Input("job_submit_time", "children"),
     State('qpu_selection', 'value'),
     State('chain_length', 'value'),
-    State('coupling_strength', 'value'),)
-def submit_job(job_submit_time, qpu_name, spins, J):
+    State('coupling_strength', 'value'),
+    State("anneal_duration", "value"),)
+def submit_job(job_submit_time, qpu_name, spins, J, ta_ns):
     """Submit job and provide job ID."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -413,15 +443,23 @@ def submit_job(job_submit_time, qpu_name, spins, J):
 
         solver = qpus[qpu_name]
 
+        print(qpu_name, solver.name)
+
         bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
         embedding = cached_embeddings[qpu_name][spins]
+
         bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
 
-        computation = solver.sample_bqm(bqm_embedded,
-                    label=f"Examples - KZ Simulation, submitted: {job_submit_time}",
-                    auto_scale=False,
-                    num_reads=100)      # Need final SAPI interface
+        param_dict = {
+            "bqm": bqm_embedded,
+            "anneal_time": 0.001 * ta_ns,
+            "auto_scale": False, 
+            "answer_mode": "raw",
+            "num_reads": 100, 
+            "label": f"Examples - KZ Simulation, submitted: {job_submit_time}",}
+        param_dict = placeholder_params(param_dict)
+        computation = solver.sample_bqm(**param_dict)      # Need final SAPI interface
 
         return computation.wait_id()
 
@@ -480,19 +518,7 @@ def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time):
         return disable_btn, disable_watchdog, 0.1*1000, 0, dash.no_update, dash.no_update
 
     else:   # Exception state: should only ever happen in testing
-        return False, True, 0, 0, formatting.job_status_to_display("ERROR"), dash.no_update, \
-            "Please restart"
-
-job_bar_display = {
-    "READY": [0, "link"],
-    "EMBEDDING": [0, "dark"],     
-    "NO_SOLVER": [100, "danger"],
-    "SUBMITTED": [10, "info"],
-    "PENDING": [50, "warning"],
-    "IN_PROGRESS": [75 ,"primary"],
-    "COMPLETED": [100, "success"],
-    "CANCELLED": [100, "light"],
-    "FAILED": [100, "danger"], }
+        return False, True, 0, 0, "ERROR", dash.no_update, 
 
 @app.callback(
     Output("bar_job_status", "value"),

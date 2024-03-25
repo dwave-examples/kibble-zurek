@@ -18,7 +18,7 @@ from dash.dcc import Dropdown, Input, RadioItems
 from dash import dcc, html
 
 __all__ = ["config_anneal_duration", "config_chain_length", 
-    "config_coupling_strength", "config_qpu_selection", "job_bar",
+    "config_coupling_strength", "config_qpu_selection", "job_bar_display",
     "ring_lengths", "status_solver",]
 
 ring_lengths = [512, 1024, 2048]
@@ -77,8 +77,9 @@ def config_qpu_selection(solvers):
         placeholder="Select a quantum computer"
     )
 
-job_bar = {"READY": [0, "link"],
-#   "WAITING": [0, "dark"],     Placeholder, to remember the color
+job_bar_display = {
+    "READY": [0, "link"],
+    "EMBEDDING": [0, "dark"],     
     "NO_SOLVER": [100, "danger"],
     "SUBMITTED": [10, "info"],
     "PENDING": [50, "warning"],

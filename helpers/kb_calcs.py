@@ -12,9 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import dimod
 import numpy as np
 import pandas as pd
+
+__all__ = ["avg_kink_density", "theoretical_kink_density"]
 
 # Temporarily using the standard schedule, must be replaced with new one
 schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')

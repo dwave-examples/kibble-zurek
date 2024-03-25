@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from helpers.kb_calcs import theoretical_kink_density
+from helpers.kb_calcs import avg_kink_density, theoretical_kink_density
 
 # Temporarily using the standard schedule
 schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
@@ -31,7 +31,7 @@ C = schedule['C (normalized)']
 a = A/1.5092E24     
 b = B/1.5092E24
 
-__all__ = ["plot_kink_densities_bg"]
+__all__ = ["plot_kink_densities_bg", "plot_kink_density"]
 
 def plot_kink_densities_bg(time_range, coupling_strength):
     """
@@ -85,3 +85,18 @@ def plot_kink_densities_bg(time_range, coupling_strength):
     fig=go.Figure(data=[trace1, trace2, trace3], layout=layout)
  
     return fig
+
+def plot_kink_density(fig_dict, kink_density, anneal_time):
+    """"""
+
+    fig=go.Figure(fig_dict)
+
+    return fig.add_trace(
+        go.Scatter(
+            x=[anneal_time], 
+            y=[kink_density], 
+            marker=dict(size=20, 
+                        color="MediumPurple",
+                        symbol="star")
+        )
+    )
