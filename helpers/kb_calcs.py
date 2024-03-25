@@ -17,14 +17,7 @@ import pandas as pd
 
 __all__ = ["avg_kink_density", "theoretical_kink_density"]
 
-# Temporarily using the standard schedule, must be replaced with new one
-schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
-
-A = schedule['A(s) (GHz)']
-B = schedule['B(s) (GHz)']         
-C = schedule['C (normalized)']
-
-def theoretical_kink_density(annealing_times_ns, J):
+def theoretical_kink_density(annealing_times_ns, J, schedule_name):
     """
     Calculate the coherent-theory kink density for the coupling strength & annealing times. 
 
@@ -33,9 +26,21 @@ def theoretical_kink_density(annealing_times_ns, J):
 
         J: Coupling strength
 
+        schedule_name: Filename of anneal schedule
+
     Returns:
         n(ta).  
     """
+
+    if schedule_name:
+        schedule = pd.read_csv(f'helpers/{schedule_name}')
+    else:
+        schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
+
+    A = schedule['A(s) (GHz)']
+    B = schedule['B(s) (GHz)']         
+    C = schedule['C (normalized)']
+
     A_tag = A.diff()/C.diff()
     B_tag = B.diff()/C.diff()
 

@@ -20,20 +20,9 @@ import plotly.graph_objects as go
 
 from helpers.kb_calcs import avg_kink_density, theoretical_kink_density
 
-# Temporarily using the standard schedule
-schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
-
-A = schedule['A(s) (GHz)']
-B = schedule['B(s) (GHz)']         
-C = schedule['C (normalized)']
-
-# Display in Joule
-a = A/1.5092E24     
-b = B/1.5092E24
-
 __all__ = ["plot_kink_densities_bg", "plot_kink_density"]
 
-def plot_kink_densities_bg(time_range, coupling_strength):
+def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
     """
     Plot density based on theory and energy scales. 
 
@@ -42,10 +31,25 @@ def plot_kink_densities_bg(time_range, coupling_strength):
 
         coupling_strength: value of J
 
+        schedule_name: Filename of anneal schedule
+
     """
+    if schedule_name:
+        schedule = pd.read_csv(f'helpers/{schedule_name}')
+    else:
+        schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
+
+    A = schedule['A(s) (GHz)']
+    B = schedule['B(s) (GHz)']         
+    C = schedule['C (normalized)']
+
+    # Display in Joule
+    a = A/1.5092E24     
+    b = B/1.5092E24
+
     fig = go.Figure()
 
-    n = theoretical_kink_density(time_range, coupling_strength)
+    n = theoretical_kink_density(time_range, coupling_strength, schedule_name)
     
     trace1 = go.Scatter(
             x=np.asarray(time_range), 
@@ -66,7 +70,7 @@ def plot_kink_densities_bg(time_range, coupling_strength):
         opacity=0.4)
 
     trace3 = go.Scatter(
-        x=100*C,        
+        x=time_range[1]*C,    # C=1 --> MAX(t_a)     
         y=abs(coupling_strength)*b, 
         mode='lines',
         name="B(C(s))", 

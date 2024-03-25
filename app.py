@@ -57,7 +57,7 @@ except Exception as client_err:
     job_status_color = dict(color="red")
 
 schedules = [file for file in os.listdir('helpers') if ".csv" in file]
-best_schedules = {"NO SCHEDULE FOUND: Using generic schedule": "FALLBACK_SCHEDULE.csv"}
+best_schedules = {"FALLBACK_SCHEDULE.csv"}
 for qpu_name in qpus:
     for schedule_name in schedules:
         if qpu_name.split(".")[0] in schedule_name:
@@ -322,7 +322,7 @@ def select_qpu(qpu_name):
             for length in ring_lengths 
         ]
 
-        if qpu_name in schedule_name:   # Red if old version of schedule 
+        if qpu_name in best_schedules:   # Red if old version of schedule 
             style = {"color": "white", "fontSize": 12} 
             schedule = best_schedules[qpu_name]
         else:
@@ -345,8 +345,8 @@ def select_qpu(qpu_name):
 @app.callback(
     Output('coupling_strength_display', 'children'), 
     Input('coupling_strength', 'value'))
-def update_j_output(value):
-    J = value - 2
+def update_j_output(J_offset):
+    J = J_offset - 2
     return f"J={J:.1f}"
 
 @app.callback(
@@ -359,16 +359,20 @@ def update_j_output(value):
     State("anneal_duration", "value"),
     State('qpu_selection', 'value'),
     State('chain_length', 'value'),
-    State("sample_vs_theory", "figure"),)
-def display_graphics_left(J, job_submit_state, job_id, ta_min, ta_max, ta, qpu_name, spins, figure):
+    State("sample_vs_theory", "figure"),
+    State("quench_schedule_filename", "children"),)
+def display_graphics_left(J_offset, job_submit_state, job_id, ta_min, ta_max, ta, \
+    qpu_name, spins, figure, schedule_filename):
     """Generate graphics for theory and samples."""
 
     trigger = dash.callback_context.triggered
     trigger_id = trigger[0]["prop_id"].split(".")[0]
 
+    J = J_offset - 2
+
     if trigger_id == "coupling_strength":
         
-        fig = plot_kink_densities_bg([ta_min, ta_max], J)
+        fig = plot_kink_densities_bg([ta_min, ta_max], J, schedule_filename)
 
         return fig
     
@@ -391,7 +395,9 @@ def display_graphics_left(J, job_submit_state, job_id, ta_min, ta_max, ta, qpu_n
         else:
             return dash.no_update
         
-    fig = plot_kink_densities_bg([ta_min, ta_max], J)
+    print(schedule_filename)
+        
+    fig = plot_kink_densities_bg([ta_min, ta_max], J, schedule_filename)
     return fig
 
 @app.callback(
@@ -434,16 +440,16 @@ def disable_buttons(job_submit_state, chain_length_options):        # Add cached
     State('chain_length', 'value'),
     State('coupling_strength', 'value'),
     State("anneal_duration", "value"),)
-def submit_job(job_submit_time, qpu_name, spins, J, ta_ns):
+def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns):
     """Submit job and provide job ID."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
+    J = J_offset - 2
+
     if trigger_id =="job_submit_time":
 
         solver = qpus[qpu_name]
-
-        print(qpu_name, solver.name)
 
         bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
