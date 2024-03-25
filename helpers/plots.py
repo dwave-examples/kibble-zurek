@@ -51,42 +51,77 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
 
     n = theoretical_kink_density(time_range, coupling_strength, schedule_name)
     
-    trace1 = go.Scatter(
+    trace1_p = go.Scatter(
             x=np.asarray(time_range), 
-            y=np.asarray(n),
+            y=np.asarray(1.1 * n),
             mode='lines',
-            name='Theory',
+            name='Theory &plusmn;10%',
+            xaxis="x1",
             yaxis="y1",
             line_color='lightgrey', 
-            line_width=10)
+            line_width=1,
+            )
+    
+    trace1_m = go.Scatter(
+            x=np.asarray(time_range), 
+            y=np.asarray(0.90 * n),
+            mode='lines',
+            xaxis="x1",
+            yaxis="y1",
+            line_color='lightgrey', 
+            line_width=1,
+            fill='tonexty',
+            fillcolor="white",
+            showlegend=False,)
     
     trace2 = go.Scatter(
-        x=time_range[1]*C,   # C=1 --> MAX(t_a)     
+        x=C, #time_range[1]*C,   # C=1 --> MAX(t_a)     
         y=a, 
         mode='lines',
         name="A(C(s))", 
+        xaxis="x2",
         yaxis='y2',
         line_color='blue',
         opacity=0.4)
 
     trace3 = go.Scatter(
-        x=time_range[1]*C,    # C=1 --> MAX(t_a)     
+        x=C, #time_range[1]*C,    # C=1 --> MAX(t_a)     
         y=abs(coupling_strength)*b, 
         mode='lines',
         name="B(C(s))", 
+        xaxis="x2",
         yaxis='y2',
         line_color='red',
         opacity=0.4)
 
     layout = go.Layout(
         title='Kink Density: Theory Vs. QPU Simulation',
-        xaxis=dict(title='Quench Time [ns]', type="log", range=[0, 2]),     # exponents for log
-        yaxis=dict(title='Kink Density', type="log"),
-        yaxis2=dict(title='Energy [Joule]',  overlaying='y', side='right', type="log", range=[-23, -25]),
-        legend=dict(x=0, y=1)
+        title_font_color="rgb(243, 120, 32)",
+        xaxis=dict(
+            title='Quench Time [ns]', 
+            type="log", range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)]),     # exponents for log
+        yaxis=dict(
+            title='Kink Density', 
+            type="log"),
+        xaxis2=dict(
+            title={
+                'text': 'C(s)', 
+                'standoff':0}, 
+            overlaying='x1', 
+            side="top", 
+            type="log", 
+            range=[-1, 0]),
+        yaxis2=dict(
+            title='Energy [Joule]',  
+            overlaying='y1', 
+            side='right', 
+            type="linear", 
+            #range=[-26, -22]),
+            range=[0, np.max(b)]),
+        legend=dict(x=0.7, y=0.9)
     )
 
-    fig=go.Figure(data=[trace1, trace2, trace3], layout=layout)
+    fig=go.Figure(data=[trace1_p, trace1_m, trace2, trace3], layout=layout)
  
     return fig
 
@@ -99,8 +134,11 @@ def plot_kink_density(fig_dict, kink_density, anneal_time):
         go.Scatter(
             x=[anneal_time], 
             y=[kink_density], 
-            marker=dict(size=20, 
-                        color="MediumPurple",
-                        symbol="star")
+            xaxis="x1",
+            yaxis="y1",
+            showlegend=False,
+            marker=dict(size=10, 
+                        color="black",
+                        symbol="x")
         )
     )

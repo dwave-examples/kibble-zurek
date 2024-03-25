@@ -57,7 +57,7 @@ except Exception as client_err:
     job_status_color = dict(color="red")
 
 schedules = [file for file in os.listdir('helpers') if ".csv" in file]
-best_schedules = {"FALLBACK_SCHEDULE.csv"}
+best_schedules = {"generic": "FALLBACK_SCHEDULE.csv"}
 for qpu_name in qpus:
     for schedule_name in schedules:
         if qpu_name.split(".")[0] in schedule_name:
@@ -327,7 +327,7 @@ def select_qpu(qpu_name):
             schedule = best_schedules[qpu_name]
         else:
            style = {"color": "red", "fontSize": 12} 
-           schedule = next(iter(best_schedules)) 
+           schedule = best_schedules["generic"]
 
         return options, embedding_lengths, schedule, style
 
@@ -352,6 +352,7 @@ def update_j_output(J_offset):
 @app.callback(
     Output("sample_vs_theory", "figure"),
     Input("coupling_strength", "value"),
+    Input("quench_schedule_filename", "children"),
     Input("job_submit_state", "children"),
     State("job_id", "children"),
     State("anneal_duration", "min"),
@@ -359,10 +360,9 @@ def update_j_output(J_offset):
     State("anneal_duration", "value"),
     State('qpu_selection', 'value'),
     State('chain_length', 'value'),
-    State("sample_vs_theory", "figure"),
-    State("quench_schedule_filename", "children"),)
-def display_graphics_left(J_offset, job_submit_state, job_id, ta_min, ta_max, ta, \
-    qpu_name, spins, figure, schedule_filename):
+    State("sample_vs_theory", "figure"),)
+def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id, ta_min, ta_max, ta, \
+    qpu_name, spins, figure):
     """Generate graphics for theory and samples."""
 
     trigger = dash.callback_context.triggered
@@ -370,7 +370,7 @@ def display_graphics_left(J_offset, job_submit_state, job_id, ta_min, ta_max, ta
 
     J = J_offset - 2
 
-    if trigger_id == "coupling_strength":
+    if trigger_id in ["coupling_strength", "quench_schedule_filename"] :
         
         fig = plot_kink_densities_bg([ta_min, ta_max], J, schedule_filename)
 
@@ -394,8 +394,6 @@ def display_graphics_left(J_offset, job_submit_state, job_id, ta_min, ta_max, ta
         
         else:
             return dash.no_update
-        
-    print(schedule_filename)
         
     fig = plot_kink_densities_bg([ta_min, ta_max], J, schedule_filename)
     return fig
