@@ -13,10 +13,14 @@
 #    limitations under the License.
 
 from dwave.cloud.api import exceptions, Problems
+from dwave.embedding import unembed_sampleset
 import dimod
 import minorminer
 
-__all__ = ["create_bqm", "find_one_to_one_embedding", "get_job_status"]
+
+from helpers.cached_embeddings import cached_embeddings
+
+__all__ = ["create_bqm", "find_one_to_one_embedding", "get_samples", "get_job_status"]
 
 def create_bqm(num_spins=500, coupling_strength=-1):
     """
@@ -71,4 +75,13 @@ def get_job_status(client, job_id, job_submit_time):
     except exceptions.ResourceNotFoundError as err:
         return None
 
+def get_samples(client, job_id, num_spins, J, qpu_name):
+    """Get unembedded sampleset"""
     
+    sampleset = client.retrieve_answer(job_id).sampleset
+            
+    bqm = create_bqm(num_spins=num_spins, coupling_strength=J)
+    embedding = cached_embeddings[qpu_name][num_spins]
+    
+    return  unembed_sampleset(sampleset, embedding, bqm)
+   

@@ -14,9 +14,7 @@
 
 import dash
 import dash_bootstrap_components as dbc
-import dash_daq as daq
 from dash import dcc, html, Input, Output, State
-from dash.dcc import Dropdown
 
 import plotly.graph_objects as go
 
@@ -25,7 +23,7 @@ import numpy as np
 import os
 
 from dwave.cloud import Client
-from dwave.embedding import embed_bqm, unembed_sampleset
+from dwave.embedding import embed_bqm
 from dwave.system import DWaveSampler
 
 from helpers.tooltips import tool_tips
@@ -350,17 +348,6 @@ def update_j_output(J_offset):
     J = J_offset - 2
     return f"J={J:.1f}"
 
-def get_samples(client, job_id, num_spins, J, qpu_name):
-    """Get unembedded sampleset"""
-    
-    sampleset = client.retrieve_answer(job_id).sampleset
-            
-    bqm = create_bqm(num_spins=num_spins, coupling_strength=J)
-    embedding = cached_embeddings[qpu_name][num_spins]
-    
-    return  unembed_sampleset(sampleset, embedding, bqm)
-    
-
 @app.callback(
     Output("sample_vs_theory", "figure"),
     Input("coupling_strength", "value"),
@@ -420,8 +407,6 @@ def display_graphics_right(spins, job_submit_state, job_id, J_offset, qpu_name):
     J = J_offset - 2
    
     if trigger_id == "job_submit_state": 
-
-        print(f"job_submit_state: {job_submit_state}")
     
         if job_submit_state == "COMPLETED":
 

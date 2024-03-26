@@ -99,7 +99,7 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
         opacity=0.4)
 
     layout = go.Layout(
-        title='Kink Density: Theory Vs. QPU Simulation',
+        title='QPU Simulation Vs. Kibble-Zurek Prediction',
         title_font_color="rgb(243, 120, 32)",
         xaxis=dict(
             title='Quench Time [ns]', 
@@ -165,17 +165,12 @@ def plot_spin_orientation(num_spins=512, sample=None):
         cones_red = cones_blue = np.ones(num_spins, dtype=bool)
         num_cones_red = num_cones_blue = num_spins
 
-        print("no sample")
-
     else:
 
-        print(f"sample {sample}")
         cones_red = ~np.isnan(np.where(sample==1, z, np.nan))
         cones_blue = ~cones_red
         num_cones_red = np.count_nonzero(cones_red)
         num_cones_blue = num_spins - num_cones_red
-
-        print(f"cones {num_cones_red, num_cones_blue}")
      
     trace_red = go.Cone(
         x = x[cones_red],
@@ -210,7 +205,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
     fig = go.Figure(
         data=[trace_red, trace_blue],
         layout=go.Layout(
-            title='Spins',
+            title='Spin States',
             title_font_color="rgb(243, 120, 32)",
             showlegend=False,
             margin=dict(b=0,l=0,r=0,t=60),
@@ -222,5 +217,15 @@ def plot_spin_orientation(num_spins=512, sample=None):
             )
         )
     )
+
+    fig.add_layout_image(
+    dict(
+        source="assets/spin_states.png",
+        xref="paper", yref="paper",
+        x=0.05, y=0.05,
+        sizex=0.3, sizey=0.3,
+        xanchor="left", yanchor="bottom"
+    )
+)
 
     return fig
