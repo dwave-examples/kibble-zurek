@@ -14,13 +14,17 @@
 
 
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from helpers.kb_calcs import avg_kink_density, theoretical_kink_density
+import dimod
 
-__all__ = ["plot_kink_densities_bg", "plot_kink_density"]
+from helpers.kb_calcs import avg_kink_density, theoretical_kink_density
+from helpers.qa import create_bqm
+
+__all__ = ["plot_kink_densities_bg", "plot_kink_density", "plot_spin_orientation"]
 
 def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
     """
@@ -142,3 +146,59 @@ def plot_kink_density(fig_dict, kink_density, anneal_time):
                         symbol="x")
         )
     )
+
+
+def plot_spin_orientation(num_spins=512):
+    """"""
+
+    fig = go.Figure()
+
+    bqm = create_bqm(num_spins=num_spins, coupling_strength=-2)
+    G = dimod.to_networkx_graph(bqm)
+
+    t = np.linspace(0, 10, num_spins)
+    x, y, z = np.cos(5*t), np.sin(5*t), t
+
+   
+
+    spin_up_trace = go.Scatter3d(
+        x=x[:int(0.5*num_spins)], y=y[:int(0.5*num_spins)],z=t[:int(0.5*num_spins)],
+        mode='markers',
+        marker=dict(
+            symbol="circle",
+            color="blue",
+            size=2,
+            line_width=2))
+    
+    spin_down_trace = go.Scatter3d(
+        x=x[int(0.5*num_spins):], y=y[int(0.5*num_spins):],z=t[int(0.5*num_spins):],
+        mode='markers',
+        marker=dict(
+            symbol="square",
+            color="green",
+            size=2,
+            line_width=2))
+
+    fig = go.Figure(data=[spin_up_trace, spin_down_trace],
+            layout=go.Layout(
+                title='Spins',
+                title_font_color="rgb(243, 120, 32)",
+                showlegend=False,
+                #margin=dict(b=20,l=5,r=5,t=40),
+                scene=dict(
+                    xaxis=dict(showticklabels=False),
+                    yaxis=dict(showticklabels=False),
+                    zaxis=dict(showticklabels=False),
+                )
+            )
+    )
+
+    # fig = go.Figure(data=go.Scatter(
+    #     x=[1, 2, 3, 4],
+    #     y=[10, 11, 12, 13],
+    #     mode='markers',
+    #     marker=dict(size=[40, 60, 80, 100],
+    #                 color=[0, 1, 2, 3])
+    # ))
+
+    return fig

@@ -187,7 +187,7 @@ graphs = dbc.Card([
     dbc.Row([
         dbc.Col([
             dcc.Graph(
-                id="sample_vs_theory", 
+                id="spin_orientation", 
                 figure=go.Figure()
             )
         ], 
@@ -195,7 +195,8 @@ graphs = dbc.Card([
         ),
         dbc.Col([
             dcc.Graph(
-                id="sample_kinks"
+                id="sample_vs_theory",
+                figure=go.Figure()
             )
         ], 
             width=6
@@ -396,6 +397,23 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
             return dash.no_update
         
     fig = plot_kink_densities_bg([ta_min, ta_max], J, schedule_filename)
+    return fig
+
+@app.callback(
+    Output("spin_orientation", "figure"),
+#    Input("job_submit_state", "children"),
+    Input('chain_length', 'value'),)
+def display_graphics_right(spins):
+    """Generate graphics for spin display."""
+
+    trigger = dash.callback_context.triggered
+    trigger_id = trigger[0]["prop_id"].split(".")[0]
+   
+    if trigger_id == "chain_length":
+         
+        print(f"spins {spins}")
+
+    fig = plot_spin_orientation(num_spins=spins)
     return fig
 
 @app.callback(
