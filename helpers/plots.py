@@ -21,7 +21,7 @@ import plotly.graph_objects as go
 
 import dimod
 
-from helpers.kb_calcs import avg_kink_density, theoretical_kink_density
+from helpers.kb_calcs import theoretical_kink_density
 from helpers.qa import create_bqm
 
 __all__ = ["plot_kink_densities_bg", "plot_kink_density", "plot_spin_orientation"]
@@ -151,6 +151,8 @@ def plot_kink_density(fig_dict, kink_density, anneal_time):
 def plot_spin_orientation(num_spins=512, sample=None):
     """"""
 
+    fig = go.Figure()       # Erase previous plot
+
     conesize = num_spins/20
 
     #sample = np.random.choice([-1, 1], size=num_spins)
@@ -158,15 +160,23 @@ def plot_spin_orientation(num_spins=512, sample=None):
     z = np.linspace(0, 10, num_spins)
     x, y = z*np.cos(5*z), z*np.sin(5*z)
 
-    if sample:
+    if sample is None:
+
+        cones_red = cones_blue = np.ones(num_spins, dtype=bool)
+        num_cones_red = num_cones_blue = num_spins
+
+        print("no sample")
+
+    else:
+
+        print(f"sample {sample}")
         cones_red = ~np.isnan(np.where(sample==1, z, np.nan))
         cones_blue = ~cones_red
         num_cones_red = np.count_nonzero(cones_red)
         num_cones_blue = num_spins - num_cones_red
-    else:
-        cones_red = cones_blue = np.ones(num_spins, dtype=bool)
-        num_cones_red = num_cones_blue = num_spins
 
+        print(f"cones {num_cones_red, num_cones_blue}")
+     
     trace_red = go.Cone(
         x = x[cones_red],
         y = y[cones_red],

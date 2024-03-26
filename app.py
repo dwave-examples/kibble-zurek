@@ -350,6 +350,17 @@ def update_j_output(J_offset):
     J = J_offset - 2
     return f"J={J:.1f}"
 
+def get_samples(client, job_id, num_spins, J, qpu_name):
+    """Get unembedded sampleset"""
+    
+    sampleset = client.retrieve_answer(job_id).sampleset
+            
+    bqm = create_bqm(num_spins=num_spins, coupling_strength=J)
+    embedding = cached_embeddings[qpu_name][num_spins]
+    
+    return  unembed_sampleset(sampleset, embedding, bqm)
+    
+
 @app.callback(
     Output("sample_vs_theory", "figure"),
     Input("coupling_strength", "value"),
@@ -380,17 +391,11 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
     if trigger_id == "job_submit_state":
 
         if job_submit_state == "COMPLETED":
-            
-            sampleset = client.retrieve_answer(job_id).sampleset
-            
-            bqm = create_bqm(num_spins=spins, coupling_strength=J)
-            embedding = cached_embeddings[qpu_name][spins]
-            sampleset_unembedded = unembed_sampleset(sampleset, embedding, bqm)
-            
-            kink_density = avg_kink_density(sampleset_unembedded, J)
+
+            sampleset_unembedded = get_samples(client, job_id, spins, J, qpu_name)              
+            _, kink_density = kink_stats(sampleset_unembedded, J)
             
             fig = plot_kink_density(figure, kink_density, ta)
-
             return fig
         
         else:
@@ -401,19 +406,38 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
 
 @app.callback(
     Output("spin_orientation", "figure"),
-#    Input("job_submit_state", "children"),
-    Input('chain_length', 'value'),)
-def display_graphics_right(spins):
+    Input('chain_length', 'value'),
+    Input("job_submit_state", "children"),
+    State("job_id", "children"),
+    State("coupling_strength", "value"),
+    State('qpu_selection', 'value'),)
+def display_graphics_right(spins, job_submit_state, job_id, J_offset, qpu_name):
     """Generate graphics for spin display."""
 
     trigger = dash.callback_context.triggered
     trigger_id = trigger[0]["prop_id"].split(".")[0]
-   
-    if trigger_id == "chain_length":
-         
-        print(f"spins {spins}")
 
-    fig = plot_spin_orientation(num_spins=spins)
+    J = J_offset - 2
+   
+    if trigger_id == "job_submit_state": 
+
+        print(f"job_submit_state: {job_submit_state}")
+    
+        if job_submit_state == "COMPLETED":
+
+            sampleset_unembedded = get_samples(client, job_id, spins, J, qpu_name)
+            kinks_per_sample, kink_density = kink_stats(sampleset_unembedded, J)
+            best_indx = np.abs(kinks_per_sample - kink_density).argmin()
+            best_sample = sampleset_unembedded.record.sample[best_indx]
+
+            fig = plot_spin_orientation(num_spins=spins, sample=best_sample)
+            return fig
+        
+        else:
+
+            return dash.no_update
+
+    fig = plot_spin_orientation(num_spins=spins, sample=None)
     return fig
 
 @app.callback(

@@ -15,7 +15,7 @@
 import numpy as np
 import pandas as pd
 
-__all__ = ["avg_kink_density", "theoretical_kink_density"]
+__all__ = ["kink_stats", "theoretical_kink_density"]
 
 def theoretical_kink_density(annealing_times_ns, J, schedule_name):
     """
@@ -52,7 +52,7 @@ def theoretical_kink_density(annealing_times_ns, J, schedule_name):
 
     return np.power([t*1e-9 for t in annealing_times_ns], -0.5)/(2*np.pi*np.sqrt(2*b))
 
-def avg_kink_density(sampleset, J):
+def kink_stats(sampleset, J):
     """
     Calculate the average kink density for the sampleset. 
 
@@ -73,9 +73,11 @@ def avg_kink_density(sampleset, J):
     if J < 0:
         switches_per_sample = np.count_nonzero(sign_switches, 1)
         kink_density = np.mean(switches_per_sample)/sampleset.record.sample.shape[1]
+
+        return switches_per_sample, kink_density
     else:
         non_switches_per_sample = np.count_nonzero(sign_switches==0, 1)
         kink_density = np.mean(non_switches_per_sample)/sampleset.record.sample.shape[1]
     
-    return kink_density
+        return non_switches_per_sample, kink_density
     
