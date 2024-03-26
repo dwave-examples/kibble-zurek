@@ -59,7 +59,7 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
             x=np.asarray(time_range), 
             y=np.asarray(1.1 * n),
             mode='lines',
-            name='Theory &plusmn;10%',
+            name='Predicted (&plusmn;10%)',
             xaxis="x1",
             yaxis="y1",
             line_color='lightgrey', 
@@ -122,7 +122,7 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
             type="linear", 
             #range=[-26, -22]),
             range=[0, np.max(b)]),
-        legend=dict(x=0.7, y=0.9)
+        legend=dict(x=0.6, y=0.9)
     )
 
     fig=go.Figure(data=[trace1_p, trace1_m, trace2, trace3], layout=layout)
@@ -148,57 +148,69 @@ def plot_kink_density(fig_dict, kink_density, anneal_time):
     )
 
 
-def plot_spin_orientation(num_spins=512):
+def plot_spin_orientation(num_spins=512, sample=None):
     """"""
 
-    fig = go.Figure()
+    conesize = num_spins/20
 
-    bqm = create_bqm(num_spins=num_spins, coupling_strength=-2)
-    G = dimod.to_networkx_graph(bqm)
+    #sample = np.random.choice([-1, 1], size=num_spins)
 
-    t = np.linspace(0, 10, num_spins)
-    x, y, z = np.cos(5*t), np.sin(5*t), t
+    z = np.linspace(0, 10, num_spins)
+    x, y = z*np.cos(5*z), z*np.sin(5*z)
 
-   
+    if sample:
+        cones_red = ~np.isnan(np.where(sample==1, z, np.nan))
+        cones_blue = ~cones_red
+        num_cones_red = np.count_nonzero(cones_red)
+        num_cones_blue = num_spins - num_cones_red
+    else:
+        cones_red = cones_blue = np.ones(num_spins, dtype=bool)
+        num_cones_red = num_cones_blue = num_spins
 
-    spin_up_trace = go.Scatter3d(
-        x=x[:int(0.5*num_spins)], y=y[:int(0.5*num_spins)],z=t[:int(0.5*num_spins)],
-        mode='markers',
-        marker=dict(
-            symbol="circle",
-            color="blue",
-            size=2,
-            line_width=2))
-    
-    spin_down_trace = go.Scatter3d(
-        x=x[int(0.5*num_spins):], y=y[int(0.5*num_spins):],z=t[int(0.5*num_spins):],
-        mode='markers',
-        marker=dict(
-            symbol="square",
-            color="green",
-            size=2,
-            line_width=2))
-
-    fig = go.Figure(data=[spin_up_trace, spin_down_trace],
-            layout=go.Layout(
-                title='Spins',
-                title_font_color="rgb(243, 120, 32)",
-                showlegend=False,
-                #margin=dict(b=20,l=5,r=5,t=40),
-                scene=dict(
-                    xaxis=dict(showticklabels=False),
-                    yaxis=dict(showticklabels=False),
-                    zaxis=dict(showticklabels=False),
-                )
-            )
+    trace_red = go.Cone(
+        x = x[cones_red],
+        y = y[cones_red],
+        z = z[cones_red],
+        u=num_cones_red*[0],
+        v=num_cones_red*[0],
+        w=num_cones_red*[1],
+        showlegend=False,
+        showscale=False,
+        colorscale=[[0, 'red'], [1, 'red']],
+        hoverinfo=None,
+        sizemode="absolute",
+        sizeref=conesize
     )
 
-    # fig = go.Figure(data=go.Scatter(
-    #     x=[1, 2, 3, 4],
-    #     y=[10, 11, 12, 13],
-    #     mode='markers',
-    #     marker=dict(size=[40, 60, 80, 100],
-    #                 color=[0, 1, 2, 3])
-    # ))
+    trace_blue = go.Cone(
+        x=x[cones_blue],
+        y=y[cones_blue],
+        z=z[cones_blue],
+        u=num_cones_blue*[0],
+        v=num_cones_blue*[0],
+        w=num_cones_blue*[-1],
+        showlegend=False,
+        showscale=False,
+        colorscale=[[0, 'blue'], [1, 'blue']],
+        hoverinfo=None,
+        sizemode="absolute",
+        sizeref=conesize
+    )
+
+    fig = go.Figure(
+        data=[trace_red, trace_blue],
+        layout=go.Layout(
+            title='Spins',
+            title_font_color="rgb(243, 120, 32)",
+            showlegend=False,
+            margin=dict(b=0,l=0,r=0,t=60),
+            scene=dict(
+                xaxis=dict(showticklabels=False, visible=False),
+                yaxis=dict(showticklabels=False, visible=False),
+                zaxis=dict(showticklabels=False, visible=False),
+            camera_eye=dict(x=1, y=1, z=0.5)
+            )
+        )
+    )
 
     return fig
