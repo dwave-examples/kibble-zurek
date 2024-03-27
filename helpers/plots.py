@@ -21,27 +21,29 @@ import plotly.graph_objects as go
 
 import dimod
 
-from helpers.kb_calcs import theoretical_kink_density
+from helpers.kz_calcs import theoretical_kink_density
 from helpers.qa import create_bqm
 
 __all__ = ["plot_kink_densities_bg", "plot_kink_density", "plot_spin_orientation"]
 
 def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
     """
-    Plot density based on theory and energy scales. 
+    Plot background of KZ-theory density and (lightly) energy scales. 
 
     Args:
-        time_range: max and min quench times
+        time_range: Max and min quench times, as a list.
 
-        coupling_strength: value of J
+        coupling_strength: Value of J.
 
-        schedule_name: Filename of anneal schedule
-
+        schedule_name: Filename of anneal schedule.
+    
+    Returns:
+        Plotly figure of predicted kink densities (main) and energy scales (background).
     """
     if schedule_name:
         schedule = pd.read_csv(f'helpers/{schedule_name}')
     else:
-        schedule = pd.read_csv('helpers/09-1302A-B_Advantage2_prototype2.2_annealing_schedule.csv')
+        schedule = pd.read_csv('helpers/FALLBACK_SCHEDULE.csv')
 
     A = schedule['A(s) (GHz)']
     B = schedule['B(s) (GHz)']         
@@ -53,78 +55,90 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
 
     n = theoretical_kink_density(time_range, coupling_strength, schedule_name)
     
-    trace1_p = go.Scatter(
-            x=np.asarray(time_range), 
-            y=np.asarray(1.1 * n),
-            mode='lines',
-            name='Predicted (&plusmn;10%)',
-            xaxis="x1",
-            yaxis="y1",
-            line_color='lightgrey', 
-            line_width=1,
-            )
+    predicted_plus = go.Scatter(
+        x=np.asarray(time_range), 
+        y=np.asarray(1.1 * n),
+        mode='lines',
+        name='<b>Predicted (&plusmn;10%)',
+        xaxis="x1",
+        yaxis="y1",
+        line_color='black', 
+        line_width=1,
+    )
     
-    trace1_m = go.Scatter(
-            x=np.asarray(time_range), 
-            y=np.asarray(0.90 * n),
-            mode='lines',
-            xaxis="x1",
-            yaxis="y1",
-            line_color='lightgrey', 
-            line_width=1,
-            fill='tonexty',
-            fillcolor="white",
-            showlegend=False,)
+    predicted_minus = go.Scatter(
+        x=np.asarray(time_range), 
+        y=np.asarray(0.90 * n),
+        mode='lines',
+        xaxis="x1",
+        yaxis="y1",
+        line_color='black', 
+        line_width=1,
+        fill='tonexty',
+        fillcolor="white",
+        showlegend=False,
+    )
     
-    trace2 = go.Scatter(
-        x=C, #time_range[1]*C,   # C=1 --> MAX(t_a)     
+    energy_transverse = go.Scatter(
+        x=C, # to get time_range[1]*C where C=1 equals max(t_a); also for problem plot     
         y=a, 
         mode='lines',
         name="A(C(s))", 
         xaxis="x2",
         yaxis='y2',
         line_color='blue',
-        opacity=0.4)
+        opacity=0.15,
+    )
 
-    trace3 = go.Scatter(
-        x=C, #time_range[1]*C,    # C=1 --> MAX(t_a)     
+    energy_problem = go.Scatter(
+        x=C, # see above comment     
         y=abs(coupling_strength)*b, 
         mode='lines',
         name="B(C(s))", 
         xaxis="x2",
         yaxis='y2',
         line_color='red',
-        opacity=0.4)
+        opacity=0.15,
+    )
 
     layout = go.Layout(
         title='QPU Simulation Vs. Kibble-Zurek Prediction',
         title_font_color="rgb(243, 120, 32)",
         xaxis=dict(
-            title='Quench Time [ns]', 
-            type="log", range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)]),     # exponents for log
+            title='<b>Quench Time [ns]<b>', 
+            type="log", 
+            range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],  
+        ),
         yaxis=dict(
-            title='Kink Density', 
-            type="log"),
+            title='<b>Kink Density<b>', 
+            type="log",
+        ),
         xaxis2=dict(
             title={
                 'text': 'C(s)', 
-                'standoff':0}, 
+                'standoff': 0,
+            }, 
             overlaying='x1', 
             side="top", 
             type="log", 
-            range=[-1, 0]),
+            range=[-1, 0],  # Minimal C=0.1 seems reasonable 
+        ),
         yaxis2=dict(
             title='Energy [Joule]',  
             overlaying='y1', 
             side='right', 
             type="linear", 
-            range=[0, np.max(b)]),
-        legend=dict(x=0.6, y=0.9)
+            range=[0, np.max(b)],
+        ),
+        legend=dict(x=0.6, y=0.9),
+        margin=dict(b=5,l=5,r=20,t=80),
+        #plot_bgcolor='white',  # Kept for reference
     )
 
-    fig=go.Figure(data=[trace1_p, trace1_m, trace2, trace3], layout=layout)
-
-    print(f"1.5*(time_range[0] - 1) {1.5*(time_range[0] - 1)} 0.7*(time_range[1] + 1) {0.7*(time_range[1] + 1)}")
+    fig=go.Figure(
+        data=[predicted_plus, predicted_minus, energy_transverse, energy_problem], 
+        layout=layout
+    )
 
     fig.add_annotation(
         xref="x",
@@ -155,9 +169,22 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
     return fig
 
 def plot_kink_density(fig_dict, kink_density, anneal_time):
-    """"""
+    """Add QPU-based kink density to kink-density plot.
 
-    fig=go.Figure(fig_dict)
+    Args:
+        fig_dict: Existing background Plotly figure, as a dict.
+
+        kink_density: Calculated kink density derived from last QPU sampleset.
+
+        anneal_time: Anneal time used for input kink density.
+    
+    Returns:
+        Updated Plotly figure with a marker at (anneal time, kink-density).
+    """
+
+    fig=go.Figure(
+        fig_dict
+    )
 
     return fig.add_trace(
         go.Scatter(
@@ -168,22 +195,28 @@ def plot_kink_density(fig_dict, kink_density, anneal_time):
             showlegend=False,
             marker=dict(size=10, 
                         color="black",
-                        symbol="x")
+                        symbol="x",
+            )
         )
     )
 
 
 def plot_spin_orientation(num_spins=512, sample=None):
-    """"""
+    """Plot the ring of spins. 
 
-    fig = go.Figure()       # Erase previous plot
+    Args:
+        num_spins: Number of spins.
 
-    conesize = num_spins/20
+        sample: Single sample from the QPU's sampleset.
 
-    #sample = np.random.choice([-1, 1], size=num_spins)
+    Returns:
+        Plotly figure of orientation for all spins in the ring.
+    """
+    
+    cone_size = num_spins/20    # Based on how it looks
 
     z = np.linspace(0, 10, num_spins)
-    x, y = z*np.cos(5*z), z*np.sin(5*z)
+    x, y = z * np.cos(5 * z), z * np.sin(5 * z)
 
     if sample is None:
 
@@ -192,12 +225,12 @@ def plot_spin_orientation(num_spins=512, sample=None):
 
     else:
 
-        cones_red = ~np.isnan(np.where(sample==1, z, np.nan))
+        cones_red = ~np.isnan(np.where(sample == 1, z, np.nan))
         cones_blue = ~cones_red
         num_cones_red = np.count_nonzero(cones_red)
         num_cones_blue = num_spins - num_cones_red
      
-    trace_red = go.Cone(
+    spins_up = go.Cone(
         x = x[cones_red],
         y = y[cones_red],
         z = z[cones_red],
@@ -209,10 +242,10 @@ def plot_spin_orientation(num_spins=512, sample=None):
         colorscale=[[0, 'red'], [1, 'red']],
         hoverinfo=None,
         sizemode="absolute",
-        sizeref=conesize
+        sizeref=cone_size
     )
 
-    trace_blue = go.Cone(
+    spins_down = go.Cone(
         x=x[cones_blue],
         y=y[cones_blue],
         z=z[cones_blue],
@@ -224,21 +257,30 @@ def plot_spin_orientation(num_spins=512, sample=None):
         colorscale=[[0, 'blue'], [1, 'blue']],
         hoverinfo=None,
         sizemode="absolute",
-        sizeref=conesize
+        sizeref=cone_size
     )
 
     fig = go.Figure(
-        data=[trace_red, trace_blue],
+        data=[spins_up, spins_down],
         layout=go.Layout(
             title=f'Spin States of {num_spins} Qubits in a 1D Ring',
             title_font_color="rgb(243, 120, 32)",
             showlegend=False,
-            margin=dict(b=0,l=0,r=0,t=60),
+            margin=dict(b=0,l=0,r=0,t=80),
             scene=dict(
-                xaxis=dict(showticklabels=False, visible=False),
-                yaxis=dict(showticklabels=False, visible=False),
-                zaxis=dict(showticklabels=False, visible=False),
-            camera_eye=dict(x=1, y=1, z=0.5)
+                xaxis=dict(
+                    showticklabels=False, 
+                    visible=False,
+                ),
+                yaxis=dict(
+                    showticklabels=False, 
+                    visible=False,
+                ),
+                zaxis=dict(
+                    showticklabels=False, 
+                    visible=False,
+                ),
+                camera_eye=dict(x=1, y=1, z=0.5)
             )
         )
     )
@@ -246,10 +288,14 @@ def plot_spin_orientation(num_spins=512, sample=None):
     fig.add_layout_image(
     dict(
         source="assets/spin_states.png",
-        xref="paper", yref="paper",
-        x=0.05, y=0.05,
-        sizex=0.3, sizey=0.3,
-        xanchor="left", yanchor="bottom"
+        xref="paper", 
+        yref="paper",
+        x=0.05, 
+        y=0.05,
+        sizex=0.3, 
+        sizey=0.3,
+        xanchor="left", 
+        yanchor="bottom",
     )
 )
 

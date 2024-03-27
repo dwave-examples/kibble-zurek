@@ -12,71 +12,109 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import dimod
 from dwave.cloud.api import exceptions, Problems
 from dwave.embedding import unembed_sampleset
-import dimod
 import minorminer
-
 
 from helpers.cached_embeddings import cached_embeddings
 
-__all__ = ["create_bqm", "find_one_to_one_embedding", "get_samples", "get_job_status"]
+__all__ = ["create_bqm", "find_one_to_one_embedding", "get_job_status", "get_samples"]
 
-def create_bqm(num_spins=500, coupling_strength=-1):
+def create_bqm(num_spins=512, coupling_strength=-1.4):
     """
-    Create a BQM representing a FM chain. 
+    Create a binary quadratic model (BQM) representing a ferromagnetic 1D ring. 
 
     Args:
-        num_spins: Length of chain
+        num_spins: Number of spins, which is the length of the ring.
 
-        coupling_strength: value of J
+        coupling_strength: Value of J.
 
     Returns:
-        dimod BQM  
+        dimod BQM.  
     """
     bqm = dimod.BinaryQuadraticModel(vartype='SPIN')
+
     for spin in range(num_spins):
         bqm.add_quadratic(spin, (spin + 1) % num_spins, coupling_strength)
+    
     return bqm
 
 def find_one_to_one_embedding(ising_chain_length, sampler_edgelist):
     """
-    Find an embedding of chain_length=1. 
+    Find an embedding with chains of length one for the spin ring. 
 
     Args:
-        ising_chain_length: Length of chain
+        ising_chain_length: Length of ring, which is the number of spins. 
 
-        sampler_edgelist: sampler.edgelist
+        sampler_edgelist: Edges of the QPU. 
 
     Returns:
-        embedding  
+        Embedding, as a dict of format ``{spin: [qubit]}``.  
     """
     bqm = create_bqm(ising_chain_length)
+
     for tries in range(3):
-        print(f"Attempt {tries + 1} to find an embedding...")
-        embedding = minorminer.find_embedding(bqm.quadratic, sampler_edgelist)  # Currently using simple minorminer `find_embedding` function
+
+        print(f"Attempt {tries + 1} to find an embedding...")   # TODO: move this
+
+        embedding = minorminer.find_embedding(bqm.quadratic, sampler_edgelist) 
+
         if max(len(val) for val in embedding.values()) == 1:
-            print("Found an embedding.")
             return embedding
         
-    raise ValueError("Failed to find a good embedding in 3 tries")
+    raise ValueError("Failed to find a good embedding in 3 tries")  # TODO: terminate gracefully
 
 def get_job_status(client, job_id, job_submit_time):
-    """Return status of submitted job."""
+    """Return status of a submitted job.
+
+    Args:
+        client: dwave-cloud-client Client instance. 
+
+        job_id: Identification string of the job. 
+
+        job_submit_time: Clock time of submission for identification.
+
+    Returns:
+        Embedding, as a dict of format ``{spin: [qubit]}``.
+    """
 
     p = Problems.from_config(client.config)
+
     try:
+
         status = p.get_problem_status(job_id)
         label_time = dict(status)["label"].split("submitted: ")[1]
+
         if label_time == job_submit_time:
+
             return status.status.value
+        
         else:
+
             return None
+    
     except exceptions.ResourceNotFoundError as err:
+
         return None
 
 def get_samples(client, job_id, num_spins, J, qpu_name):
-    """Get unembedded sampleset"""
+    """Retrieve an unembedded sampleset for a given job ID. 
+
+    Args:
+        client: dwave-cloud-client Client instance. 
+
+        job_id: Identification string of the job. 
+
+        num_spins: Number of spins, which is the length of the ring.
+
+        coupling_strength: Value of J.
+
+        qpu_name: Name of the quantum computer the job was submitted to. 
+
+    Returns:
+        Unembedded dimod sampleset. .
+    """
     
     sampleset = client.retrieve_answer(job_id).sampleset
             

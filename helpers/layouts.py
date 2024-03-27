@@ -12,10 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import dash_bootstrap_components as dbc
-import dash_daq as daq
-from dash.dcc import Dropdown, Input, RadioItems
-from dash import dcc, html
+import dash_bootstrap_components as dbc 
+from dash.dcc import Checklist, Dropdown, Input, RadioItems
+from dash_daq import Knob
+from dash import html
 
 __all__ = ["config_anneal_duration", "config_chain_length", 
     "config_coupling_strength", "config_qpu_selection", "job_bar_display",
@@ -43,13 +43,12 @@ config_chain_length = RadioItems(
         } for length in ring_lengths
     ],
     value=512,
-    inline=True,
     inputStyle={"margin-right": "10px", "margin-bottom": "10px"},
     labelStyle={"color": "white", "font-size": 12, "display": "flex"}
 )
 
 config_coupling_strength = html.Div([
-    daq.Knob(
+    Knob(
         id="coupling_strength",
         color={"default": "rgb(243, 120, 32)"},
         size=50,
@@ -87,7 +86,7 @@ job_bar_display = {
     "COMPLETED": [100, "success"],
     "CANCELLED": [100, "light"],
     "FAILED": [100, "danger"], 
-    }
+}
 
 status_solver = dbc.Row([
     dbc.Col([
@@ -95,14 +94,16 @@ status_solver = dbc.Row([
             "Cached Embeddings",
             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
         ),
-        dcc.Checklist(
+        Checklist(
             options=[{
                 "label": 
-                    html.Div([f"{length}"], 
-                    style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
+                    html.Div([
+                        f"{length}"], 
+                        style={'color': 'white', 'font-size': 10, "marginRight": 10}
+                    ), 
                 "value": length,
-                "disabled": True} for length in ring_lengths   
-            ], 
+                "disabled": True
+            } for length in ring_lengths], 
             value=[], 
             id=f"embedding_is_cached",
             style={"color": "white"},

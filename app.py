@@ -26,12 +26,12 @@ from dwave.cloud import Client
 from dwave.embedding import embed_bqm
 from dwave.system import DWaveSampler
 
-from helpers.tooltips import tool_tips
+from helpers.cached_embeddings import cached_embeddings
+from helpers.kz_calcs import *
 from helpers.layouts import *
 from helpers.plots import *
-from helpers.kb_calcs import *
-from helpers.cached_embeddings import cached_embeddings
 from helpers.qa import *
+from helpers.tooltips import tool_tips
 #from kz import build_bqm
 
 from zzz_TMP import placeholder_params      # TEMPORARY UNTIL SAPI ADDS FEATURE PARAMS
@@ -339,7 +339,7 @@ def select_qpu(qpu_name):
             }
             for length in ring_lengths  
         ]
-    return options, [], "", dash.no_update
+    return options, [], "Select a quantum computer", dash.no_update
 
 @app.callback(
     Output('coupling_strength_display', 'children'), 
