@@ -51,8 +51,6 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
     a = A/1.5092E24     
     b = B/1.5092E24
 
-    fig = go.Figure()
-
     n = theoretical_kink_density(time_range, coupling_strength, schedule_name)
     
     trace1_p = go.Scatter(
@@ -120,13 +118,40 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
             overlaying='y1', 
             side='right', 
             type="linear", 
-            #range=[-26, -22]),
             range=[0, np.max(b)]),
         legend=dict(x=0.6, y=0.9)
     )
 
     fig=go.Figure(data=[trace1_p, trace1_m, trace2, trace3], layout=layout)
+
+    print(f"1.5*(time_range[0] - 1) {1.5*(time_range[0] - 1)} 0.7*(time_range[1] + 1) {0.7*(time_range[1] + 1)}")
+
+    fig.add_annotation(
+        xref="x",
+        yref="y",
+        x=np.log10(1.5*(time_range[0] - 1)),
+        y=np.log10(1.2*n.min()),
+        text="Coherent",
+        axref="x",
+        ayref="y",
+        ax=np.log10(3*(time_range[0] - 1)),
+        ay=np.log10(1.2*n.min()),
+        arrowhead=5,
+    )
  
+    fig.add_annotation(
+        xref="x",
+        yref="y",
+        x=np.log10(0.8*(time_range[1] + 1)),
+        y=np.log10(1.2*n.min()),
+        text="Adiabatic",
+        axref="x",
+        ayref="y",
+        ax=np.log10(0.4*(time_range[1] + 1)),
+        ay=np.log10(1.2*n.min()),
+        arrowhead=5,
+    )
+
     return fig
 
 def plot_kink_density(fig_dict, kink_density, anneal_time):
@@ -205,7 +230,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
     fig = go.Figure(
         data=[trace_red, trace_blue],
         layout=go.Layout(
-            title='Spin States',
+            title=f'Spin States of {num_spins} Qubits in a 1D Ring',
             title_font_color="rgb(243, 120, 32)",
             showlegend=False,
             margin=dict(b=0,l=0,r=0,t=60),
