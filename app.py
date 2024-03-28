@@ -1,4 +1,4 @@
-# Copyright 2024 D-Wave Systems Inc.
+# Copyright 2024 D-Wave
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ from dwave.system import DWaveSampler
 from helpers.cached_embeddings import cached_embeddings
 from helpers.kz_calcs import *
 from helpers.layouts import *
+from helpers.layouts_panels import *
 from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips
@@ -41,25 +42,13 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 try:
     client = Client.from_config(client="qpu")
     # TODO: change to "fast_anneal_time_range"
-    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedule=True)}     
-    if len(qpus) < 1:
-        client.close()
-        init_job_status = "NO_SOLVER"
-        job_status_color = dict(color="red")
-    else:
-        init_job_status = "READY"
-        job_status_color = dict()
+    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedule=True)}    
+    init_job_status = "READY"
+    job_status_color = dict()
 except Exception as client_err:
     client = None
     init_job_status = "NO_SOLVER"
     job_status_color = dict(color="red")
-
-schedules = [file for file in os.listdir('helpers') if ".csv" in file]
-best_schedules = {"generic": "FALLBACK_SCHEDULE.csv"}
-for qpu_name in qpus:
-    for schedule_name in schedules:
-        if qpu_name.split(".")[0] in schedule_name:
-            best_schedules[qpu_name] = schedule_name
 
 # Simulation panel
 simulation_card = dbc.Card([
@@ -180,29 +169,7 @@ kz_config = dbc.Card([
     color="dark"
 )
 
-# Graph panel
-graphs = dbc.Card([
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(
-                id="spin_orientation", 
-                figure=go.Figure()
-            )
-        ], 
-            width=6
-        ),
-        dbc.Col([
-            dcc.Graph(
-                id="sample_vs_theory",
-                figure=go.Figure()
-            )
-        ], 
-            width=6
-        ),
-    ]),
-], 
-    color="dark"
-)
+
 
 # Page-layout section
 app_layout = [
@@ -225,7 +192,7 @@ app_layout = [
     ),
     dbc.Row([
         dbc.Col(
-            graphs,   
+            graphs_card,   
             width=12
         ),
     ], 
@@ -305,41 +272,51 @@ def alert_no_solver(btn_simulate):
     Output('quench_schedule_filename', 'style'),
     Input('qpu_selection', 'value'))
 def select_qpu(qpu_name):
-    """Ensure embeddings and schedules"""
+    """Select the QPU from the available one.
 
-    if qpu_name and (qpu_name in cached_embeddings.keys()):
-        
-        embedding_lengths =  list(cached_embeddings[qpu_name].keys()) 
+    Set embeddings and schedule.
+    """
 
-        options = [     # Display checklist for cached embeddings
-            {"label": 
-                html.Div([f"{length}"], 
-                style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
-            "value": length,
-            "disabled": length not in embedding_lengths
-            }
-            for length in ring_lengths 
-        ]
+    trigger = dash.callback_context.triggered
+    trigger_id = trigger[0]["prop_id"].split(".")[0]
 
-        if qpu_name in best_schedules:   # Red if old version of schedule 
-            style = {"color": "white", "fontSize": 12} 
-            schedule = best_schedules[qpu_name]
-        else:
-           style = {"color": "red", "fontSize": 12} 
-           schedule = best_schedules["generic"]
+    schedule_filename = "FALLBACK_SCHEDULE.csv"  
+    schedule_filename_style = {"color": "red", "fontSize": 12}
 
-        return options, embedding_lengths, schedule, style
-
-    options = [     # Default: disable embeddings for all lengths
-            {"label": 
+    embedding_lengths = []
+    embeddings_options = [     # Default: disable embeddings for all lengths
+        {
+            "label": 
                 html.Div([f"{length}"], 
                 style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
             "value": length,
             "disabled": True
-            }
-            for length in ring_lengths  
-        ]
-    return options, [], "Select a quantum computer", dash.no_update
+        } for length in ring_lengths]
+
+    if trigger_id == 'qpu_selection':
+
+        for filename in [file for file in os.listdir('helpers') if ".csv" in file]:
+
+            if qpu_name.split(".")[0] in filename:  # Accepts & reddens older major versions
+            
+                schedule_filename = filename
+
+                if qpu_name in filename:
+
+                    schedule_filename_style = {"color": "white", "fontSize": 12} 
+            
+        if qpu_name in cached_embeddings.keys():
+
+            embedding_lengths =  list(cached_embeddings[qpu_name].keys()) 
+
+            # Enable checklist for cached embeddings
+            for indx, length in enumerate(ring_lengths):
+
+                if length in embedding_lengths:
+
+                    embeddings_options[indx]["disabled"] = False
+
+    return embeddings_options, embedding_lengths, schedule_filename, schedule_filename_style
 
 @app.callback(
     Output('coupling_strength_display', 'children'), 
