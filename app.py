@@ -28,8 +28,8 @@ from dwave.system import DWaveSampler
 
 from helpers.cached_embeddings import cached_embeddings
 from helpers.kz_calcs import *
-from helpers.layouts import *
-from helpers.layouts_panels import *
+from helpers.layouts_cards import *
+from helpers.layouts_components import *
 from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips
@@ -42,150 +42,28 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 try:
     client = Client.from_config(client="qpu")
     # TODO: change to "fast_anneal_time_range"
-    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedules=True)}
+    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedule=True)}
     if len(qpus) < 1:
         raise Exception    
     init_job_status = "READY"
     job_status_color = dict()
 except Exception:
     qpus = {}
-    print(f"qpus {qpus}")
     client = None
     init_job_status = "NO_SOLVER"
     job_status_color = dict(color="red")
 
-# Simulation panel
-simulation_card = dbc.Card([
-    html.H4(
-        "Simulation", 
-        className="card-title",
-        style={"color":"rgb(243, 120, 32)"}
-    ),
-    dbc.Col([
-        dbc.Button(
-            "Simulate", 
-            id="btn_simulate", 
-            color="primary", 
-            className="me-1",
-            style={"marginBottom":"5px"}
-        ),
-        dcc.Interval(
-            id="wd_job", 
-            interval=None, 
-            n_intervals=0, 
-            disabled=True, 
-            max_intervals=1
-        ),
-        dbc.Progress(
-            id="bar_job_status", 
-            value=0,
-            color="link", 
-            className="mb-3",
-            style={"width": "60%"}
-        ),
-        html.P(
-            id="job_submit_state", 
-            children=f"Status: {init_job_status}",
-            style={"color": "white", "fontSize": 12}
-        ),
-        html.P(
-            id="job_submit_time", 
-            children="", 
-            style = dict(display="none")
-        ),
-        status_solver,
-        html.P(
-            id="job_id", 
-            children="", 
-            style = dict(display="none")
-        )
-    ],
-        width=12)
-],
-    color="dark", body=True
-)
-
-# Configuration panel
-kz_config = dbc.Card([
-    dbc.Row([
-        dbc.Col([
-            html.H4(
-                "Configuration", 
-                className="card-title",
-                style={"color": "rgb(243, 120, 32)"}
-            )
-        ])
-    ],
-        id="tour_settings_row"
-    ),
-    dbc.Row([
-        dbc.Col([
-            html.P(
-                "QPU",
-                style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-            ), 
-            html.Div([
-                config_qpu_selection(qpus),
-                html.P(
-                    id="embedding", 
-                    children="", 
-                    style = dict(display="none")
-                )
-            ]), 
-        ], 
-            width=9
-        ),
-        dbc.Col([
-            html.P(
-                "Spins",
-                style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-            ), 
-            html.Div([
-                config_chain_length
-            ]), 
-        ], 
-            width=3
-        ),
-    ]),
-    dbc.Row([
-        dbc.Col([
-            html.P(
-                "Coupling Strength",
-                style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-            ), 
-            html.Div([
-                config_coupling_strength
-            ]),
-        ]),
-        dbc.Col([
-            html.P(
-                "Quench Duration [ns]",
-                style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-            ),
-            html.Div([
-                config_anneal_duration
-                
-            ]), 
-        ]),
-    ]),
-], 
-    body=True, 
-    color="dark"
-)
-
-
-
-# Page-layout section
-app_layout = [
+# Dashboard-organization section
+cards_layout = [
     dbc.Row([
         dbc.Col(
-            kz_config,
+            kz_config(solvers=qpus),
             width=6
         ),
         dbc.Col([
             dbc.Row([
                 dbc.Col([
-                    simulation_card
+                    simulation_card(init_job_status=init_job_status)
                 ])
             ]),
         ], 
@@ -196,21 +74,17 @@ app_layout = [
     ),
     dbc.Row([
         dbc.Col(
-            graphs_card,   
+            graphs_card(),   
             width=12
         ),
     ], 
         justify="left"
     ),
+    *_dbc_modal("modal_solver"),
+    # [dbc.Tooltip(
+    # message, target=target, id=f"tooltip_{target}", style = dict())
+    # for target, message in tool_tips.items()]
 ]
-
-# tips = [dbc.Tooltip(
-#             message, target=target, id=f"tooltip_{target}", style = dict())
-#             for target, message in tool_tips.items()]
-# app_layout.extend(tips)
-
-modal_solver = _dbc_modal("modal_solver")
-app_layout.extend(modal_solver)
 
 app.layout = dbc.Container([
     dbc.Row([
@@ -233,7 +107,7 @@ app.layout = dbc.Container([
         )
     ]),
     dbc.Container(
-        app_layout, 
+        cards_layout, 
         fluid=True,
         style={"color": "rgb(3, 184, 255)",
                 "paddingLeft": 10, 
