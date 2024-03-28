@@ -42,10 +42,14 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 try:
     client = Client.from_config(client="qpu")
     # TODO: change to "fast_anneal_time_range"
-    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedule=True)}    
+    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedules=True)}
+    if len(qpus) < 1:
+        raise Exception    
     init_job_status = "READY"
     job_status_color = dict()
-except Exception as client_err:
+except Exception:
+    qpus = {}
+    print(f"qpus {qpus}")
     client = None
     init_job_status = "NO_SOLVER"
     job_status_color = dict(color="red")
@@ -205,6 +209,9 @@ app_layout = [
 #             for target, message in tool_tips.items()]
 # app_layout.extend(tips)
 
+modal_solver = _dbc_modal("modal_solver")
+app_layout.extend(modal_solver)
+
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
@@ -254,7 +261,7 @@ app.config["suppress_callback_exceptions"] = True
     Output("solver_modal", "is_open"),
     Input("btn_simulate", "n_clicks"),)
 def alert_no_solver(btn_simulate):
-    """Notify if no Leap hybrid CQM solver is accessible."""
+    """Notify if no quantum computer is accessible."""
 
     trigger = dash.callback_context.triggered
     trigger_id = trigger[0]["prop_id"].split(".")[0]

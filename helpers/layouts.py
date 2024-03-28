@@ -13,12 +13,12 @@
 #    limitations under the License.
 
 import dash_bootstrap_components as dbc 
-from dash.dcc import Checklist, Dropdown, Input, RadioItems
+from dash.dcc import Checklist, Dropdown, Input, Link, RadioItems
 from dash_daq import Knob
 from dash import html
 
 __all__ = ["config_anneal_duration", "config_chain_length", 
-    "config_coupling_strength", "config_qpu_selection", "job_bar_display",
+    "config_coupling_strength", "config_qpu_selection", "_dbc_modal", "job_bar_display",
     "ring_lengths", "status_solver",]
 
 ring_lengths = [512, 1024, 2048]
@@ -87,6 +87,47 @@ job_bar_display = {
     "CANCELLED": [100, "light"],
     "FAILED": [100, "danger"], 
 }
+
+modal_texts = {
+    "solver": ["Leap's Quantum Computers Inaccessible",
+    [
+        html.Div([
+        html.Div("Could not connect to a Leap quantum computer."),
+        html.Div(["""
+    If you are running locally, set environment variables or a
+    dwave-cloud-client configuration file as described in the
+    """,
+        Link(children=[html.Div(" Ocean")],
+            href="https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html",
+            style={"display":"inline-block"}),
+        "documentation."],
+            style={"display":"inline-block"}),
+        html.Div(["If you are running in an online IDE, see the ",
+        Link(children=[html.Div("system documentation")],
+            href="https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html",
+            style={"display":"inline-block"}),
+        " on supported IDEs"],
+            style={"display":"inline-block"}),])]
+    ],
+}
+
+def _dbc_modal(name):
+    name = name.split("_")[1]
+    return [
+        html.Div([
+            dbc.Modal([
+                dbc.ModalHeader(
+                    dbc.ModalTitle(
+                        modal_texts[name][0]
+                    )
+                ),
+                dbc.ModalBody(
+                    modal_texts[name][1]
+                ),
+            ],
+            id=f"{name}_modal", size="sm")
+        ])
+        ]
 
 status_solver = dbc.Row([
     dbc.Col([
