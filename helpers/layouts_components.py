@@ -18,8 +18,8 @@ from dash_daq import Knob
 from dash import html
 
 __all__ = ["config_anneal_duration", "config_chain_length", 
-    "config_coupling_strength", "config_qpu_selection", "dbc_modal", "job_bar_display",
-    "ring_lengths", "status_solver",]
+    "config_coupling_strength", "config_qpu_selection", "dbc_modal", "embeddings",
+    "job_bar_display", "ring_lengths", ]
 
 ring_lengths = [512, 1024, 2048]
 
@@ -44,29 +44,40 @@ config_chain_length = RadioItems(
     ],
     value=512,
     inputStyle={"margin-right": "10px", "margin-bottom": "10px"},
-    labelStyle={"color": "white", "font-size": 12, "display": "flex"}
+    labelStyle={"color": "white", "font-size": 12, 'display': 'inline-block', 'marginLeft': 20},
+    inline=True,    # Currently requires above "inline-block"
 )
 
-config_coupling_strength = html.Div([
-    Knob(
-        id="coupling_strength",
-        color={"default": "rgb(243, 120, 32)"},
-        size=50,
-        scale={"custom": {
-                0: {"label": "-2", "style": {"fontSize": 20}}, 
-                2: {"label": "0", "style": {"fontSize": 20}}, 
-                3: {"label": "1", "style": {"fontSize": 20}}
-                        }, 
-                },
-        style={"marginBottom": 0},
-        min=0,
-        max=3,
-        value=-1.4+2
+config_coupling_strength = dbc.Row([
+    dbc.Col([
+        html.Div([
+            Knob(
+                id="coupling_strength",
+                color={"default": "rgb(243, 120, 32)"},
+                size=50,
+                scale={"custom": {
+                        0: {"label": "-2", "style": {"fontSize": 20}}, 
+                        2: {"label": "0", "style": {"fontSize": 20}}, 
+                        3: {"label": "1", "style": {"fontSize": 20}}
+                                }, 
+                        },
+                style={"marginBottom": 0},
+                min=0,
+                max=3,
+                value=-1.4+2
+            )
+        ]),
+    ],
+    width=4,
     ),
-    html.Div(
-    id='coupling_strength_display',
-    style={'width': '100%', "color": "white", "marginLeft": 40, "marginTop": 0}
-    )
+    dbc.Col([        
+        html.Div(
+            id='coupling_strength_display',
+            style={'width': '100%', "color": "white", "marginLeft": 40, "marginTop": 0}
+        ),
+    ],
+    width=8,
+    ),
 ])
 
 def config_qpu_selection(solvers):
@@ -129,37 +140,18 @@ def dbc_modal(name):
         ])
         ]
 
-status_solver = dbc.Row([
-    dbc.Col([
-        html.P(
-            "Cached Embeddings",
-            style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-        ),
-        Checklist(
-            options=[{
-                "label": 
-                    html.Div([
-                        f"{length}"], 
-                        style={'color': 'white', 'font-size': 10, "marginRight": 10}
-                    ), 
-                "value": length,
-                "disabled": True
-            } for length in ring_lengths], 
-            value=[], 
-            id=f"embedding_is_cached",
-            style={"color": "white"},
-            inline=True
-        ),
-    ]),
-    dbc.Col([
-        html.P(
-            "Quench Schedule",
-            style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-        ),
-        html.P(
-            id="quench_schedule_filename", 
-            children="",
-            style={"color": "white", "fontSize": 12}
-        ),
-    ])
-])
+embeddings = Checklist(
+    options=[{
+        "label": 
+            html.Div([
+                f"{length}"], 
+                style={'color': 'white', 'font-size': 10, "marginRight": 10}
+            ), 
+        "value": length,
+        "disabled": True
+    } for length in ring_lengths], 
+    value=[], 
+    id=f"embedding_is_cached",
+    style={"color": "white"},
+    inline=True
+)

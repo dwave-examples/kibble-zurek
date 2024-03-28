@@ -12,28 +12,59 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from dash import dcc, html, State
+from dash import dcc, html
 import dash_bootstrap_components as dbc 
 
 import plotly.graph_objects as go
 
 from helpers.layouts_components import *
 
-__all__ = ["graphs_card", "kz_config", "simulation_card"]
+__all__ = ["control_card", "graphs_card", ]
 
 # Configuration card
-def kz_config(solvers={}): 
+def control_card(
+    solvers={}, 
+    init_job_status="READY"): 
+
+    if init_job_status == "NO SOLVER":
+        job_status_color = "red"
+    else:  
+        job_status_color = "white"
+
     return dbc.Card([
-        dbc.Row([
-            dbc.Col([
+        dbc.Row(
+            [
+            dbc.Col(
+                [
                 html.H4(
                     "Coherent Annealing: KZ Simulation", 
                     className="card-title",
                     style={"color": "rgb(243, 120, 32)"}
                 ),
-                html.P(
+                html.H5(
+                        "Spins",
+                        style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                ),
+                html.Div([
+                    config_chain_length
+                ]),
+                html.H5(
+                    "Coupling Strength",
+                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                ), 
+                html.Div([
+                    config_coupling_strength
+                ]),
+                html.H5(
+                    "Quench Duration [ns]",
+                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                ),
+                html.Div([
+                    config_anneal_duration
+                ]),
+                html.H5(
                     "QPU",
-                    style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
                 ), 
                 html.Div([
                     config_qpu_selection(solvers),
@@ -43,82 +74,72 @@ def kz_config(solvers={}):
                         style = dict(display="none")
                     )
                 ]),
-                html.P(
-                        "Spins",
-                        style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-                ), 
-                html.Div([
-                    config_chain_length
-                ]),
-                html.P(
-                    "Coupling Strength",
-                    style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-                ), 
-                html.Div([
-                    config_coupling_strength
-                ]),
-                html.P(
-                    "Quench Duration [ns]",
-                    style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
+                html.P([
+                    "Quench Schedule: ",
+                    html.Span(
+                        id="quench_schedule_filename", 
+                        children="",
+                        style={"color": "white", "fontSize": 12}
+                    ),
+                ],
+                    style={"color": "white", "marginBottom": 0}
                 ),
-                html.Div([
-                    config_anneal_duration
-                    
-                ]),
-            ])
-        ],
+                html.H5(
+                    "Cached Embeddings",
+                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                ),
+                embeddings, 
+                html.H5(
+                    "Simulation",
+                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                ),
+                dbc.Button(
+                    "Run", 
+                    id="btn_simulate", 
+                    color="primary", 
+                    className="me-1",
+                    style={"marginTop":"5px"}
+                ),
+                dbc.Progress(
+                    id="bar_job_status", 
+                    value=0,
+                    color="link", 
+                    className="mb-3",
+                    style={"width": "60%"}
+                ),
+                html.P([
+                    "Status: ",
+                    html.Span(
+                        id="job_submit_state", 
+                        children=f"{init_job_status}",
+                        style={"color": job_status_color, "fontSize": 12}
+                    ),
+                ], 
+                    style={"color": "white"}
+                ),
+                # Used for storing status. Can probably be replaced with dcc.Store. 
+                dcc.Interval(
+                    id="wd_job", 
+                    interval=None, 
+                    n_intervals=0, 
+                    disabled=True, 
+                    max_intervals=1
+                ),
+                html.P(
+                    id="job_submit_time", 
+                    children="", 
+                    style = dict(display="none")
+                ),
+                html.P(
+                    id="job_id", 
+                    children="", 
+                    style = dict(display="none")
+                ),
+                ]
+            ),
+            ],
             id="tour_settings_row"
         ),
-        # dbc.Row([
-        #     dbc.Col([
-        #         html.P(
-        #             "QPU",
-        #             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-        #         ), 
-        #         html.Div([
-        #             config_qpu_selection(solvers),
-        #             html.P(
-        #                 id="embedding", 
-        #                 children="", 
-        #                 style = dict(display="none")
-        #             )
-        #         ]), 
-        #     ], 
-        #         width=9
-        #     ),
-        #     dbc.Col([
-        #         html.P(
-        #             "Spins",
-        #             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-        #         ), 
-        #         html.Div([
-        #             config_chain_length
-        #         ]), 
-        #     ], 
-        #         width=3
-        #     ),
-        # ]),
-        # dbc.Row([
-        #     dbc.Col([
-        #         html.P(
-        #             "Coupling Strength",
-        #             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-        #         ), 
-        #         html.Div([
-        #             config_coupling_strength
-        #         ]),
-        #     ]),
-        #     dbc.Col([
-        #         html.P(
-        #             "Quench Duration [ns]",
-        #             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
-        #         ),
-        #         html.Div([
-        #             config_anneal_duration
-                    
-        #         ]), 
-        #     ]),
-        # ]),
     ], 
         body=True, 
         color="dark"
@@ -143,62 +164,4 @@ def graphs_card():
         ]),
     ], 
         color="dark"
-    )
-
-# Simulation card
-def simulation_card(init_job_status="READY"):
-
-    if init_job_status == "NO SOLVER":
-        job_status_color = "red"
-    else:  
-        job_status_color = "white"
-
-    return dbc.Card([
-        html.H4(
-            "Simulation", 
-            className="card-title",
-            style={"color":"rgb(243, 120, 32)"}
-        ),
-        dbc.Col([
-            dbc.Button(
-                "Simulate", 
-                id="btn_simulate", 
-                color="primary", 
-                className="me-1",
-                style={"marginBottom":"5px"}
-            ),
-            dcc.Interval(
-                id="wd_job", 
-                interval=None, 
-                n_intervals=0, 
-                disabled=True, 
-                max_intervals=1
-            ),
-            dbc.Progress(
-                id="bar_job_status", 
-                value=0,
-                color="link", 
-                className="mb-3",
-                style={"width": "60%"}
-            ),
-            html.P(
-                id="job_submit_state", 
-                children=f"Status: {init_job_status}",
-                style={"color": job_status_color, "fontSize": 12}
-            ),
-            html.P(
-                id="job_submit_time", 
-                children="", 
-                style = dict(display="none")
-            ),
-            status_solver,
-            html.P(
-                id="job_id", 
-                children="", 
-                style = dict(display="none")
-            )
-        ],
-            width=12)
-    ],
-        color="dark", body=True
     )

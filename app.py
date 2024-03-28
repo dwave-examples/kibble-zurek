@@ -52,33 +52,9 @@ except Exception:
     init_job_status = "NO SOLVER"
 
 # Dashboard-organization section
-controls_layout = [
-    dbc.Row([
-        dbc.Col(
-            [
-            kz_config(solvers=qpus),
-            simulation_card(init_job_status=init_job_status)],
-        ),
-    ], 
-        justify="left"
-    ),
-    *dbc_modal("modal_solver"),
-    # [dbc.Tooltip(
-    # message, target=target, id=f"tooltip_{target}", style = dict())
-    # for target, message in tool_tips.items()]
-]
-
-display_layout = [
-    dbc.Row([
-        dbc.Col(
-            graphs_card(),   
-        ),
-    ], 
-        justify="left"
-    ),
-]
 
 app.layout = dbc.Container([
+    # Logo
     dbc.Row([
         dbc.Col([
             html.Img(
@@ -91,13 +67,24 @@ app.layout = dbc.Container([
         )
     ]),
     dbc.Row([
+        # Left: Control panel 
         dbc.Col(
-            controls_layout,
-            width=3,   
+            [
+            control_card(
+                solvers=qpus, 
+                init_job_status=init_job_status
+            ),
+            *dbc_modal("modal_solver"),
+            # [dbc.Tooltip(
+            # message, target=target, id=f"tooltip_{target}", style = dict())
+            # for target, message in tool_tips.items()]
+            ],
+            width=4,   
         ),
+        # Right: Display area
         dbc.Col(
-            display_layout,
-            width=9,
+            graphs_card(),
+            width=8,
         ),
     ]),
 ],
