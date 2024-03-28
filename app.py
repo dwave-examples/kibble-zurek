@@ -46,12 +46,10 @@ try:
     if len(qpus) < 1:
         raise Exception    
     init_job_status = "READY"
-    job_status_color = dict()
 except Exception:
     qpus = {}
     client = None
-    init_job_status = "NO_SOLVER"
-    job_status_color = dict(color="red")
+    init_job_status = "NO SOLVER"
 
 # Dashboard-organization section
 cards_layout = [
@@ -80,7 +78,7 @@ cards_layout = [
     ], 
         justify="left"
     ),
-    *_dbc_modal("modal_solver"),
+    *dbc_modal("modal_solver"),
     # [dbc.Tooltip(
     # message, target=target, id=f"tooltip_{target}", style = dict())
     # for target, message in tool_tips.items()]
@@ -137,8 +135,7 @@ app.config["suppress_callback_exceptions"] = True
 def alert_no_solver(btn_simulate):
     """Notify if no quantum computer is accessible."""
 
-    trigger = dash.callback_context.triggered
-    trigger_id = trigger[0]["prop_id"].split(".")[0]
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     if trigger_id == "btn_simulate":
         if not client:
@@ -158,8 +155,7 @@ def select_qpu(qpu_name):
     Set embeddings and schedule.
     """
 
-    trigger = dash.callback_context.triggered
-    trigger_id = trigger[0]["prop_id"].split(".")[0]
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     schedule_filename = "FALLBACK_SCHEDULE.csv"  
     schedule_filename_style = {"color": "red", "fontSize": 12}
@@ -222,8 +218,7 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
     qpu_name, spins, figure):
     """Generate graphics for theory and samples."""
 
-    trigger = dash.callback_context.triggered
-    trigger_id = trigger[0]["prop_id"].split(".")[0]
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     J = J_offset - 2
 
@@ -259,8 +254,7 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
 def display_graphics_right(spins, job_submit_state, job_id, J_offset, qpu_name):
     """Generate graphics for spin display."""
 
-    trigger = dash.callback_context.triggered
-    trigger_id = trigger[0]["prop_id"].split(".")[0]
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     J = J_offset - 2
    
@@ -418,11 +412,11 @@ def set_progress_bar(job_submit_state):
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
-    if trigger_id != "job_submit_state":
-        return job_bar_display["READY"][0], job_bar_display["READY"][1]
-    else:
-        state = job_submit_state
-        return job_bar_display[state][0], job_bar_display[state][1]
+    if trigger_id == "job_submit_state":
+ 
+        return job_bar_display[job_submit_state][0], job_bar_display[job_submit_state][1]
+    
+    return job_bar_display["READY"][0], job_bar_display["READY"][1]
 
 if __name__ == "__main__":
     app.run_server(debug=True)

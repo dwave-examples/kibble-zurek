@@ -117,6 +117,12 @@ def graphs_card():
 
 # Simulation card
 def simulation_card(init_job_status="READY"):
+
+    if init_job_status == "NO SOLVER":
+        job_status_color = "red"
+    else:  
+        job_status_color = "white"
+
     return dbc.Card([
         html.H4(
             "Simulation", 
@@ -148,7 +154,7 @@ def simulation_card(init_job_status="READY"):
             html.P(
                 id="job_submit_state", 
                 children=f"Status: {init_job_status}",
-                style={"color": "white", "fontSize": 12}
+                style={"color": job_status_color, "fontSize": 12}
             ),
             html.P(
                 id="job_submit_time", 

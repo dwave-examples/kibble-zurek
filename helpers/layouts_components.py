@@ -18,7 +18,7 @@ from dash_daq import Knob
 from dash import html
 
 __all__ = ["config_anneal_duration", "config_chain_length", 
-    "config_coupling_strength", "config_qpu_selection", "_dbc_modal", "job_bar_display",
+    "config_coupling_strength", "config_qpu_selection", "dbc_modal", "job_bar_display",
     "ring_lengths", "status_solver",]
 
 ring_lengths = [512, 1024, 2048]
@@ -79,7 +79,7 @@ def config_qpu_selection(solvers):
 job_bar_display = {
     "READY": [0, "link"],
     "EMBEDDING": [0, "dark"],     
-    "NO_SOLVER": [100, "danger"],
+    "NO SOLVER": [100, "danger"],
     "SUBMITTED": [10, "info"],
     "PENDING": [50, "warning"],
     "IN_PROGRESS": [75 ,"primary"],
@@ -106,12 +106,12 @@ modal_texts = {
         Link(children=[html.Div("system documentation")],
             href="https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html",
             style={"display":"inline-block"}),
-        " on supported IDEs"],
+        " on supported IDEs."],
             style={"display":"inline-block"}),])]
     ],
 }
 
-def _dbc_modal(name):
+def dbc_modal(name):
     name = name.split("_")[1]
     return [
         html.Div([
