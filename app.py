@@ -52,48 +52,10 @@ except Exception:
     init_job_status = "NO SOLVER"
 
 # Dashboard-organization section
-cards_layout = [
-    dbc.Row([
-        dbc.Col(
-            kz_config(solvers=qpus),
-            width=6
-        ),
-        dbc.Col([
-            dbc.Row([
-                dbc.Col([
-                    simulation_card(init_job_status=init_job_status)
-                ])
-            ]),
-        ], 
-            width=5
-        ),
-    ], 
-        justify="left"
-    ),
-    dbc.Row([
-        dbc.Col(
-            graphs_card(),   
-            width=12
-        ),
-    ], 
-        justify="left"
-    ),
-    *dbc_modal("modal_solver"),
-    # [dbc.Tooltip(
-    # message, target=target, id=f"tooltip_{target}", style = dict())
-    # for target, message in tool_tips.items()]
-]
 
 app.layout = dbc.Container([
+    # Logo
     dbc.Row([
-        dbc.Col([
-            html.H1(
-                "Coherent Annealing: KZ Simulation", 
-                style={"textAlign": "left", "color": "white"}
-            )
-        ],
-            width=9
-        ),
         dbc.Col([
             html.Img(
                 src="assets/dwave_logo.png", 
@@ -101,27 +63,41 @@ app.layout = dbc.Container([
                 style={"textAlign": "left"}
             )
         ],
-            width=3
+            width=3,
         )
     ]),
-    dbc.Container(
-        cards_layout, 
-        fluid=True,
-        style={"color": "rgb(3, 184, 255)",
-                "paddingLeft": 10, 
-                "paddingRight": 10}
-    )
+    dbc.Row([
+        # Left: Control panel 
+        dbc.Col(
+            [
+            control_card(
+                solvers=qpus, 
+                init_job_status=init_job_status
+            ),
+            *dbc_modal("modal_solver"),
+            # [dbc.Tooltip(
+            # message, target=target, id=f"tooltip_{target}", style = dict())
+            # for target, message in tool_tips.items()]
+            ],
+            width=4,   
+        ),
+        # Right: Display area
+        dbc.Col(
+            graphs_card(),
+            width=8,
+        ),
+    ]),
 ],
     style={
+        "color": "rgb(3, 184, 255)",
         "backgroundColor": "black",
-        "background-image": "url('assets/electric_squids.png')",
         "background-size": "cover",
-        "paddingLeft": 100, 
-        "paddingRight": 100,
+        "paddingLeft": 10, 
+        "paddingRight": 10,
         "paddingTop": 25, 
-        "paddingBottom": 50
+        "paddingBottom": 100
     }, 
-    fluid=True
+    fluid=True,
 )
 
 server = app.server
