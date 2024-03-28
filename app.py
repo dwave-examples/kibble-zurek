@@ -97,7 +97,7 @@ app.layout = dbc.Container([
         "paddingTop": 25, 
         "paddingBottom": 100
     }, 
-    fluid=True
+    fluid=True,
 )
 
 server = app.server

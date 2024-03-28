@@ -266,7 +266,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
             title=f'Spin States of {num_spins} Qubits in a 1D Ring',
             title_font_color="rgb(243, 120, 32)",
             showlegend=False,
-            margin=dict(b=0,l=0,r=0,t=80),
+            margin=dict(b=0,l=0,r=0,t=40),
             scene=dict(
                 xaxis=dict(
                     showticklabels=False, 
@@ -280,23 +280,23 @@ def plot_spin_orientation(num_spins=512, sample=None):
                     showticklabels=False, 
                     visible=False,
                 ),
-                camera_eye=dict(x=1, y=1, z=0.5)
+                camera_eye=dict(x=0.15, y=1.25, z=0.15)
             )
         )
     )
 
     fig.add_layout_image(
-    dict(
-        source="assets/spin_states.png",
-        xref="paper", 
-        yref="paper",
-        x=0.05, 
-        y=0.05,
-        sizex=0.3, 
-        sizey=0.3,
-        xanchor="left", 
-        yanchor="bottom",
+        dict(
+            source="assets/spin_states.png",
+            xref="paper", 
+            yref="paper",
+            x=0.05, 
+            y=0.05,
+            sizex=0.3, 
+            sizey=0.3,
+            xanchor="left", 
+            yanchor="bottom",
+        )
     )
-)
 
     return fig

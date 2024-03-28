@@ -41,30 +41,34 @@ def control_card(
                     className="card-title",
                     style={"color": "rgb(243, 120, 32)"}
                 ),
+                html.P([
+                    "Simulate the Kibble-Zurek mechanism of a 1D ring of magnetic spins.", 
+                ],
+                    style={"color": "white", "fontSize": 12}),
                 html.H5(
                         "Spins",
-                        style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                        style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
                 ),
                 html.Div([
                     config_chain_length
                 ]),
                 html.H5(
                     "Coupling Strength",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
                 ), 
                 html.Div([
                     config_coupling_strength
                 ]),
                 html.H5(
                     "Quench Duration [ns]",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
                 ),
                 html.Div([
                     config_anneal_duration
                 ]),
                 html.H5(
                     "QPU",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
                 ), 
                 html.Div([
                     config_qpu_selection(solvers),
@@ -82,16 +86,16 @@ def control_card(
                         style={"color": "white", "fontSize": 12}
                     ),
                 ],
-                    style={"color": "white", "marginBottom": 0}
+                    style={"color": "white", "marginTop": "10px"}
                 ),
                 html.H5(
                     "Cached Embeddings",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
                 ),
                 embeddings, 
                 html.H5(
                     "Simulation",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": 20}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
                 ),
                 dbc.Button(
                     "Run", 
@@ -115,7 +119,7 @@ def control_card(
                         style={"color": job_status_color, "fontSize": 12}
                     ),
                 ], 
-                    style={"color": "white"}
+                    style={"color": "white", "marginTop": "5px"}
                 ),
                 # Used for storing status. Can probably be replaced with dcc.Store. 
                 dcc.Interval(
@@ -152,16 +156,24 @@ def graphs_card():
             dbc.Col([
                 dcc.Graph(
                     id="spin_orientation", 
-                    figure=go.Figure()
+                    figure=go.Figure(),
+                    style={'height': '40vh'},
                 ),
+            ], 
+                width=12,
+            ),
+        ], ),
+        dbc.Row([
+            dbc.Col([
                 dcc.Graph(
                     id="sample_vs_theory",
-                    figure=go.Figure()
+                    figure=go.Figure(),
+                    
                 )
             ], 
                 width=12
             ),
         ]),
     ], 
-        color="dark"
+        color="dark",
     )
