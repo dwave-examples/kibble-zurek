@@ -27,16 +27,10 @@ def kz_config(solvers={}):
         dbc.Row([
             dbc.Col([
                 html.H4(
-                    "Configuration", 
+                    "Coherent Annealing: KZ Simulation", 
                     className="card-title",
                     style={"color": "rgb(243, 120, 32)"}
-                )
-            ])
-        ],
-            id="tour_settings_row"
-        ),
-        dbc.Row([
-            dbc.Col([
+                ),
                 html.P(
                     "QPU",
                     style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
@@ -48,24 +42,14 @@ def kz_config(solvers={}):
                         children="", 
                         style = dict(display="none")
                     )
-                ]), 
-            ], 
-                width=9
-            ),
-            dbc.Col([
+                ]),
                 html.P(
-                    "Spins",
-                    style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
+                        "Spins",
+                        style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
                 ), 
                 html.Div([
                     config_chain_length
-                ]), 
-            ], 
-                width=3
-            ),
-        ]),
-        dbc.Row([
-            dbc.Col([
+                ]),
                 html.P(
                     "Coupling Strength",
                     style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
@@ -73,8 +57,6 @@ def kz_config(solvers={}):
                 html.Div([
                     config_coupling_strength
                 ]),
-            ]),
-            dbc.Col([
                 html.P(
                     "Quench Duration [ns]",
                     style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
@@ -82,9 +64,61 @@ def kz_config(solvers={}):
                 html.Div([
                     config_anneal_duration
                     
-                ]), 
-            ]),
-        ]),
+                ]),
+            ])
+        ],
+            id="tour_settings_row"
+        ),
+        # dbc.Row([
+        #     dbc.Col([
+        #         html.P(
+        #             "QPU",
+        #             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
+        #         ), 
+        #         html.Div([
+        #             config_qpu_selection(solvers),
+        #             html.P(
+        #                 id="embedding", 
+        #                 children="", 
+        #                 style = dict(display="none")
+        #             )
+        #         ]), 
+        #     ], 
+        #         width=9
+        #     ),
+        #     dbc.Col([
+        #         html.P(
+        #             "Spins",
+        #             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
+        #         ), 
+        #         html.Div([
+        #             config_chain_length
+        #         ]), 
+        #     ], 
+        #         width=3
+        #     ),
+        # ]),
+        # dbc.Row([
+        #     dbc.Col([
+        #         html.P(
+        #             "Coupling Strength",
+        #             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
+        #         ), 
+        #         html.Div([
+        #             config_coupling_strength
+        #         ]),
+        #     ]),
+        #     dbc.Col([
+        #         html.P(
+        #             "Quench Duration [ns]",
+        #             style={"color": "rgb(3, 184, 255)", "marginBottom": 0}
+        #         ),
+        #         html.Div([
+        #             config_anneal_duration
+                    
+        #         ]), 
+        #     ]),
+        # ]),
     ], 
         body=True, 
         color="dark"
@@ -98,17 +132,13 @@ def graphs_card():
                 dcc.Graph(
                     id="spin_orientation", 
                     figure=go.Figure()
-                )
-            ], 
-                width=6
-            ),
-            dbc.Col([
+                ),
                 dcc.Graph(
                     id="sample_vs_theory",
                     figure=go.Figure()
                 )
             ], 
-                width=6
+                width=12
             ),
         ]),
     ], 
