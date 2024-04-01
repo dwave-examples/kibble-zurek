@@ -331,8 +331,12 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns):
     Input("wd_job", "n_intervals"),
     State("job_id", "children"),
     State("job_submit_state", "children"),
-    State("job_submit_time", "children"),)
-def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time):
+    State("job_submit_time", "children"),
+    State('embedding_is_cached', 'value'),
+    State('chain_length', 'value'),
+    State('qpu_selection', 'value'),)
+def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time, \
+             cached_embedding_lengths, spins, qpu_name):
     """Manage simulation: embedding, job submission."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -343,18 +347,32 @@ def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time):
 
     if trigger_id == "btn_simulate":
 
-        submit_time = datetime.datetime.now().strftime("%c")
+        if spins in cached_embedding_lengths:
+
+            submit_time = datetime.datetime.now().strftime("%c")
+            job_submit_state = "SUBMITTED"
+
+        else:
+
+            submit_time = dash.no_update
+            job_submit_state = "EMBEDDING"
+
         disable_btn = True
         disable_watchdog = False
 
-        return disable_btn, disable_watchdog, 0.5*1000, 0, "EMBEDDING", submit_time
+        return disable_btn, disable_watchdog, 0.5*1000, 0, job_submit_state, submit_time
     
-    # if job_submit_state == "EMBEDDING":
+    if job_submit_state == "EMBEDDING":
 
-    #     return True, False, 0.2*1000, 0, job_submit_state, dash.no_update
+        cached_embeddings[qpu_name][spins] = find_one_to_one_embedding(spins, qpus[qpu_name].edges)
+
+        submit_time = datetime.datetime.now().strftime("%c")
+        job_submit_state = "SUBMITTED"
+
+        return True, False, 0.2*1000, 0, job_submit_state, submit_time
 
     if any(job_submit_state == status for status in
-        ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
+        ["SUBMITTED", "PENDING", "IN_PROGRESS"]):
 
         job_submit_state = get_job_status(client, job_id, job_submit_time)
         if not job_submit_state:
