@@ -120,7 +120,6 @@ def alert_no_solver(btn_simulate):
     return False
 
 @app.callback(
-    Output('embedding_is_cached', 'options'), 
     Output('embedding_is_cached', 'value'),
     Output('quench_schedule_filename', 'children'),
     Output('quench_schedule_filename', 'style'),
@@ -136,16 +135,8 @@ def select_qpu(qpu_name):
     schedule_filename = "FALLBACK_SCHEDULE.csv"  
     schedule_filename_style = {"color": "red", "fontSize": 12}
 
-    embedding_lengths = []
-    embeddings_options = [     # Default: disable embeddings for all lengths
-        {
-            "label": 
-                html.Div([f"{length}"], 
-                style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
-            "value": length,
-            "disabled": True
-        } for length in ring_lengths]
-
+    cached_embedding_lengths = []
+ 
     if trigger_id == 'qpu_selection':
 
         for filename in [file for file in os.listdir('helpers') if ".csv" in file]:
@@ -160,16 +151,9 @@ def select_qpu(qpu_name):
             
         if qpu_name in cached_embeddings.keys():
 
-            embedding_lengths =  list(cached_embeddings[qpu_name].keys()) 
+            cached_embedding_lengths =  list(cached_embeddings[qpu_name].keys()) 
 
-            # Enable checklist for cached embeddings
-            for indx, length in enumerate(ring_lengths):
-
-                if length in embedding_lengths:
-
-                    embeddings_options[indx]["disabled"] = False
-
-    return embeddings_options, embedding_lengths, schedule_filename, schedule_filename_style
+    return cached_embedding_lengths, schedule_filename, schedule_filename_style
 
 @app.callback(
     Output('coupling_strength_display', 'children'), 

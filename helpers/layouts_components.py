@@ -148,7 +148,7 @@ embeddings = Checklist(
                 style={'color': 'white', 'font-size': 10, "marginRight": 10}
             ), 
         "value": length,
-        "disabled": True
+        "disabled": False,
     } for length in ring_lengths], 
     value=[], 
     id=f"embedding_is_cached",
