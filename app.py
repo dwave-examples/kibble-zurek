@@ -22,8 +22,9 @@ import datetime
 import numpy as np
 import os
 
+import dimod
 from dwave.cloud import Client
-from dwave.embedding import embed_bqm
+from dwave.embedding import embed_bqm, is_valid_embedding
 from dwave.system import DWaveSampler
 
 from helpers.cached_embeddings import cached_embeddings
@@ -152,6 +153,17 @@ def select_qpu(qpu_name):
         if qpu_name in cached_embeddings.keys():
 
             cached_embedding_lengths =  list(cached_embeddings[qpu_name].keys()) 
+
+            # Validate that file-cached embedding still has all edges
+            for length in cached_embedding_lengths:
+                
+                source_graph = dimod.to_networkx_graph(create_bqm(num_spins=length)).edges 
+                target_graph = qpus[qpu_name].edges
+                emb = cached_embeddings[qpu_name][length]
+
+                if not is_valid_embedding(emb, source_graph, target_graph):
+                    cached_embedding_lengths.remove(length)
+
 
     return cached_embedding_lengths, schedule_filename, schedule_filename_style
 
