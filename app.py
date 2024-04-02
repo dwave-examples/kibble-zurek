@@ -119,24 +119,17 @@ def alert_no_solver(btn_simulate):
     return False
 
 @app.callback(
-    Output('embeddings_cached', 'data'),
-    Output('embedding_is_cached', 'value'),
     Output('quench_schedule_filename', 'children'),
     Output('quench_schedule_filename', 'style'),
-    Input('qpu_selection', 'value'),
-    State("chain_length", "options"),)
-def select_qpu(qpu_name, spins):
-    """Select the QPU from the available one.
-
-    Set embeddings and schedule.
+    Input('qpu_selection', 'value'),)
+def set_schedule(qpu_name):
+    """Set the schedule for the selected QPU.
     """
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     schedule_filename = "FALLBACK_SCHEDULE.csv"  
     schedule_filename_style = {"color": "red", "fontSize": 12}
-
-    embeddings_cached = {}
  
     if trigger_id == 'qpu_selection':
 
@@ -149,7 +142,23 @@ def select_qpu(qpu_name, spins):
                 if qpu_name in filename:
 
                     schedule_filename_style = {"color": "white", "fontSize": 12} 
-            
+
+    return schedule_filename, schedule_filename_style
+
+@app.callback(
+    Output('embeddings_cached', 'data'),
+    Output('embedding_is_cached', 'value'),
+    Input('qpu_selection', 'value'),)
+def cache_embeddings(qpu_name):
+    """Cache embeddings for the selected QPU.
+    """
+
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+
+    embeddings_cached = {}
+ 
+    if trigger_id == 'qpu_selection':
+          
         for filename in [file for file in os.listdir('helpers') if ".json" in file and "emb_" in file]:
 
             if qpu_name.split(".")[0] in filename:
@@ -170,19 +179,7 @@ def select_qpu(qpu_name, spins):
 
                         del embeddings_cached[length]
 
-        # Try complement any missing embeddings for the selected QPU
-        for length in [option["value"] for option in spins]:
-            if length not in list(embeddings_cached.keys()):
-                try:
-                    embedding = find_one_to_one_embedding(length, qpus[qpu_name].edges)
-                    if embedding:
-                        embeddings_cached[length] = embedding
-                except Exception:
-                    print("failed")
-                    pass
-
-
-    return embeddings_cached, list(embeddings_cached.keys()), schedule_filename, schedule_filename_style
+    return embeddings_cached, list(embeddings_cached.keys())
 
 @app.callback(
     Output('coupling_strength_display', 'children'), 
@@ -388,6 +385,17 @@ def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time, \
         return disable_btn, disable_watchdog, 0.5*1000, 0, job_submit_state, submit_time
     
     if job_submit_state == "EMBEDDING":
+
+        # Try complement any missing embeddings for the selected QPU
+        for length in [option["value"] for option in spins]:
+            if length not in list(embeddings_cached.keys()):
+                try:
+                    embedding = find_one_to_one_embedding(length, qpus[qpu_name].edges)
+                    if embedding:
+                        embeddings_cached[length] = embedding
+                except Exception:
+                    print("failed")
+                    pass
  
         submit_time = datetime.datetime.now().strftime("%c")
         job_submit_state = "FAILED"
