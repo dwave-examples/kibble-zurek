@@ -183,11 +183,14 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
 
     if trigger_id == 'embeddings_found':
 
-        if embeddings_found != "needed":
+        if embeddings_found != "needed" and embeddings_found != "not found":
 
             embeddings_cached = json_to_dict(embeddings_cached)
             embeddings_found = json_to_dict(embeddings_found)
             embeddings_cached[list(embeddings_found.keys())[0]] = embeddings_found[list(embeddings_found.keys())[0]]
+
+        else:
+            return dash.no_update, dash.no_update
 
     return embeddings_cached, list(embeddings_cached.keys())
 
@@ -407,8 +410,12 @@ def simulate(dummy1, dummy2, job_id, job_submit_state, job_submit_time, \
                 if embedding:
                     job_submit_state = "EMBEDDING"  # Stay another WD to allow caching the embedding
                     embedding = {spins: embedding}
+                else:
+                    job_submit_state = "FAILED"
+                    embedding = "not found"
             except Exception:
                 job_submit_state = "FAILED"
+                embedding = "not found"
 
         else:   # Found embedding last WD, so is cached, so now can submit job
             
