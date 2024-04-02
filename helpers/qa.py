@@ -54,14 +54,13 @@ def find_one_to_one_embedding(ising_chain_length, sampler_edgelist):
 
     for tries in range(3):
 
-        print(f"Attempt {tries + 1} to find an embedding...")   # TODO: move this
-
         embedding = minorminer.find_embedding(bqm.quadratic, sampler_edgelist) 
 
         if max(len(val) for val in embedding.values()) == 1:
+
             return embedding
         
-    raise ValueError("Failed to find a good embedding in 3 tries")  # TODO: terminate gracefully
+    return {}
 
 def get_job_status(client, job_id, job_submit_time):
     """Return status of a submitted job.

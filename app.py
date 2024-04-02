@@ -123,8 +123,9 @@ def alert_no_solver(btn_simulate):
     Output('embedding_is_cached', 'value'),
     Output('quench_schedule_filename', 'children'),
     Output('quench_schedule_filename', 'style'),
-    Input('qpu_selection', 'value'))
-def select_qpu(qpu_name):
+    Input('qpu_selection', 'value'),
+    State("chain_length", "options"),)
+def select_qpu(qpu_name, spins):
     """Select the QPU from the available one.
 
     Set embeddings and schedule.
@@ -139,7 +140,7 @@ def select_qpu(qpu_name):
  
     if trigger_id == 'qpu_selection':
 
-        for filename in [file for file in os.listdir('helpers') if ".csv" in file]:
+        for filename in [file for file in os.listdir('helpers') if "schedule.csv" in file.lower()]:
 
             if qpu_name.split(".")[0] in filename:  # Accepts & reddens older major versions
             
@@ -149,7 +150,7 @@ def select_qpu(qpu_name):
 
                     schedule_filename_style = {"color": "white", "fontSize": 12} 
             
-        for filename in [file for file in os.listdir('helpers') if ".json" in file]:
+        for filename in [file for file in os.listdir('helpers') if ".json" in file and "emb_" in file]:
 
             if qpu_name.split(".")[0] in filename:
 
@@ -158,7 +159,7 @@ def select_qpu(qpu_name):
 
                 embeddings_cached = json_to_dict(embeddings_cached)
                             
-                # Validate that file-cached embedding still has all edges
+                # Validate that loaded embeddings' edges are still available on the selected QPU
                 for length in list(embeddings_cached.keys()):
                     
                     source_graph = dimod.to_networkx_graph(create_bqm(num_spins=length)).edges 
@@ -167,8 +168,19 @@ def select_qpu(qpu_name):
 
                     if not is_valid_embedding(emb, source_graph, target_graph):
 
-                        print(f"select_qpu: invalid embedding for {length} ")
                         del embeddings_cached[length]
+
+        # Try complement any missing embeddings for the selected QPU
+        for length in [option["value"] for option in spins]:
+            if length not in list(embeddings_cached.keys()):
+                try:
+                    embedding = find_one_to_one_embedding(length, qpus[qpu_name].edges)
+                    if embedding:
+                        embeddings_cached[length] = embedding
+                except Exception:
+                    print("failed")
+                    pass
+
 
     return embeddings_cached, list(embeddings_cached.keys()), schedule_filename, schedule_filename_style
 
@@ -318,7 +330,7 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cac
 
         param_dict = {
             "bqm": bqm_embedded,
-            "anneal_time": 0.001 * ta_ns,
+            "annealing_time": 0.001 * ta_ns,
             "auto_scale": False, 
             "answer_mode": "raw",
             "num_reads": 100, 
@@ -358,7 +370,7 @@ def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time, \
 
     if trigger_id == "btn_simulate":
 
-        embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+        embeddings_cached = json_to_dict(embeddings_cached)
 
         if spins in embeddings_cached.keys():   
 
