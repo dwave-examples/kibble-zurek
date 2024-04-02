@@ -17,9 +17,7 @@ from dwave.cloud.api import exceptions, Problems
 from dwave.embedding import unembed_sampleset
 import minorminer
 
-from helpers.cached_embeddings import cached_embeddings
-
-__all__ = ["create_bqm", "find_one_to_one_embedding", "get_job_status", "get_samples"]
+__all__ = ["create_bqm", "find_one_to_one_embedding", "get_job_status", "get_samples", "json_to_dict"]
 
 def create_bqm(num_spins=512, coupling_strength=-1.4):
     """
@@ -40,30 +38,29 @@ def create_bqm(num_spins=512, coupling_strength=-1.4):
     
     return bqm
 
-def find_one_to_one_embedding(ising_chain_length, sampler_edgelist):
+def find_one_to_one_embedding(spins, sampler_edgelist):
     """
     Find an embedding with chains of length one for the spin ring. 
 
     Args:
-        ising_chain_length: Length of ring, which is the number of spins. 
+        spins: Length of ring, which is the number of spins. 
 
         sampler_edgelist: Edges of the QPU. 
 
     Returns:
         Embedding, as a dict of format ``{spin: [qubit]}``.  
     """
-    bqm = create_bqm(ising_chain_length)
+    bqm = create_bqm(spins)
 
     for tries in range(3):
-
-        print(f"Attempt {tries + 1} to find an embedding...")   # TODO: move this
 
         embedding = minorminer.find_embedding(bqm.quadratic, sampler_edgelist) 
 
         if max(len(val) for val in embedding.values()) == 1:
+
             return embedding
         
-    raise ValueError("Failed to find a good embedding in 3 tries")  # TODO: terminate gracefully
+    return {}
 
 def get_job_status(client, job_id, job_submit_time):
     """Return status of a submitted job.
@@ -98,7 +95,7 @@ def get_job_status(client, job_id, job_submit_time):
 
         return None
 
-def get_samples(client, job_id, num_spins, J, qpu_name):
+def get_samples(client, job_id, num_spins, J, embedding):
     """Retrieve an unembedded sampleset for a given job ID. 
 
     Args:
@@ -112,14 +109,29 @@ def get_samples(client, job_id, num_spins, J, qpu_name):
 
         qpu_name: Name of the quantum computer the job was submitted to. 
 
+        embedding: Embedding used for the job. 
+
     Returns:
-        Unembedded dimod sampleset. .
+        Unembedded dimod sampleset. 
     """
     
     sampleset = client.retrieve_answer(job_id).sampleset
             
     bqm = create_bqm(num_spins=num_spins, coupling_strength=J)
-    embedding = cached_embeddings[qpu_name][num_spins]
     
     return  unembed_sampleset(sampleset, embedding, bqm)
+
+def json_to_dict(emb_json):
+    """Retrieve an unembedded sampleset for a given job ID. 
+
+    Args:
+        emb_json: JSON-formatted dict of embeddings, as {'spins': {'node1': [qubit1], 'node2': [qubit2], ...}, ...}. 
+    
+    Returns:
+        Embedding in standard dict format.
+
+    """
+
+    return {int(key): {int(node): qubits for node, qubits in emb.items()} 
+                for key, emb in emb_json.items()}
    

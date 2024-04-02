@@ -15,18 +15,17 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, Input, Output, State
-
-import plotly.graph_objects as go
-
 import datetime
+import json
+import plotly.graph_objects as go
 import numpy as np
 import os
 
+import dimod
 from dwave.cloud import Client
-from dwave.embedding import embed_bqm
+from dwave.embedding import embed_bqm, is_valid_embedding
 from dwave.system import DWaveSampler
 
-from helpers.cached_embeddings import cached_embeddings
 from helpers.kz_calcs import *
 from helpers.layouts_cards import *
 from helpers.layouts_components import *
@@ -90,11 +89,11 @@ app.layout = dbc.Container([
 ],
     style={
         "color": "rgb(3, 184, 255)",
-        "backgroundColor": "black",
+        "backgroundColor": "#074c91",
         "background-size": "cover",
         "paddingLeft": 10, 
         "paddingRight": 10,
-        "paddingTop": 25, 
+        "paddingTop": 10, 
         "paddingBottom": 100
     }, 
     fluid=True,
@@ -108,7 +107,7 @@ app.config["suppress_callback_exceptions"] = True
 @app.callback(
     Output("solver_modal", "is_open"),
     Input("btn_simulate", "n_clicks"),)
-def alert_no_solver(btn_simulate):
+def alert_no_solver(dummy):
     """Notify if no quantum computer is accessible."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -120,35 +119,60 @@ def alert_no_solver(btn_simulate):
     return False
 
 @app.callback(
-    Output('embedding_is_cached', 'options'), 
-    Output('embedding_is_cached', 'value'),
+    Output("anneal_duration", "disabled"),
+    Output("coupling_strength", "disabled"),
+    Output("spins", "options"),
+    Output("qpu_selection", "disabled"),
+    Input("job_submit_state", "children"),
+    State("spins", "options"))
+def disable_buttons(job_submit_state, spins_options):        
+    """Disable user input during job submissions."""
+
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+
+    if trigger_id !="job_submit_state":
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+    if any(job_submit_state == status for status in ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
+        
+        for inx, option in enumerate(spins_options): 
+            spins_options[inx]['disabled'] = True
+        
+        return  True, True, spins_options, True
+
+    elif any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
+
+        for inx, option in enumerate(spins_options): 
+            spins_options[inx]['disabled'] = False
+        
+        return False, False, spins_options, False
+
+    else:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+@app.callback(
+    Output('coupling_strength_display', 'children'), 
+    Input('coupling_strength', 'value'))
+def update_j_output(J_offset):
+    J = J_offset - 2
+    return f"J={J:.1f}"
+
+@app.callback(
     Output('quench_schedule_filename', 'children'),
     Output('quench_schedule_filename', 'style'),
-    Input('qpu_selection', 'value'))
-def select_qpu(qpu_name):
-    """Select the QPU from the available one.
-
-    Set embeddings and schedule.
+    Input('qpu_selection', 'value'),)
+def set_schedule(qpu_name):
+    """Set the schedule for the selected QPU.
     """
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     schedule_filename = "FALLBACK_SCHEDULE.csv"  
     schedule_filename_style = {"color": "red", "fontSize": 12}
-
-    embedding_lengths = []
-    embeddings_options = [     # Default: disable embeddings for all lengths
-        {
-            "label": 
-                html.Div([f"{length}"], 
-                style={'color': 'white', 'font-size': 10, "marginRight": 10}), 
-            "value": length,
-            "disabled": True
-        } for length in ring_lengths]
-
+ 
     if trigger_id == 'qpu_selection':
 
-        for filename in [file for file in os.listdir('helpers') if ".csv" in file]:
+        for filename in [file for file in os.listdir('helpers') if "schedule.csv" in file.lower()]:
 
             if qpu_name.split(".")[0] in filename:  # Accepts & reddens older major versions
             
@@ -157,26 +181,57 @@ def select_qpu(qpu_name):
                 if qpu_name in filename:
 
                     schedule_filename_style = {"color": "white", "fontSize": 12} 
-            
-        if qpu_name in cached_embeddings.keys():
 
-            embedding_lengths =  list(cached_embeddings[qpu_name].keys()) 
-
-            # Enable checklist for cached embeddings
-            for indx, length in enumerate(ring_lengths):
-
-                if length in embedding_lengths:
-
-                    embeddings_options[indx]["disabled"] = False
-
-    return embeddings_options, embedding_lengths, schedule_filename, schedule_filename_style
+    return schedule_filename, schedule_filename_style
 
 @app.callback(
-    Output('coupling_strength_display', 'children'), 
-    Input('coupling_strength', 'value'))
-def update_j_output(J_offset):
-    J = J_offset - 2
-    return f"J={J:.1f}"
+    Output('embeddings_cached', 'data'),
+    Output('embedding_is_cached', 'value'),
+    Input('qpu_selection', 'value'),
+    Input("embeddings_found", "data"),
+    State("embeddings_cached", "data"),)
+def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
+    """Cache embeddings for the selected QPU.
+    """
+
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+ 
+    if trigger_id == 'qpu_selection':
+
+        embeddings_cached = {}  # Wipe out previous QPU's embeddings
+          
+        for filename in [file for file in os.listdir('helpers') if ".json" in file and "emb_" in file]:
+
+            if qpu_name.split(".")[0] in filename:
+
+                with open(f'helpers/{filename}', 'r') as fp:
+                    embeddings_cached = json.load(fp)
+
+                embeddings_cached = json_to_dict(embeddings_cached)
+                            
+                # Validate that loaded embeddings' edges are still available on the selected QPU
+                for length in list(embeddings_cached.keys()):
+                    
+                    source_graph = dimod.to_networkx_graph(create_bqm(num_spins=length)).edges 
+                    target_graph = qpus[qpu_name].edges
+                    emb = embeddings_cached[length]
+
+                    if not is_valid_embedding(emb, source_graph, target_graph):
+
+                        del embeddings_cached[length]
+
+    if trigger_id == 'embeddings_found':
+
+        if embeddings_found != "needed" and embeddings_found != "not found":
+
+            embeddings_cached = json_to_dict(embeddings_cached)
+            embeddings_found = json_to_dict(embeddings_found)
+            embeddings_cached[list(embeddings_found.keys())[0]] = embeddings_found[list(embeddings_found.keys())[0]]
+
+        else:
+            return dash.no_update, dash.no_update
+
+    return embeddings_cached, list(embeddings_cached.keys())
 
 @app.callback(
     Output("sample_vs_theory", "figure"),
@@ -187,11 +242,11 @@ def update_j_output(J_offset):
     State("anneal_duration", "min"),
     State("anneal_duration", "max"),
     State("anneal_duration", "value"),
-    State('qpu_selection', 'value'),
-    State('chain_length', 'value'),
+    State('spins', 'value'),
+    State('embeddings_cached', 'data'),
     State("sample_vs_theory", "figure"),)
 def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id, ta_min, ta_max, ta, \
-    qpu_name, spins, figure):
+    spins, embeddings_cached, figure):
     """Generate graphics for theory and samples."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -208,7 +263,9 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
 
         if job_submit_state == "COMPLETED":
 
-            sampleset_unembedded = get_samples(client, job_id, spins, J, qpu_name)              
+            embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+
+            sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
             _, kink_density = kink_stats(sampleset_unembedded, J)
             
             fig = plot_kink_density(figure, kink_density, ta)
@@ -222,12 +279,12 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
 
 @app.callback(
     Output("spin_orientation", "figure"),
-    Input('chain_length', 'value'),
+    Input('spins', 'value'),
     Input("job_submit_state", "children"),
     State("job_id", "children"),
     State("coupling_strength", "value"),
-    State('qpu_selection', 'value'),)
-def display_graphics_right(spins, job_submit_state, job_id, J_offset, qpu_name):
+    State('embeddings_cached', 'data'),)
+def display_graphics_right(spins, job_submit_state, job_id, J_offset, embeddings_cached):
     """Generate graphics for spin display."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -238,7 +295,8 @@ def display_graphics_right(spins, job_submit_state, job_id, J_offset, qpu_name):
     
         if job_submit_state == "COMPLETED":
 
-            sampleset_unembedded = get_samples(client, job_id, spins, J, qpu_name)
+            embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+            sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])
             kinks_per_sample, kink_density = kink_stats(sampleset_unembedded, J)
             best_indx = np.abs(kinks_per_sample - kink_density).argmin()
             best_sample = sampleset_unembedded.record.sample[best_indx]
@@ -254,46 +312,14 @@ def display_graphics_right(spins, job_submit_state, job_id, J_offset, qpu_name):
     return fig
 
 @app.callback(
-    Output("anneal_duration", "disabled"),
-    Output("coupling_strength", "disabled") ,
-    Output("chain_length", "options"),
-    Input("job_submit_state", "children"),
-    State("chain_length", "options"))
-def disable_buttons(job_submit_state, chain_length_options):        # Add cached embeddings
-    """Disable user input during job submissions."""
-
-    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id !="job_submit_state":
-        return dash.no_update, dash.no_update, dash.no_update
-
-    if any(job_submit_state == status for status in ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
-        
-        chain_length_disable = chain_length_options
-        for inx, option in enumerate(chain_length_disable): 
-            chain_length_disable[inx]['disabled'] = True
-        
-        return  True, True, chain_length_disable
-
-    elif any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
-
-        chain_length_enable = chain_length_options
-        for inx, option in enumerate(chain_length_enable): 
-            chain_length_enable[inx]['disabled'] = False
-        
-        return False, False, chain_length_enable
-
-    else:
-        return dash.no_update, dash.no_update, dash.no_update
-
-@app.callback(
     Output("job_id", "children"),
     Input("job_submit_time", "children"),
     State('qpu_selection', 'value'),
-    State('chain_length', 'value'),
+    State('spins', 'value'),
     State('coupling_strength', 'value'),
-    State("anneal_duration", "value"),)
-def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns):
+    State("anneal_duration", "value"),
+    State('embeddings_cached', 'data'),)
+def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cached):
     """Submit job and provide job ID."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -306,13 +332,14 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns):
 
         bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
-        embedding = cached_embeddings[qpu_name][spins]
+        embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+        embedding = embeddings_cached[spins]
 
         bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
 
         param_dict = {
             "bqm": bqm_embedded,
-            "anneal_time": 0.001 * ta_ns,
+            "annealing_time": 0.001 * ta_ns,
             "auto_scale": False, 
             "answer_mode": "raw",
             "num_reads": 100, 
@@ -331,34 +358,73 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns):
     Output("wd_job", "n_intervals"),
     Output("job_submit_state", "children"),
     Output("job_submit_time", "children"),
+    Output("embeddings_found", "data"),
     Input("btn_simulate", "n_clicks"),
     Input("wd_job", "n_intervals"),
     State("job_id", "children"),
     State("job_submit_state", "children"),
-    State("job_submit_time", "children"),)
-def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time):
+    State("job_submit_time", "children"),
+    State('embedding_is_cached', 'value'),
+    State('spins', 'value'),
+    State('qpu_selection', 'value'),
+    State("embeddings_found", "data"),)
+def simulate(dummy1, dummy2, job_id, job_submit_state, job_submit_time, \
+             cached_embedding_lengths, spins, qpu_name, embeddings_found):
     """Manage simulation: embedding, job submission."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     if not any(trigger_id == input for input in ["btn_simulate", "wd_job"]):
         return dash.no_update, dash.no_update, dash.no_update, \
-            dash.no_update, dash.no_update, dash.no_update
+            dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
     if trigger_id == "btn_simulate":
 
-        submit_time = datetime.datetime.now().strftime("%c")
+        if spins in cached_embedding_lengths:   
+
+            submit_time = datetime.datetime.now().strftime("%c")
+            job_submit_state = "SUBMITTED"
+            embedding = dash.no_update
+
+        else:
+
+            submit_time = dash.no_update
+            job_submit_state = "EMBEDDING"
+            embedding = "needed"
+
         disable_btn = True
         disable_watchdog = False
 
-        return disable_btn, disable_watchdog, 0.5*1000, 0, "EMBEDDING", submit_time
+        return disable_btn, disable_watchdog, 0.5*1000, 0, job_submit_state, submit_time, embedding
     
-    # if job_submit_state == "EMBEDDING":
+    if job_submit_state == "EMBEDDING":
 
-    #     return True, False, 0.2*1000, 0, job_submit_state, dash.no_update
+        submit_time = dash.no_update
+        embedding = dash.no_update
+
+        if embeddings_found == "needed":
+
+            try:
+                embedding = find_one_to_one_embedding(spins, qpus[qpu_name].edges)
+                if embedding:
+                    job_submit_state = "EMBEDDING"  # Stay another WD to allow caching the embedding
+                    embedding = {spins: embedding}
+                else:
+                    job_submit_state = "FAILED"
+                    embedding = "not found"
+            except Exception:
+                job_submit_state = "FAILED"
+                embedding = "not found"
+
+        else:   # Found embedding last WD, so is cached, so now can submit job
+            
+            submit_time = datetime.datetime.now().strftime("%c")
+            job_submit_state = "SUBMITTED"
+
+        return True, False, 0.2*1000, 0, job_submit_state, submit_time, embedding
 
     if any(job_submit_state == status for status in
-        ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
+        ["SUBMITTED", "PENDING", "IN_PROGRESS"]):
 
         job_submit_state = get_job_status(client, job_id, job_submit_time)
         if not job_submit_state:
@@ -367,17 +433,17 @@ def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time):
         else:
             wd_time = 1*1000
 
-        return True, False, wd_time, 0, job_submit_state, dash.no_update
+        return True, False, wd_time, 0, job_submit_state, dash.no_update, dash.no_update
 
     if any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
 
         disable_btn = False
         disable_watchdog = True
 
-        return disable_btn, disable_watchdog, 0.1*1000, 0, dash.no_update, dash.no_update
+        return disable_btn, disable_watchdog, 0.1*1000, 0, dash.no_update, dash.no_update, dash.no_update
 
     else:   # Exception state: should only ever happen in testing
-        return False, True, 0, 0, "ERROR", dash.no_update, 
+        return False, True, 0, 0, "ERROR", dash.no_update, dash.no_update
 
 @app.callback(
     Output("bar_job_status", "value"),

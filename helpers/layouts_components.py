@@ -17,7 +17,7 @@ from dash.dcc import Checklist, Dropdown, Input, Link, RadioItems
 from dash_daq import Knob
 from dash import html
 
-__all__ = ["config_anneal_duration", "config_chain_length", 
+__all__ = ["config_anneal_duration", "config_spins", 
     "config_coupling_strength", "config_qpu_selection", "dbc_modal", "embeddings",
     "job_bar_display", "ring_lengths", ]
 
@@ -33,8 +33,8 @@ config_anneal_duration = Input(
     style={"max-width": "95%"}
 )
 
-config_chain_length = RadioItems(
-    id="chain_length",
+config_spins = RadioItems(
+    id="spins",
     options=[
         {
             "label": f"{length}", 
@@ -89,11 +89,11 @@ def config_qpu_selection(solvers):
 
 job_bar_display = {
     "READY": [0, "link"],
-    "EMBEDDING": [0, "dark"],     
+    "EMBEDDING": [20, "warning"],     
     "NO SOLVER": [100, "danger"],
-    "SUBMITTED": [10, "info"],
-    "PENDING": [50, "warning"],
-    "IN_PROGRESS": [75 ,"primary"],
+    "SUBMITTED": [40, "info"],
+    "PENDING": [60, "primary"],
+    "IN_PROGRESS": [85 ,"dark"],
     "COMPLETED": [100, "success"],
     "CANCELLED": [100, "light"],
     "FAILED": [100, "danger"], 
@@ -148,7 +148,7 @@ embeddings = Checklist(
                 style={'color': 'white', 'font-size': 10, "marginRight": 10}
             ), 
         "value": length,
-        "disabled": True
+        "disabled": True,
     } for length in ring_lengths], 
     value=[], 
     id=f"embedding_is_cached",

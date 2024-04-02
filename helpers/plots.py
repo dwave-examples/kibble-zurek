@@ -290,11 +290,11 @@ def plot_spin_orientation(num_spins=512, sample=None):
             source="assets/spin_states.png",
             xref="paper", 
             yref="paper",
-            x=0.05, 
+            x=0.95, 
             y=0.05,
-            sizex=0.3, 
-            sizey=0.3,
-            xanchor="left", 
+            sizex=0.4, 
+            sizey=0.4,
+            xanchor="right", 
             yanchor="bottom",
         )
     )
