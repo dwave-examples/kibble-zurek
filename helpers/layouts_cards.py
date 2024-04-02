@@ -139,6 +139,11 @@ def control_card(
                     children="", 
                     style = dict(display="none")
                 ),
+                dcc.Store(
+                    id='embeddings_cached',
+                    storage_type='memory',
+                    data={},
+                ),
                 ]
             ),
             ],
