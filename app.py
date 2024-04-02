@@ -107,7 +107,7 @@ app.config["suppress_callback_exceptions"] = True
 @app.callback(
     Output("solver_modal", "is_open"),
     Input("btn_simulate", "n_clicks"),)
-def alert_no_solver(btn_simulate):
+def alert_no_solver(dummy):
     """Notify if no quantum computer is accessible."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -117,6 +117,45 @@ def alert_no_solver(btn_simulate):
             return True
 
     return False
+
+@app.callback(
+    Output("anneal_duration", "disabled"),
+    Output("coupling_strength", "disabled"),
+    Output("spins", "options"),
+    Output("qpu_selection", "disabled"),
+    Input("job_submit_state", "children"),
+    State("spins", "options"))
+def disable_buttons(job_submit_state, spins_options):        
+    """Disable user input during job submissions."""
+
+    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+
+    if trigger_id !="job_submit_state":
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+    if any(job_submit_state == status for status in ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
+        
+        for inx, option in enumerate(spins_options): 
+            spins_options[inx]['disabled'] = True
+        
+        return  True, True, spins_options, True
+
+    elif any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
+
+        for inx, option in enumerate(spins_options): 
+            spins_options[inx]['disabled'] = False
+        
+        return False, False, spins_options, False
+
+    else:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+@app.callback(
+    Output('coupling_strength_display', 'children'), 
+    Input('coupling_strength', 'value'))
+def update_j_output(J_offset):
+    J = J_offset - 2
+    return f"J={J:.1f}"
 
 @app.callback(
     Output('quench_schedule_filename', 'children'),
@@ -195,13 +234,6 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
     return embeddings_cached, list(embeddings_cached.keys())
 
 @app.callback(
-    Output('coupling_strength_display', 'children'), 
-    Input('coupling_strength', 'value'))
-def update_j_output(J_offset):
-    J = J_offset - 2
-    return f"J={J:.1f}"
-
-@app.callback(
     Output("sample_vs_theory", "figure"),
     Input("coupling_strength", "value"),
     Input("quench_schedule_filename", "children"),
@@ -278,39 +310,6 @@ def display_graphics_right(spins, job_submit_state, job_id, J_offset, embeddings
 
     fig = plot_spin_orientation(num_spins=spins, sample=None)
     return fig
-
-@app.callback(
-    Output("anneal_duration", "disabled"),
-    Output("coupling_strength", "disabled") ,
-    Output("spins", "options"),
-    Input("job_submit_state", "children"),
-    State("spins", "options"))
-def disable_buttons(job_submit_state, spins_options):        # Add cached embeddings
-    """Disable user input during job submissions."""
-
-    trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id !="job_submit_state":
-        return dash.no_update, dash.no_update, dash.no_update
-
-    if any(job_submit_state == status for status in ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
-        
-        spins_disable = spins_options
-        for inx, option in enumerate(spins_disable): 
-            spins_disable[inx]['disabled'] = True
-        
-        return  True, True, spins_disable
-
-    elif any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
-
-        spins_enable = spins_options
-        for inx, option in enumerate(spins_enable): 
-            spins_enable[inx]['disabled'] = False
-        
-        return False, False, spins_enable
-
-    else:
-        return dash.no_update, dash.no_update, dash.no_update
 
 @app.callback(
     Output("job_id", "children"),
