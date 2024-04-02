@@ -41,34 +41,36 @@ def control_card(
                     className="card-title",
                     style={"color": "rgb(243, 120, 32)"}
                 ),
-                html.P([
-                    "Simulate the Kibble-Zurek mechanism of a 1D ring of magnetic spins.", 
-                ],
-                    style={"color": "white", "fontSize": 12}),
+                html.P(
+"""
+Use a quantum computer to simulate the formation of topological defects in a 1D ring 
+of magnetic spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
+""", 
+                    style={"color": "white", "fontSize": 14}),
                 html.H5(
                         "Spins",
-                        style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
+                        style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
                 ),
                 html.Div([
                     config_spins
                 ]),
                 html.H5(
                     "Coupling Strength",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
                 ), 
                 html.Div([
                     config_coupling_strength
                 ]),
                 html.H5(
                     "Quench Duration [ns]",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
                 ),
                 html.Div([
                     config_anneal_duration
                 ]),
                 html.H5(
                     "QPU",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
                 ), 
                 html.Div([
                     config_qpu_selection(solvers),
@@ -83,19 +85,19 @@ def control_card(
                     html.Span(
                         id="quench_schedule_filename", 
                         children="",
-                        style={"color": "white", "fontSize": 12}
+                        style={"color": "white", "fontSize": 10}
                     ),
                 ],
                     style={"color": "white", "marginTop": "10px"}
                 ),
                 html.H5(
                     "Cached Embeddings",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
                 ),
                 embeddings, 
                 html.H5(
                     "Simulation",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
+                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
                 ),
                 dbc.Button(
                     "Run", 
@@ -116,7 +118,7 @@ def control_card(
                     html.Span(
                         id="job_submit_state", 
                         children=f"{init_job_status}",
-                        style={"color": job_status_color, "fontSize": 12}
+                        style={"color": job_status_color, "fontSize": 12, "marginTop": "10px"}
                     ),
                 ], 
                     style={"color": "white", "marginTop": "5px"}
