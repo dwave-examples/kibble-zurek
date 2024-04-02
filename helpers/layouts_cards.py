@@ -50,7 +50,7 @@ def control_card(
                         style={"color": "rgb(3, 184, 255)", "marginTop": "20px"}
                 ),
                 html.Div([
-                    config_chain_length
+                    config_spins
                 ]),
                 html.H5(
                     "Coupling Strength",

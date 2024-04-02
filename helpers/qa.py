@@ -38,19 +38,19 @@ def create_bqm(num_spins=512, coupling_strength=-1.4):
     
     return bqm
 
-def find_one_to_one_embedding(ising_chain_length, sampler_edgelist):
+def find_one_to_one_embedding(spins, sampler_edgelist):
     """
     Find an embedding with chains of length one for the spin ring. 
 
     Args:
-        ising_chain_length: Length of ring, which is the number of spins. 
+        spins: Length of ring, which is the number of spins. 
 
         sampler_edgelist: Edges of the QPU. 
 
     Returns:
         Embedding, as a dict of format ``{spin: [qubit]}``.  
     """
-    bqm = create_bqm(ising_chain_length)
+    bqm = create_bqm(spins)
 
     for tries in range(3):
 

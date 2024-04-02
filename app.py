@@ -210,7 +210,7 @@ def update_j_output(J_offset):
     State("anneal_duration", "min"),
     State("anneal_duration", "max"),
     State("anneal_duration", "value"),
-    State('chain_length', 'value'),
+    State('spins', 'value'),
     State('embeddings_cached', 'data'),
     State("sample_vs_theory", "figure"),)
 def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id, ta_min, ta_max, ta, \
@@ -247,7 +247,7 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
 
 @app.callback(
     Output("spin_orientation", "figure"),
-    Input('chain_length', 'value'),
+    Input('spins', 'value'),
     Input("job_submit_state", "children"),
     State("job_id", "children"),
     State("coupling_strength", "value"),
@@ -282,10 +282,10 @@ def display_graphics_right(spins, job_submit_state, job_id, J_offset, embeddings
 @app.callback(
     Output("anneal_duration", "disabled"),
     Output("coupling_strength", "disabled") ,
-    Output("chain_length", "options"),
+    Output("spins", "options"),
     Input("job_submit_state", "children"),
-    State("chain_length", "options"))
-def disable_buttons(job_submit_state, chain_length_options):        # Add cached embeddings
+    State("spins", "options"))
+def disable_buttons(job_submit_state, spins_options):        # Add cached embeddings
     """Disable user input during job submissions."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -295,19 +295,19 @@ def disable_buttons(job_submit_state, chain_length_options):        # Add cached
 
     if any(job_submit_state == status for status in ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]):
         
-        chain_length_disable = chain_length_options
-        for inx, option in enumerate(chain_length_disable): 
-            chain_length_disable[inx]['disabled'] = True
+        spins_disable = spins_options
+        for inx, option in enumerate(spins_disable): 
+            spins_disable[inx]['disabled'] = True
         
-        return  True, True, chain_length_disable
+        return  True, True, spins_disable
 
     elif any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
 
-        chain_length_enable = chain_length_options
-        for inx, option in enumerate(chain_length_enable): 
-            chain_length_enable[inx]['disabled'] = False
+        spins_enable = spins_options
+        for inx, option in enumerate(spins_enable): 
+            spins_enable[inx]['disabled'] = False
         
-        return False, False, chain_length_enable
+        return False, False, spins_enable
 
     else:
         return dash.no_update, dash.no_update, dash.no_update
@@ -316,7 +316,7 @@ def disable_buttons(job_submit_state, chain_length_options):        # Add cached
     Output("job_id", "children"),
     Input("job_submit_time", "children"),
     State('qpu_selection', 'value'),
-    State('chain_length', 'value'),
+    State('spins', 'value'),
     State('coupling_strength', 'value'),
     State("anneal_duration", "value"),
     State('embeddings_cached', 'data'),)
@@ -366,7 +366,7 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cac
     State("job_submit_state", "children"),
     State("job_submit_time", "children"),
     State('embedding_is_cached', 'value'),
-    State('chain_length', 'value'),
+    State('spins', 'value'),
     State('qpu_selection', 'value'),
     State("embeddings_found", "data"),)
 def simulate(dummy1, dummy2, job_id, job_submit_state, job_submit_time, \
