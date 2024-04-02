@@ -144,6 +144,11 @@ def control_card(
                     storage_type='memory',
                     data={},
                 ),
+                dcc.Store(
+                    id='embeddings_found',
+                    storage_type='memory',
+                    data={},
+                ),
                 ]
             ),
             ],

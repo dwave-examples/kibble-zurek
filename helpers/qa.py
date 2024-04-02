@@ -125,7 +125,7 @@ def json_to_dict(emb_json):
     """Retrieve an unembedded sampleset for a given job ID. 
 
     Args:
-        emb_json: JSON-formatted dict of embeddings. 
+        emb_json: JSON-formatted dict of embeddings, as {'spins': {'node1': [qubit1], 'node2': [qubit2], ...}, ...}. 
     
     Returns:
         Embedding in standard dict format.

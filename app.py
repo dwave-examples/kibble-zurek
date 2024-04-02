@@ -148,16 +148,18 @@ def set_schedule(qpu_name):
 @app.callback(
     Output('embeddings_cached', 'data'),
     Output('embedding_is_cached', 'value'),
-    Input('qpu_selection', 'value'),)
-def cache_embeddings(qpu_name):
+    Input('qpu_selection', 'value'),
+    Input("embeddings_found", "data"),
+    State("embeddings_cached", "data"),)
+def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
     """Cache embeddings for the selected QPU.
     """
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
-
-    embeddings_cached = {}
  
     if trigger_id == 'qpu_selection':
+
+        embeddings_cached = {}  # Wipe out previous QPU's embeddings
           
         for filename in [file for file in os.listdir('helpers') if ".json" in file and "emb_" in file]:
 
@@ -178,6 +180,14 @@ def cache_embeddings(qpu_name):
                     if not is_valid_embedding(emb, source_graph, target_graph):
 
                         del embeddings_cached[length]
+
+    if trigger_id == 'embeddings_found':
+
+        if embeddings_found != "needed":
+
+            embeddings_cached = json_to_dict(embeddings_cached)
+            embeddings_found = json_to_dict(embeddings_found)
+            embeddings_cached[list(embeddings_found.keys())[0]] = embeddings_found[list(embeddings_found.keys())[0]]
 
     return embeddings_cached, list(embeddings_cached.keys())
 
@@ -346,6 +356,7 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cac
     Output("wd_job", "n_intervals"),
     Output("job_submit_state", "children"),
     Output("job_submit_time", "children"),
+    Output("embeddings_found", "data"),
     Input("btn_simulate", "n_clicks"),
     Input("wd_job", "n_intervals"),
     State("job_id", "children"),
@@ -354,53 +365,57 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cac
     State('embedding_is_cached', 'value'),
     State('chain_length', 'value'),
     State('qpu_selection', 'value'),
-    State("embeddings_cached", "data"),)
-def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time, \
-             use_cached_lengths, spins, qpu_name, embeddings_cached):
+    State("embeddings_found", "data"),)
+def simulate(dummy1, dummy2, job_id, job_submit_state, job_submit_time, \
+             cached_embedding_lengths, spins, qpu_name, embeddings_found):
     """Manage simulation: embedding, job submission."""
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     if not any(trigger_id == input for input in ["btn_simulate", "wd_job"]):
         return dash.no_update, dash.no_update, dash.no_update, \
-            dash.no_update, dash.no_update, dash.no_update
+            dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
     if trigger_id == "btn_simulate":
 
-        embeddings_cached = json_to_dict(embeddings_cached)
-
-        if spins in embeddings_cached.keys():   
+        if spins in cached_embedding_lengths:   
 
             submit_time = datetime.datetime.now().strftime("%c")
             job_submit_state = "SUBMITTED"
+            embedding = dash.no_update
 
         else:
 
             submit_time = dash.no_update
             job_submit_state = "EMBEDDING"
+            embedding = "needed"
 
         disable_btn = True
         disable_watchdog = False
 
-        return disable_btn, disable_watchdog, 0.5*1000, 0, job_submit_state, submit_time
+        return disable_btn, disable_watchdog, 0.5*1000, 0, job_submit_state, submit_time, embedding
     
     if job_submit_state == "EMBEDDING":
 
-        # Try complement any missing embeddings for the selected QPU
-        for length in [option["value"] for option in spins]:
-            if length not in list(embeddings_cached.keys()):
-                try:
-                    embedding = find_one_to_one_embedding(length, qpus[qpu_name].edges)
-                    if embedding:
-                        embeddings_cached[length] = embedding
-                except Exception:
-                    print("failed")
-                    pass
- 
-        submit_time = datetime.datetime.now().strftime("%c")
-        job_submit_state = "FAILED"
+        submit_time = dash.no_update
+        embedding = dash.no_update
 
-        return True, False, 0.2*1000, 0, job_submit_state, submit_time
+        if embeddings_found == "needed":
+
+            try:
+                embedding = find_one_to_one_embedding(spins, qpus[qpu_name].edges)
+                if embedding:
+                    job_submit_state = "EMBEDDING"  # Stay another WD to allow caching the embedding
+                    embedding = {spins: embedding}
+            except Exception:
+                job_submit_state = "FAILED"
+
+        else:   # Found embedding last WD, so is cached, so now can submit job
+            
+            submit_time = datetime.datetime.now().strftime("%c")
+            job_submit_state = "SUBMITTED"
+
+        return True, False, 0.2*1000, 0, job_submit_state, submit_time, embedding
 
     if any(job_submit_state == status for status in
         ["SUBMITTED", "PENDING", "IN_PROGRESS"]):
@@ -412,17 +427,17 @@ def simulate(n_clicks, n_intervals, job_id, job_submit_state, job_submit_time, \
         else:
             wd_time = 1*1000
 
-        return True, False, wd_time, 0, job_submit_state, dash.no_update
+        return True, False, wd_time, 0, job_submit_state, dash.no_update, dash.no_update
 
     if any(job_submit_state == status for status in ["COMPLETED", "CANCELLED", "FAILED"]):
 
         disable_btn = False
         disable_watchdog = True
 
-        return disable_btn, disable_watchdog, 0.1*1000, 0, dash.no_update, dash.no_update
+        return disable_btn, disable_watchdog, 0.1*1000, 0, dash.no_update, dash.no_update, dash.no_update
 
     else:   # Exception state: should only ever happen in testing
-        return False, True, 0, 0, "ERROR", dash.no_update
+        return False, True, 0, 0, "ERROR", dash.no_update, dash.no_update
 
 @app.callback(
     Output("bar_job_status", "value"),
