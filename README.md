@@ -7,7 +7,7 @@
 A demonstration of using the 
 [fast-anneal protocol](https://docs.dwavesys.com/docs/latest/c_qpu_annealing.html) 
 on a quantum processing unit (QPU) to simulate the formation of topological defects 
-in a 1D ring of magnetic spins undergoing a phase transition, as described by the 
+in a 1D ring of spins undergoing a phase transition, as described by the 
 [Kibble-Zurek mechanism](https://en.wikipedia.org/wiki/Kibble%E2%80%93Zurek_mechanism).
 
 This example anneals an Ising problem in the coherent regime, producing results 
@@ -23,6 +23,34 @@ predicted for your configured anneal duration.
 * [License](License)
 
 ## <a name="The-Kibble-Zurek-Mechanism"></a> The Kibble-Zurek Mechanism
+
+Everyone is familiar with macroscopic phase transitions: raise the surrounding 
+temperature and solid ice transitions to liquid water, magnets become 
+demagnetized. The material switches from an orderly state to a disorderly 
+one: all microscopic magnetic domains aligned in the magnet and atoms arranged 
+in a crystalline structure in ice to randomly oriented magnetic domains and 
+constant formation and breaking of hydrogen bonds in water. 
+
+![Ice to Water](assets/ice_water.png)
+
+![Demagnetized Magnet](assets/magnet_demagnetized.png)
+
+The Kibble-Zurek mechanism relates the formation of topological defects in 
+a system driven through a phase transition to the (finite) rate of that 
+transition. Kibble originally formulated it to explain the transition of the 
+early universe, post-Big Bang, from symmetric at its first high temperature 
+state to its unsymmetric cool and expanding state.  
+
+![Universe](assets/universe.png)
+
+In the case of the universe, these symmetry-breaking defects led to the formation
+of galaxies. 
+
+Zurek expanded the idea to condensed matter. It pertains also to quantum phase 
+transitions.
+
+Consider 
+
 
 ## <a name="Installation"></a> Installation
 
