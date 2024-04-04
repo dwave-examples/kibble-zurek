@@ -24,20 +24,24 @@ predicted for your configured anneal duration.
 
 ## <a name="The-Kibble-Zurek-Mechanism"></a> The Kibble-Zurek Mechanism
 
-Some macroscopic phase transitions are familiar: raise the surrounding 
-temperature and solid ice transitions to liquid water, magnets become 
-demagnetized. The material switches from an orderly state to a disorderly 
-one. In the former magnet, once-aligned microscopic magnetic domains acquire 
-random orientations; the crystalline structure of ice atoms gives way to  
-an ongoing formation and breaking of hydrogen bonds in water. 
+For a system driven through a [phase transition](#Phase-Transitions), the 
+Kibble-Zurek mechanism relates the formation of 
+[topological defects](#Topological-Defects) to the transition speed. 
 
-![Ice to Water](assets/ice_water.png)
+### <a name="Phase-Transitions"></a> Phase Transitions
 
-![Demagnetized Magnet](assets/magnet_demagnetized.png)
+Some macroscopic phase transitions are familiar: liquid water to solid ice, 
+metal to magnet. 
 
-The Kibble-Zurek mechanism relates the formation of topological defects in 
-a system driven through a phase transition to the (finite) rate of that 
-transition. 
+![Phase Transitions](assets/phase_transitions.png)
+
+The material switches between **disorderly** and **orderly** states: 
+
+*   Magnet/Non-magnet: aligned microscopic magnetic domains versus random orientations 
+*   Ice/Water: crystalline structure versus ongoing formation and breaking of 
+    hydrogen bonds. 
+
+### <a name="Topological-Defects"></a> Topological Defects
 
 Kibble originally formulated the mechanism to explain the transition of the 
 hot post-Big Bang universe from highly symmetric to the current cool and 
@@ -45,26 +49,35 @@ expanding state, with its galaxies of stars and planets.
 
 ![Universe](assets/universe.png)
 
-Zurek expanded the idea to condensed matter. It pertains also to quantum phase 
-transitions. The Kibble-Zurek mechanism relates the density of topological 
-defects from continuous or quantum phase transitions to the quench time as 
-a universal scaling law.  
+Zurek expanded the idea to condensed matter and quantum phase transitions.   
 
-For the relatively simple quantum phase transitions, a 
-one-dimensional transverse-field Ising model (TFIM), 
+A one-dimensional ferromagnetic/anti-ferromagnetic ring of spins undergoing 
+quantum annealing is an example of a quantum phase transition.
 
-FORMULA OF ISING MODEL WITH J=-1, 
+![Ising J=1](assets/ising.png)
 
-consider two extreme cases:
+A fast anneal (a "quench") transitions the system from a phase of superposition 
+of its spins to a state of alternating groups of spins, some up and some down. 
+Switches from one group to the next are called "kinks". 
 
-1. The system undergoes an ideal adiabatic quench. 
+![1D Spin Ring Kinks](assets/1D_kinks.png)
+
+### Kink Density
+
+The mechanism relates the density of topological defects (kinks) from 
+continuous or quantum phase transitions to the quench time as a universal 
+scaling law.
+
+Consider two extreme cases:
+
+1. **Ideal adiabatic transition**. 
 
 ![!D Spin Ring Adiabatic](assets/1D_adiabatic.png)
 
 At the end of a very long anneal, it ends in one of two ground states:
 all spins up or all spins down.
 
-2. The system undergoes an instantaneous quench.
+2. **Instantaneous quench**.
 
 ![!D Spin Ring Instantaneous](assets/1D_instantaneous.png)
 
@@ -72,16 +85,10 @@ Each spin is independently oriented up or down.
 
 In between these two extremes, for finite quenches, the system ends in a state 
 of alternating groups of spins, some up and some down. The length of these
-groups increases with the quench time. (For the case of a 1D TFIM, it increases 
-as a function of the square root of the anneal time.)
+groups increases with the quench time. For the case of a 1D ring of spins, it 
+increases as a function of the square root of the anneal time.
 
 ![!D Spin Ring Finite](assets/1D_finite.png)
-
-For a particular topology, such as the 1D chain of spins, you can predict 
-the average length of these groups, which is equivalent to the density of 
-switches from one group to the next ("kinks"). 
-
-![!D Spin Ring Kinks](assets/1D_kinks.png)
 
 ## <a name="Installation"></a> Installation
 
