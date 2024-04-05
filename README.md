@@ -6,12 +6,13 @@
 
 A demonstration of using the 
 [fast-anneal protocol](https://docs.dwavesys.com/docs/latest/c_qpu_annealing.html) 
-on a quantum processing unit (QPU) to simulate the formation of topological defects 
+on a quantum computer to simulate the formation of topological defects 
 in a 1D ring of spins undergoing a phase transition, as described by the 
 [Kibble-Zurek mechanism](https://en.wikipedia.org/wiki/Kibble%E2%80%93Zurek_mechanism).
 
-This example anneals an Ising problem in the coherent regime, producing results 
-predicted for your configured anneal duration.
+This example employs quantum annealing in the coherent regime of a D-Wave
+quantum processing unit (QPU), producing samples that align with the theoretical 
+predictions.
 
 ![Simulation vs Predicted](assets/simulation_vs_predicted.png)
 
@@ -24,69 +25,73 @@ predicted for your configured anneal duration.
 
 ## <a name="The-Kibble-Zurek-Mechanism"></a> The Kibble-Zurek Mechanism
 
-For a system driven through a [phase transition](#Phase-Transitions), the 
-Kibble-Zurek mechanism relates the formation of 
-[topological defects](#Topological-Defects) to the transition speed. 
+The Kibble-Zurek mechanism relates, for a system driven through a 
+[phase transition](#Phase-Transitions), the formation of 
+[topological defects](#Topological-Defects) to the 
+[transition rate](#Transition-Rate). This section provides an intuitive 
+understanding of the highlighted terms. 
 
 ### <a name="Phase-Transitions"></a> Phase Transitions
 
-Some macroscopic phase transitions are familiar: liquid water to solid ice, 
-metal to magnet. 
+Some macroscopic phase transitions are familiar: a changing temperature will 
+transition water (a liquid) to ice (a solid); it can also change the magnetic 
+properties of metal. 
 
 ![Phase Transitions](assets/phase_transitions.png)
 
-The material switches between **disorderly** and **orderly** states: 
+In both cases, the material transitions between **disorderly** and **orderly** 
+states: 
 
-*   Magnet/Non-magnet: aligned microscopic magnetic domains versus random orientations 
-*   Ice/Water: crystalline structure versus ongoing formation and breaking of 
-    hydrogen bonds. 
+*   Orderly crystalline structure of ice versus the ongoing formation and 
+    breaking of hydrogen bonds in water.
+*   Aligned microscopic magnetic domains in a ferromagnet versus random 
+    orientations in a nonmagnetic metal. 
 
 ### <a name="Topological-Defects"></a> Topological Defects
 
-Kibble originally formulated the mechanism to explain the transition of the 
-hot post-Big Bang universe from highly symmetric to the current cool and 
-expanding state, with its galaxies of stars and planets.  
+Kibble's original formulation explained the transition of the hot post-Big Bang 
+universe from highly symmetric to its current state, with its non-uniform 
+distribution of galaxies.  
 
 ![Universe](assets/universe.png)
 
 Zurek expanded the idea to condensed matter and quantum phase transitions.   
 
-A one-dimensional ferromagnetic/anti-ferromagnetic ring of spins undergoing 
-quantum annealing is an example of a quantum phase transition.
-
-![Ising J=1](assets/ising.png)
-
-A fast anneal (a "quench") transitions the system from a phase of superposition 
-of its spins to a state of alternating groups of spins, some up and some down. 
-Switches from one group to the next are called "kinks". 
+A simple example of topological defects are kinks in a ring of 
+ferromagnetically-coupled spins. 
+A fast anneal (a "quench") transitions the system from a state of spins in 
+superposition to a state that has alternating segments of up/down spins. 
+Switches from one segment to the next are called "kinks". 
 
 ![1D Spin Ring Kinks](assets/1D_kinks.png)
 
-### Kink Density
+### Transition Rate
 
-The mechanism relates the density of topological defects (kinks) from 
-continuous or quantum phase transitions to the quench time as a universal 
-scaling law.
+For continuous or quantum phase transitions, the mechanism relates the density 
+of defects/kinks to the quench time as a universal scaling law.
 
 Consider two extreme cases:
 
-1. **Ideal adiabatic transition**. 
+1.  **Ideal adiabatic transition**. 
+
+    At the end of a sufficiently slow anneal, the system ends in one of its two 
+    ground states: all spins up or all spins down.
 
 ![!D Spin Ring Adiabatic](assets/1D_adiabatic.png)
 
-At the end of a very long anneal, it ends in one of two ground states:
-all spins up or all spins down.
 
-2. **Instantaneous quench**.
+2.  **Instantaneous quench**.
+
+    Each spin independently orients up or down (in an unbiased system, both 
+    outcomes have equal probablility).
 
 ![!D Spin Ring Instantaneous](assets/1D_instantaneous.png)
 
-Each spin is independently oriented up or down.
-
-In between these two extremes, for finite quenches, the system ends in a state 
-of alternating groups of spins, some up and some down. The length of these
-groups increases with the quench time. For the case of a 1D ring of spins, it 
-increases as a function of the square root of the anneal time.
+In between these two extremes, for fast quenches, the system ends in a state 
+of alternating segments of up/down spins. The average length of these segments
+increases with the quench/anneal time. For this example of a quantum phase 
+transition (a 1D ring of spins), the Kibble-Zurek mechanism predicts that the 
+average length increases as a function of the square root of the anneal time.
 
 ![!D Spin Ring Finite](assets/1D_finite.png)
 
@@ -129,7 +134,10 @@ to the Kibble-Zurek predictions.
 
 ## <a name="Model-Overview"></a> Model Overview
 
-TBD
+
+Note that as you increase the anneal time, you move from the coherent regime 
+and the returned samples are increasingly affected by thermalization, pushing 
+the kink density away from the predicted value.  
 
 ## <a name="Code"></a> Code
 
