@@ -44,7 +44,7 @@ def control_card(
                 html.P(
 """
 Use a quantum computer to simulate the formation of topological defects in a 1D ring 
-of magnetic spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
+of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
 """, 
                     style={"color": "white", "fontSize": 14}),
                 html.H5(
