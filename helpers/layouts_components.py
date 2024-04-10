@@ -17,7 +17,7 @@ from dash.dcc import Checklist, Dropdown, Input, Link, RadioItems
 from dash_daq import Knob
 from dash import html
 
-__all__ = ["config_anneal_duration", "config_spins", 
+__all__ = ["config_anneal_duration", "config_kz_graph", "config_spins", 
     "config_coupling_strength", "config_qpu_selection", "dbc_modal", "embeddings",
     "job_bar_display", "ring_lengths", ]
 
@@ -31,6 +31,31 @@ config_anneal_duration = Input(
     step=1,
     value=7,
     style={"max-width": "95%"}
+)
+
+config_kz_graph = RadioItems(
+    id="kz_graph_display",
+    options=[
+        {
+            "label": "Both", 
+            "value": "both", 
+            "disabled": False
+        },
+        {
+            "label": "Kink density", 
+            "value": "kink_density", 
+            "disabled": False
+        },
+        {
+            "label": "Schedule", 
+            "value": "schedule", 
+            "disabled": False
+        }, 
+    ],
+    value="both",
+    inputStyle={"margin-right": "10px", "margin-bottom": "5px"},
+    labelStyle={"color": "rgb(3, 184, 255)", "font-size": 12, 'display': 'inline-block', 'marginLeft': 20},
+    inline=True,    # Currently requires above "inline-block"
 )
 
 config_spins = RadioItems(

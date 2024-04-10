@@ -12,25 +12,22 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-
-import matplotlib.pyplot as plt
-import networkx as nx
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-import dimod
-
 from helpers.kz_calcs import theoretical_kink_density
-from helpers.qa import create_bqm
 
 __all__ = ["plot_kink_densities_bg", "plot_kink_density", "plot_spin_orientation"]
 
-def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
+def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name):
     """
     Plot background of KZ-theory density and (lightly) energy scales. 
 
     Args:
+
+        display: Displays plots of type "both", "kink_density", or "schedule". 
+
         time_range: Max and min quench times, as a list.
 
         coupling_strength: Value of J.
@@ -38,7 +35,7 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
         schedule_name: Filename of anneal schedule.
     
     Returns:
-        Plotly figure of predicted kink densities (main) and energy scales (background).
+        Plotly figure of predicted kink densities (main) and/or energy scales (background).
     """
     if schedule_name:
         schedule = pd.read_csv(f'helpers/{schedule_name}')
@@ -79,13 +76,19 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
         showlegend=False,
     )
     
+    x_axis = "x2"
+    y_axis = "y2"
+    if display == "schedule":
+        x_axis = "x1"
+        y_axis = "y1"
+
     energy_transverse = go.Scatter(
         x=C, # to get time_range[1]*C where C=1 equals max(t_a); also for problem plot     
         y=a, 
         mode='lines',
         name="A(C(s))", 
-        xaxis="x2",
-        yaxis='y2',
+        xaxis=x_axis,
+        yaxis=y_axis,
         line_color='blue',
         opacity=0.15,
     )
@@ -95,83 +98,121 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
         y=abs(coupling_strength)*b, 
         mode='lines',
         name="B(C(s))", 
-        xaxis="x2",
-        yaxis='y2',
+        xaxis=x_axis,
+        yaxis=y_axis,
         line_color='red',
         opacity=0.15,
     )
 
-    layout = go.Layout(
-        title='QPU Simulation Vs. Kibble-Zurek Prediction',
-        title_font_color="rgb(243, 120, 32)",
-        xaxis=dict(
-            title='<b>Quench Duration [ns]<b>', 
-            type="log", 
-            range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],  
-        ),
-        yaxis=dict(
-            title='<b>Kink Density<b>', 
-            type="log",
-        ),
-        xaxis2=dict(
-            title={
-                'text': 'C(s)', 
-                'standoff': 0,
-            }, 
-            overlaying='x1', 
-            side="top", 
-            type="log", 
-            range=[-1, 0],  # Minimal C=0.1 seems reasonable 
-        ),
-        yaxis2=dict(
-            title='Energy [Joule]',  
-            overlaying='y1', 
-            side='right', 
-            type="linear", 
-            range=[0, np.max(b)],
-        ),
-        legend=dict(x=0.6, y=0.9),
-        margin=dict(b=5,l=5,r=20,t=80),
-        #plot_bgcolor='white',  # Kept for reference
+    xaxis = dict(
+        title='<b>Quench Duration [ns]<b>', 
+        type="log", 
+        range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],  
     )
 
+    yaxis = dict(
+        title='<b>Kink Density<b>', 
+        type="log",
+    )
+
+    xaxis2 = dict(
+        title={
+            'text': 'C(s)', 
+            'standoff': 0,
+        }, 
+        overlaying='x1', 
+        side="top", 
+        type="log", 
+        range=[-1, 0],  # Minimal C=0.1 seems reasonable 
+    )
+    
+    yaxis2 = dict(
+        title='Energy [Joule]',  
+        overlaying='y1', 
+        side='right', 
+        type="linear", 
+        range=[0, np.max(b)],
+    )
+
+    if display == "kink_density":
+
+        layout = go.Layout(
+            xaxis=xaxis,
+            yaxis=yaxis,
+        )
+
+        data = [predicted_plus, predicted_minus]
+
+    elif display == "schedule":
+
+        xaxis2.pop("overlaying")
+        yaxis2.pop("overlaying")
+
+        layout = go.Layout(
+            xaxis=xaxis2,
+            yaxis=yaxis2,
+        )
+
+        data = [energy_transverse, energy_problem]
+
+    else:   # Display both plots together
+
+        layout = go.Layout(
+            xaxis=xaxis,
+            yaxis=yaxis,
+            xaxis2=xaxis2,
+            yaxis2=yaxis2,
+        )
+
+        data = [predicted_plus, predicted_minus, energy_transverse, energy_problem]
+
     fig=go.Figure(
-        data=[predicted_plus, predicted_minus, energy_transverse, energy_problem], 
+        data=data, 
         layout=layout
     )
 
-    fig.add_annotation(
-        xref="x",
-        yref="y",
-        x=np.log10(0.25*(time_range[1])),
-        y=np.log10(1.0*n.min()),
-        text="Coherent",
-        axref="x",
-        ayref="y",
-        ax=np.log10(0.50*(time_range[1])),
-        ay=np.log10(1.0*n.min()),
-        arrowhead=5,
+    fig.update_layout(
+        legend=dict(x=0.1, y=0.1),  
+        margin=dict(b=5,l=5,r=20,t=10)  
     )
- 
-    fig.add_annotation(
-        xref="x",
-        yref="y",
-        x=np.log10(0.5*(time_range[1])),
-        y=np.log10(1.2*n.min()),
-        text="Thermalized",
-        axref="x",
-        ayref="y",
-        ax=np.log10(0.3*(time_range[1])),
-        ay=np.log10(1.2*n.min()),
-        arrowhead=5,
-    )
+
+    if display != "schedule":
+
+        fig.add_annotation(
+            xref="x",
+            yref="y",
+            x=np.log10(0.25*(time_range[1])),
+            y=np.log10(1.0*n.min()),
+            text="Coherent",
+            axref="x",
+            ayref="y",
+            ax=np.log10(0.50*(time_range[1])),
+            ay=np.log10(1.0*n.min()),
+            arrowhead=5,
+        )
+    
+        fig.add_annotation(
+            xref="x",
+            yref="y",
+            x=np.log10(0.5*(time_range[1])),
+            y=np.log10(1.2*n.min()),
+            text="Thermalized",
+            axref="x",
+            ayref="y",
+            ax=np.log10(0.3*(time_range[1])),
+            ay=np.log10(1.2*n.min()),
+            arrowhead=5,
+        )
 
     return fig
 
-def plot_kink_density(fig_dict, kink_density, anneal_time):
+def plot_kink_density(display, fig_dict, kink_density, anneal_time):
     """Add QPU-based kink density to kink-density plot.
 
     Args:
+
+        display: Displays plots of type "both", "kink_density", or "schedule". 
+
         fig_dict: Existing background Plotly figure, as a dict.
 
         kink_density: Calculated kink density derived from last QPU sampleset.
@@ -181,25 +222,28 @@ def plot_kink_density(fig_dict, kink_density, anneal_time):
     Returns:
         Updated Plotly figure with a marker at (anneal time, kink-density).
     """
-
+    
     fig=go.Figure(
         fig_dict
     )
 
-    return fig.add_trace(
-        go.Scatter(
-            x=[anneal_time], 
-            y=[kink_density], 
-            xaxis="x1",
-            yaxis="y1",
-            showlegend=False,
-            marker=dict(size=10, 
-                        color="black",
-                        symbol="x",
+    if display != "schedule":
+
+        fig.add_trace(
+            go.Scatter(
+                x=[anneal_time], 
+                y=[kink_density], 
+                xaxis="x1",
+                yaxis="y1",
+                showlegend=False,
+                marker=dict(size=10, 
+                            color="black",
+                            symbol="x",
+                )
             )
         )
-    )
 
+    return fig
 
 def plot_spin_orientation(num_spins=512, sample=None):
     """Plot the ring of spins. 
@@ -263,7 +307,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
     fig = go.Figure(
         data=[spins_up, spins_down],
         layout=go.Layout(
-            title=f'Spin States of {num_spins} Qubits in a 1D Ring',
+            #title=f'Spin States of {num_spins} Qubits in a 1D Ring',
             title_font_color="rgb(243, 120, 32)",
             showlegend=False,
             margin=dict(b=0,l=0,r=0,t=40),

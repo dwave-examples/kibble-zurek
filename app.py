@@ -235,6 +235,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
 
 @app.callback(
     Output("sample_vs_theory", "figure"),
+    Input("kz_graph_display", "value"),
     Input("coupling_strength", "value"),
     Input("quench_schedule_filename", "children"),
     Input("job_submit_state", "children"),
@@ -245,7 +246,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
     State('spins', 'value'),
     State('embeddings_cached', 'data'),
     State("sample_vs_theory", "figure"),)
-def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id, ta_min, ta_max, ta, \
+def display_graphics_left(kz_graph_display, J_offset, schedule_filename, job_submit_state, job_id, ta_min, ta_max, ta, \
     spins, embeddings_cached, figure):
     """Generate graphics for theory and samples."""
 
@@ -253,9 +254,9 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
 
     J = J_offset - 2
 
-    if trigger_id in ["coupling_strength", "quench_schedule_filename"] :
+    if trigger_id in ["kz_graph_display", "coupling_strength", "quench_schedule_filename"] :
         
-        fig = plot_kink_densities_bg([ta_min, ta_max], J, schedule_filename)
+        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J, schedule_filename)
 
         return fig
     
@@ -268,13 +269,13 @@ def display_graphics_left(J_offset, schedule_filename, job_submit_state, job_id,
             sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
             _, kink_density = kink_stats(sampleset_unembedded, J)
             
-            fig = plot_kink_density(figure, kink_density, ta)
+            fig = plot_kink_density(kz_graph_display, figure, kink_density, ta)
             return fig
         
         else:
             return dash.no_update
         
-    fig = plot_kink_densities_bg([ta_min, ta_max], J, schedule_filename)
+    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J, schedule_filename)
     return fig
 
 @app.callback(
