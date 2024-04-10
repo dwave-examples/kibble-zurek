@@ -105,7 +105,7 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
         title='QPU Simulation Vs. Kibble-Zurek Prediction',
         title_font_color="rgb(243, 120, 32)",
         xaxis=dict(
-            title='<b>Quench Time [ns]<b>', 
+            title='<b>Quench Duration [ns]<b>', 
             type="log", 
             range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],  
         ),
@@ -143,25 +143,25 @@ def plot_kink_densities_bg(time_range, coupling_strength, schedule_name):
     fig.add_annotation(
         xref="x",
         yref="y",
-        x=np.log10(1.5*(time_range[0] - 1)),
-        y=np.log10(1.2*n.min()),
+        x=np.log10(0.25*(time_range[1])),
+        y=np.log10(1.0*n.min()),
         text="Coherent",
         axref="x",
         ayref="y",
-        ax=np.log10(3*(time_range[0] - 1)),
-        ay=np.log10(1.2*n.min()),
+        ax=np.log10(0.50*(time_range[1])),
+        ay=np.log10(1.0*n.min()),
         arrowhead=5,
     )
  
     fig.add_annotation(
         xref="x",
         yref="y",
-        x=np.log10(0.8*(time_range[1] + 1)),
+        x=np.log10(0.5*(time_range[1])),
         y=np.log10(1.2*n.min()),
-        text="Adiabatic",
+        text="Thermalized",
         axref="x",
         ayref="y",
-        ax=np.log10(0.4*(time_range[1] + 1)),
+        ax=np.log10(0.3*(time_range[1])),
         ay=np.log10(1.2*n.min()),
         arrowhead=5,
     )
