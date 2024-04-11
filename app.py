@@ -71,9 +71,9 @@ app.layout = dbc.Container([
                 init_job_status=init_job_status
             ),
             *dbc_modal('modal_solver'),
-            # [dbc.Tooltip(
-            # message, target=target, id=f'tooltip_{target}', style = dict())
-            # for target, message in tool_tips.items()]
+            *[dbc.Tooltip(
+            message, target=target, id=f'tooltip_{target}', style = dict())
+            for target, message in tool_tips.items()]
             ],
             width=4,   
         ),
