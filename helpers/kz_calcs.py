@@ -13,11 +13,10 @@
 #    limitations under the License.
 
 import numpy as np
-import pandas as pd
 
 __all__ = ['kink_stats', 'theoretical_kink_density']
 
-def theoretical_kink_density(annealing_times_ns, J, schedule_name):
+def theoretical_kink_density(annealing_times_ns, J, schedule):
     """
     Calculate the kink density predicted for given the coupling strength and annealing times. 
 
@@ -26,19 +25,11 @@ def theoretical_kink_density(annealing_times_ns, J, schedule_name):
 
         J: Coupling strength between the spins of the ring.
 
-        schedule_name: Filename of the anneal schedule for the selected QPU. 
+        schedule: Anneal schedule for the selected QPU. 
 
     Returns:
         Kink density per anneal time, as a NumPy array.  
     """
-
-    if schedule_name:
-
-        schedule = pd.read_csv(f'helpers/{schedule_name}')
-    
-    else:
-
-        schedule = pd.read_csv('helpers/FALLBACK_SCHEDULE.csv')
 
     A = schedule['A(s) (GHz)']
     B = schedule['B(s) (GHz)']         
