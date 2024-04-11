@@ -166,6 +166,16 @@ def graphs_card():
     return dbc.Card([
         dbc.Row([
             dbc.Col([
+                html.H5(
+                    "Spin States of Qubits in a 1D Ring",
+                    style={"color": "rgb(243, 120, 32)", "marginTop": "5px", "backgroundColor": "white"}
+                ),
+            ]
+            ),
+        ]
+        ),
+        dbc.Row([
+            dbc.Col([
                 dcc.Graph(
                     id="spin_orientation", 
                     figure=go.Figure(),
@@ -174,18 +184,34 @@ def graphs_card():
             ], 
                 width=12,
             ),
-        ], ),
+        ], 
+        ),
+        dbc.Row([
+            dbc.Col([
+                html.H5(
+                    "QPU Samples Vs. Kibble-Zurek Prediction",
+                    style={"color": "rgb(243, 120, 32)", "marginTop": "5px", "backgroundColor": "white"}
+                ),
+            html.Div([
+                config_kz_graph
+            ]),
+            ]
+            ),
+        ]
+        ),
         dbc.Row([
             dbc.Col([
                 dcc.Graph(
                     id="sample_vs_theory",
                     figure=go.Figure(),
+                    style={'height': '40vh'},
                     
                 )
             ], 
                 width=12
             ),
-        ]),
+        ]
+        ),
     ], 
-        color="dark",
+        color="white",
     )

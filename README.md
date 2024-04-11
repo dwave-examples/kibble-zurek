@@ -58,10 +58,12 @@ distribution of galaxies.
 Zurek expanded the idea to condensed matter and quantum phase transitions.   
 
 A simple example of topological defects are kinks in a ring of 
-ferromagnetically-coupled spins. 
-A fast anneal (a "quench") transitions the system from a state of spins in 
-superposition to a state that has alternating segments of up/down spins. 
-Switches from one segment to the next are called "kinks". 
+ferromagnetically-coupled spins. A *quench* (a control parameter changing
+at a high rate compared to system dynamics; with D-Wave's fast-anneal protocol, 
+the anneal schedule can be fast compared to thermalization times) transitions 
+the system from a state of spins in superposition to a state that has alternating 
+segments of up/down spins. Switches from one segment to the next are called 
+"kinks". 
 
 ![1D Spin Ring Kinks](assets/1D_kinks.png)
 
