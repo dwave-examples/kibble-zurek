@@ -135,7 +135,7 @@ of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
                 html.P('Tooltips (hover over fields for descriptions)',
                         style={'color': 'white', 'fontSize': 12, 'marginBottom': 5, 'marginTop': '10px'}
                 ),
-                tool_tips,
+                tooltips_activate,
                 # Non-displayed section
                 dcc.Interval(
                     id='wd_job', 

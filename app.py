@@ -463,5 +463,23 @@ def set_progress_bar(job_submit_state):
     
     return job_bar_display['READY'][0], job_bar_display['READY'][1]
 
+@app.callback(
+    *[Output(f'tooltip_{target}', component_property='style') for target in tool_tips.keys()],
+    Input('tooltips_show', 'value'),)
+def activate_tooltips(tooltips_show):
+    """Activate or hide tooltips."""
+
+    trigger = dash.callback_context.triggered
+    trigger_id = trigger[0]['prop_id'].split('.')[0]
+
+    if trigger_id == 'tooltips_show':
+        if tooltips_show == 'off':
+            return dict(display='none'), dict(display='none'), dict(display='none'), \
+dict(display='none'), dict(display='none'), dict(display='none'), \
+dict(display='none'), dict(display='none'), dict(display='none'), 
+
+    return dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict()
+
+
 if __name__ == "__main__":
     app.run_server(debug=True)
