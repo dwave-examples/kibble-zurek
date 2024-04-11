@@ -87,7 +87,7 @@ config_coupling_strength = dbc.Row([
                                 }, 
                         },
                 style={'marginBottom': 0},
-                min=0,
+                min=0,  # This component doesn't like a negative to positive range
                 max=3,
                 value=-1.4+2
             )

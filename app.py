@@ -37,6 +37,7 @@ from zzz_TMP import placeholder_params      # TEMPORARY UNTIL SAPI ADDS FEATURE 
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+# Initialize: available QPUs, initial progress-bar status 
 try:
     client = Client.from_config(client='qpu')
     # TODO: change to 'fast_anneal_time_range'
@@ -50,10 +51,8 @@ except Exception:
     init_job_status = 'NO SOLVER'
 
 # Dashboard-organization section
-
 app.layout = dbc.Container([
-    # Logo
-    dbc.Row([
+    dbc.Row([                       # Logo
         dbc.Col([
             html.Img(
                 src='assets/dwave_logo.png', 
@@ -64,9 +63,8 @@ app.layout = dbc.Container([
             width=3,
         )
     ]),
-    dbc.Row([
-        # Left: Control panel 
-        dbc.Col(
+    dbc.Row([                        
+        dbc.Col(                    # Left: control panel
             [
             control_card(
                 solvers=qpus, 
@@ -79,8 +77,7 @@ app.layout = dbc.Container([
             ],
             width=4,   
         ),
-        # Right: Display area
-        dbc.Col(
+        dbc.Col(                    # Right: display area
             graphs_card(),
             width=8,
         ),
@@ -132,16 +129,18 @@ def disable_buttons(job_submit_state, spins_options):
     if trigger_id !='job_submit_state':
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
-    if any(job_submit_state == status for status in ['EMBEDDING', 'SUBMITTED', 'PENDING', 'IN_PROGRESS']):
+    if any(job_submit_state == status for status in 
+           ['EMBEDDING', 'SUBMITTED', 'PENDING', 'IN_PROGRESS']):
         
-        for inx, option in enumerate(spins_options): 
+        for inx, _ in enumerate(spins_options): 
+            
             spins_options[inx]['disabled'] = True
         
         return  True, True, spins_options, True
 
     elif any(job_submit_state == status for status in ['COMPLETED', 'CANCELLED', 'FAILED']):
 
-        for inx, option in enumerate(spins_options): 
+        for inx, _ in enumerate(spins_options): 
             spins_options[inx]['disabled'] = False
         
         return False, False, spins_options, False
@@ -153,7 +152,9 @@ def disable_buttons(job_submit_state, spins_options):
     Output('coupling_strength_display', 'children'), 
     Input('coupling_strength', 'value'))
 def update_j_output(J_offset):
-    J = J_offset - 2
+    """Shift from knob range to QPU J range."""
+
+    J = J_offset - 2        # See comment on Knob component      
     return f'J={J:.1f}'
 
 @app.callback(
@@ -161,8 +162,7 @@ def update_j_output(J_offset):
     Output('quench_schedule_filename', 'style'),
     Input('qpu_selection', 'value'),)
 def set_schedule(qpu_name):
-    """Set the schedule for the selected QPU.
-    """
+    """Set the schedule for the selected QPU."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
 
@@ -171,9 +171,10 @@ def set_schedule(qpu_name):
  
     if trigger_id == 'qpu_selection':
 
-        for filename in [file for file in os.listdir('helpers') if 'schedule.csv' in file.lower()]:
+        for filename in [file for file in os.listdir('helpers') if 
+                         'schedule.csv' in file.lower()]:
 
-            if qpu_name.split('.')[0] in filename:  # Accepts & reddens older major versions
+            if qpu_name.split('.')[0] in filename:  # Accepts & reddens older versions
             
                 schedule_filename = filename
 
@@ -190,8 +191,7 @@ def set_schedule(qpu_name):
     Input('embeddings_found', 'data'),
     State('embeddings_cached', 'data'),)
 def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
-    """Cache embeddings for the selected QPU.
-    """
+    """Cache embeddings for the selected QPU."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
  
@@ -199,7 +199,8 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
 
         embeddings_cached = {}  # Wipe out previous QPU's embeddings
           
-        for filename in [file for file in os.listdir('helpers') if '.json' in file and 'emb_' in file]:
+        for filename in [file for file in os.listdir('helpers') if 
+                         '.json' in file and 'emb_' in file]:
 
             if qpu_name.split('.')[0] in filename:
 
@@ -221,11 +222,12 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
 
     if trigger_id == 'embeddings_found':
 
-        if embeddings_found != 'needed' and embeddings_found != 'not found':
+        if not isinstance(embeddings_found, str): # embeddings_found != 'needed' or 'not found'
 
             embeddings_cached = json_to_dict(embeddings_cached)
             embeddings_found = json_to_dict(embeddings_found)
-            embeddings_cached[list(embeddings_found.keys())[0]] = embeddings_found[list(embeddings_found.keys())[0]]
+            new_embedding = list(embeddings_found.keys())[0]
+            embeddings_cached[new_embedding] = embeddings_found[new_embedding]
 
         else:
             return dash.no_update, dash.no_update
@@ -245,13 +247,14 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
     State('spins', 'value'),
     State('embeddings_cached', 'data'),
     State('sample_vs_theory', 'figure'),)
-def display_graphics_left(kz_graph_display, J_offset, schedule_filename, job_submit_state, job_id, ta_min, ta_max, ta, \
+def display_graphics_kink_density(kz_graph_display, J_offset, schedule_filename, \
+    job_submit_state, job_id, ta_min, ta_max, ta, \
     spins, embeddings_cached, figure):
-    """Generate graphics for theory and samples."""
+    """Generate graphics for kink density based on theory and QPU samples."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
 
-    J = J_offset - 2
+    J = J_offset - 2        # See comment on Knob component
 
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
         
@@ -284,12 +287,12 @@ def display_graphics_left(kz_graph_display, J_offset, schedule_filename, job_sub
     State('job_id', 'children'),
     State('coupling_strength', 'value'),
     State('embeddings_cached', 'data'),)
-def display_graphics_right(spins, job_submit_state, job_id, J_offset, embeddings_cached):
-    """Generate graphics for spin display."""
+def display_graphics_spin_ring(spins, job_submit_state, job_id, J_offset, embeddings_cached):
+    """Generate graphics for spin-ring display."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
 
-    J = J_offset - 2
+    J = J_offset - 2        # See comment on Knob component
    
     if trigger_id == 'job_submit_state': 
     
@@ -324,7 +327,7 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cac
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
 
-    J = J_offset - 2
+    J = J_offset - 2        # See comment on Knob component
 
     if trigger_id =='job_submit_time':
 
@@ -339,7 +342,7 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cac
 
         param_dict = {
             'bqm': bqm_embedded,
-            'annealing_time': 0.001 * ta_ns,
+            'annealing_time': 0.001 * ta_ns,    # QPU's anneal time is in microsecs
             'auto_scale': False, 
             'answer_mode': 'raw',
             'num_reads': 100, 
