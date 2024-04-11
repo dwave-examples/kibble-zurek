@@ -189,7 +189,7 @@ def graphs_card():
         dbc.Row([
             dbc.Col([
                 html.H5(
-                    "QPU Simulation Vs. Kibble-Zurek Prediction",
+                    "QPU Samples Vs. Kibble-Zurek Prediction",
                     style={"color": "rgb(243, 120, 32)", "marginTop": "5px", "backgroundColor": "white"}
                 ),
             html.Div([

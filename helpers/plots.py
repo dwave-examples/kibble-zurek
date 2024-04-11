@@ -78,9 +78,11 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
     
     x_axis = "x2"
     y_axis = "y2"
+    opacity = 0.15
     if display == "schedule":
         x_axis = "x1"
         y_axis = "y1"
+        opacity = 1
 
     energy_transverse = go.Scatter(
         x=C, # to get time_range[1]*C where C=1 equals max(t_a); also for problem plot     
@@ -90,7 +92,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         xaxis=x_axis,
         yaxis=y_axis,
         line_color='blue',
-        opacity=0.15,
+        opacity=opacity,
     )
 
     energy_problem = go.Scatter(
@@ -101,7 +103,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         xaxis=x_axis,
         yaxis=y_axis,
         line_color='red',
-        opacity=0.15,
+        opacity=opacity,
     )
 
     xaxis = dict(
