@@ -19,7 +19,7 @@ from dash import html
 
 __all__ = ['config_anneal_duration', 'config_kz_graph', 'config_spins', 
     'config_coupling_strength', 'config_qpu_selection', 'dbc_modal', 'embeddings',
-    'job_bar_display', 'ring_lengths', ]
+    'job_bar_display', 'ring_lengths', 'tooltips_activate', ]
 
 ring_lengths = [512, 1024, 2048]
 
@@ -180,4 +180,22 @@ embeddings = Checklist(
     id=f'embedding_is_cached',
     style={'color': 'white'},
     inline=True
+)
+
+tooltips_activate  = RadioItems(
+    id='tooltips_show',
+    options=[
+        {
+            'label': 'On', 
+            'value': 'on', 
+        },
+        {
+            'label': 'Off', 
+            'value': 'off', 
+        }
+    ],
+    value='on',
+    inputStyle={'margin-right': '10px', 'margin-bottom': '10px'},
+    labelStyle={'color': 'white', 'font-size': 12, 'display': 'inline-block', 'marginLeft': 20},
+    inline=True,    # Currently requires above 'inline-block'
 )
