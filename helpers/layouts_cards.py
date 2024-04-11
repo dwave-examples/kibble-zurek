@@ -19,17 +19,31 @@ import plotly.graph_objects as go
 
 from helpers.layouts_components import *
 
-__all__ = ["control_card", "graphs_card", ]
+__all__ = ['control_card', 'graphs_card', ]
 
-# Configuration card
+control_header_style = {'color': 'rgb(3, 184, 255)', 'marginTop': '10px'}
+
 def control_card(
     solvers={}, 
-    init_job_status="READY"): 
+    init_job_status='READY'): 
 
-    if init_job_status == "NO SOLVER":
-        job_status_color = "red"
+    """Lay out the configuration and job-submission card.
+
+    Args:
+
+        solvers: Dict of QPUs in the format {name: solver}.
+
+        init_job_status: Initial status of the submission progress bar.
+
+    Returns:
+
+        Dash card.    
+    """
+
+    if init_job_status == 'NO SOLVER':
+        job_status_color = 'red'
     else:  
-        job_status_color = "white"
+        job_status_color = 'white'
 
     return dbc.Card([
         dbc.Row(
@@ -37,109 +51,104 @@ def control_card(
             dbc.Col(
                 [
                 html.H4(
-                    "Coherent Annealing: KZ Simulation", 
-                    className="card-title",
-                    style={"color": "rgb(243, 120, 32)"}
+                    'Coherent Annealing: KZ Simulation', 
+                    className='card-title',
+                    style={'color': 'rgb(243, 120, 32)'}
                 ),
                 html.P(
 """
 Use a quantum computer to simulate the formation of topological defects in a 1D ring 
 of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
 """, 
-                    style={"color": "white", "fontSize": 14}),
+                    style={'color': 'white', 'fontSize': 14}),
                 html.H5(
-                        "Spins",
-                        style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
+                        'Spins',
+                        style=control_header_style
                 ),
                 html.Div([
                     config_spins
                 ]),
                 html.H5(
-                    "Coupling Strength",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
+                    'Coupling Strength',
+                    style=control_header_style
                 ), 
                 html.Div([
                     config_coupling_strength
                 ]),
                 html.H5(
-                    "Quench Duration [ns]",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
+                    'Quench Duration [ns]',
+                    style=control_header_style
                 ),
                 html.Div([
                     config_anneal_duration
                 ]),
                 html.H5(
-                    "QPU",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
+                    'QPU',
+                    style=control_header_style
                 ), 
                 html.Div([
                     config_qpu_selection(solvers),
-                    html.P(
-                        id="embedding", 
-                        children="", 
-                        style = dict(display="none")
-                    )
                 ]),
                 html.P([
-                    "Quench Schedule: ",
+                    'Quench Schedule: ',
                     html.Span(
-                        id="quench_schedule_filename", 
-                        children="",
-                        style={"color": "white", "fontSize": 10}
+                        id='quench_schedule_filename', 
+                        children='',
+                        style={'color': 'white', 'fontSize': 10}
                     ),
                 ],
-                    style={"color": "white", "marginTop": "10px"}
+                    style={'color': 'white', 'marginTop': '10px'}
                 ),
                 html.H5(
-                    "Cached Embeddings",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
+                    'Cached Embeddings',
+                    style=control_header_style
                 ),
                 embeddings, 
                 html.H5(
-                    "Simulation",
-                    style={"color": "rgb(3, 184, 255)", "marginTop": "10px"}
+                    'Simulation',
+                    style=control_header_style
                 ),
                 dbc.Button(
-                    "Run", 
-                    id="btn_simulate", 
-                    color="primary", 
-                    className="me-1",
-                    style={"marginTop":"5px"}
+                    'Run', 
+                    id='btn_simulate', 
+                    color='primary', 
+                    className='me-1',
+                    style={'marginTop':'5px'}
                 ),
                 dbc.Progress(
-                    id="bar_job_status", 
+                    id='bar_job_status', 
                     value=0,
-                    color="link", 
-                    className="mb-3",
-                    style={"width": "60%"}
+                    color='link', 
+                    className='mb-3',
+                    style={'width': '60%'}
                 ),
                 html.P([
-                    "Status: ",
+                    'Status: ',
                     html.Span(
-                        id="job_submit_state", 
-                        children=f"{init_job_status}",
-                        style={"color": job_status_color, "fontSize": 12, "marginTop": "10px"}
+                        id='job_submit_state', 
+                        children=f'{init_job_status}',
+                        style={'color': job_status_color, 'fontSize': 12, 'marginTop': '10px'}
                     ),
                 ], 
-                    style={"color": "white", "marginTop": "5px"}
+                    style={'color': 'white', 'marginTop': '5px'}
                 ),
-                # Used for storing status. Can probably be replaced with dcc.Store. 
                 dcc.Interval(
-                    id="wd_job", 
+                    id='wd_job', 
                     interval=None, 
                     n_intervals=0, 
                     disabled=True, 
                     max_intervals=1
                 ),
+                # Used for storing job status. Can probably be replaced with dcc.Store. 
                 html.P(
-                    id="job_submit_time", 
-                    children="", 
-                    style = dict(display="none")
+                    id='job_submit_time', 
+                    children='', 
+                    style = dict(display='none')
                 ),
                 html.P(
-                    id="job_id", 
-                    children="", 
-                    style = dict(display="none")
+                    id='job_id', 
+                    children='', 
+                    style = dict(display='none')
                 ),
                 dcc.Store(
                     id='embeddings_cached',
@@ -154,21 +163,22 @@ of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
                 ]
             ),
             ],
-            id="tour_settings_row"
+            id='tour_settings_row'
         ),
     ], 
         body=True, 
-        color="dark"
+        color='dark'
     )
 
-# Plots card
+graphic_header_style = {'color': 'rgb(243, 120, 32)', 'marginTop': '5px', 'backgroundColor': 'white'}
+
 def graphs_card():
     return dbc.Card([
         dbc.Row([
             dbc.Col([
                 html.H5(
-                    "Spin States of Qubits in a 1D Ring",
-                    style={"color": "rgb(243, 120, 32)", "marginTop": "5px", "backgroundColor": "white"}
+                    'Spin States of Qubits in a 1D Ring',
+                    style=graphic_header_style
                 ),
             ]
             ),
@@ -177,7 +187,7 @@ def graphs_card():
         dbc.Row([
             dbc.Col([
                 dcc.Graph(
-                    id="spin_orientation", 
+                    id='spin_orientation', 
                     figure=go.Figure(),
                     style={'height': '40vh'},
                 ),
@@ -189,12 +199,13 @@ def graphs_card():
         dbc.Row([
             dbc.Col([
                 html.H5(
-                    "QPU Samples Vs. Kibble-Zurek Prediction",
-                    style={"color": "rgb(243, 120, 32)", "marginTop": "5px", "backgroundColor": "white"}
+                    'QPU Samples Vs. Kibble-Zurek Prediction',
+                    style=graphic_header_style
                 ),
-            html.Div([
-                config_kz_graph
-            ]),
+                html.Div([
+                    config_kz_graph
+                ]
+                ),
             ]
             ),
         ]
@@ -202,7 +213,7 @@ def graphs_card():
         dbc.Row([
             dbc.Col([
                 dcc.Graph(
-                    id="sample_vs_theory",
+                    id='sample_vs_theory',
                     figure=go.Figure(),
                     style={'height': '40vh'},
                     
@@ -213,5 +224,5 @@ def graphs_card():
         ]
         ),
     ], 
-        color="white",
+        color='white',
     )

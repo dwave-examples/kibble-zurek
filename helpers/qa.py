@@ -17,16 +17,17 @@ from dwave.cloud.api import exceptions, Problems
 from dwave.embedding import unembed_sampleset
 import minorminer
 
-__all__ = ["create_bqm", "find_one_to_one_embedding", "get_job_status", "get_samples", "json_to_dict"]
+__all__ = ['create_bqm', 'find_one_to_one_embedding', 'get_job_status', 'get_samples', 
+           'json_to_dict', ]
 
 def create_bqm(num_spins=512, coupling_strength=-1.4):
     """
-    Create a binary quadratic model (BQM) representing a ferromagnetic 1D ring. 
+    Create a binary quadratic model (BQM) representing a magnetic 1D ring. 
 
     Args:
-        num_spins: Number of spins, which is the length of the ring.
+        num_spins: Number of spins in the ring.
 
-        coupling_strength: Value of J.
+        coupling_strength: Coupling strength between spins in the ring.
 
     Returns:
         dimod BQM.  
@@ -40,19 +41,19 @@ def create_bqm(num_spins=512, coupling_strength=-1.4):
 
 def find_one_to_one_embedding(spins, sampler_edgelist):
     """
-    Find an embedding with chains of length one for the spin ring. 
+    Find an embedding with chains of length one for the ring of spins. 
 
     Args:
-        spins: Length of ring, which is the number of spins. 
+        spins: Number of spins. 
 
-        sampler_edgelist: Edges of the QPU. 
+        sampler_edgelist: Edges (couplers) of the QPU. 
 
     Returns:
-        Embedding, as a dict of format ``{spin: [qubit]}``.  
+        Embedding, as a dict of format {spin: [qubit]}.  
     """
     bqm = create_bqm(spins)
 
-    for tries in range(3):
+    for _ in range(5):  # 4 out of 5 times will find an embedding 
 
         embedding = minorminer.find_embedding(bqm.quadratic, sampler_edgelist) 
 
@@ -81,7 +82,7 @@ def get_job_status(client, job_id, job_submit_time):
     try:
 
         status = p.get_problem_status(job_id)
-        label_time = dict(status)["label"].split("submitted: ")[1]
+        label_time = dict(status)['label'].split('submitted: ')[1]
 
         if label_time == job_submit_time:
 
@@ -91,28 +92,28 @@ def get_job_status(client, job_id, job_submit_time):
 
             return None
     
-    except exceptions.ResourceNotFoundError as err:
+    except exceptions.ResourceNotFoundError:
 
         return None
 
 def get_samples(client, job_id, num_spins, J, embedding):
-    """Retrieve an unembedded sampleset for a given job ID. 
+    """Retrieve an unembedded sample set for a given job ID. 
 
     Args:
         client: dwave-cloud-client Client instance. 
 
         job_id: Identification string of the job. 
 
-        num_spins: Number of spins, which is the length of the ring.
+        num_spins: Number of spins in the ring.
 
-        coupling_strength: Value of J.
+        coupling_strength: Coupling strength between spins in the ring.
 
         qpu_name: Name of the quantum computer the job was submitted to. 
 
         embedding: Embedding used for the job. 
 
     Returns:
-        Unembedded dimod sampleset. 
+        Unembedded dimod sample set. 
     """
     
     sampleset = client.retrieve_answer(job_id).sampleset
@@ -125,7 +126,8 @@ def json_to_dict(emb_json):
     """Retrieve an unembedded sampleset for a given job ID. 
 
     Args:
-        emb_json: JSON-formatted dict of embeddings, as {'spins': {'node1': [qubit1], 'node2': [qubit2], ...}, ...}. 
+        emb_json: JSON-formatted dict of embeddings, as 
+            {'spins': {'node1': [qubit1], 'node2': [qubit2], ...}, ...}. 
     
     Returns:
         Embedding in standard dict format.
