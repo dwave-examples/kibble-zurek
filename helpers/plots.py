@@ -18,7 +18,7 @@ import plotly.graph_objects as go
 
 from helpers.kz_calcs import theoretical_kink_density
 
-__all__ = ["plot_kink_densities_bg", "plot_kink_density", "plot_spin_orientation"]
+__all__ = ['plot_kink_densities_bg', 'plot_kink_density', 'plot_spin_orientation', ]
 
 def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name):
     """
@@ -57,8 +57,8 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         y=np.asarray(1.1 * n),
         mode='lines',
         name='<b>Predicted (&plusmn;10%)',
-        xaxis="x1",
-        yaxis="y1",
+        xaxis='x1',
+        yaxis='y1',
         line_color='black', 
         line_width=1,
     )
@@ -67,28 +67,28 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         x=np.asarray(time_range), 
         y=np.asarray(0.90 * n),
         mode='lines',
-        xaxis="x1",
-        yaxis="y1",
+        xaxis='x1',
+        yaxis='y1',
         line_color='black', 
         line_width=1,
         fill='tonexty',
-        fillcolor="white",
+        fillcolor='white',
         showlegend=False,
     )
     
-    x_axis = "x2"
-    y_axis = "y2"
+    x_axis = 'x2'
+    y_axis = 'y2'
     opacity = 0.15
-    if display == "schedule":
-        x_axis = "x1"
-        y_axis = "y1"
+    if display == 'schedule':
+        x_axis = 'x1'
+        y_axis = 'y1'
         opacity = 1
 
     energy_transverse = go.Scatter(
         x=C, # to get time_range[1]*C where C=1 equals max(t_a); also for problem plot     
         y=a, 
         mode='lines',
-        name="A(C(s))", 
+        name='A(C(s))', 
         xaxis=x_axis,
         yaxis=y_axis,
         line_color='blue',
@@ -99,7 +99,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         x=C, # see above comment     
         y=abs(coupling_strength)*b, 
         mode='lines',
-        name="B(C(s))", 
+        name='B(C(s))', 
         xaxis=x_axis,
         yaxis=y_axis,
         line_color='red',
@@ -108,13 +108,13 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
     xaxis = dict(
         title='<b>Quench Duration [ns]<b>', 
-        type="log", 
+        type='log', 
         range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],  
     )
 
     yaxis = dict(
         title='<b>Kink Density<b>', 
-        type="log",
+        type='log',
     )
 
     xaxis2 = dict(
@@ -123,8 +123,8 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
             'standoff': 0,
         }, 
         overlaying='x1', 
-        side="top", 
-        type="log", 
+        side='top', 
+        type='log', 
         range=[-1, 0],  # Minimal C=0.1 seems reasonable 
     )
     
@@ -132,11 +132,11 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         title='Energy [Joule]',  
         overlaying='y1', 
         side='right', 
-        type="linear", 
+        type='linear', 
         range=[0, np.max(b)],
     )
 
-    if display == "kink_density":
+    if display == 'kink_density':
 
         layout = go.Layout(
             xaxis=xaxis,
@@ -145,10 +145,10 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
         data = [predicted_plus, predicted_minus]
 
-    elif display == "schedule":
+    elif display == 'schedule':
 
-        xaxis2.pop("overlaying")
-        yaxis2.pop("overlaying")
+        xaxis2.pop('overlaying')
+        yaxis2.pop('overlaying')
 
         layout = go.Layout(
             xaxis=xaxis2,
@@ -178,29 +178,29 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         margin=dict(b=5,l=5,r=20,t=10)  
     )
 
-    if display != "schedule":
+    if display != 'schedule':
 
         fig.add_annotation(
-            xref="x",
-            yref="y",
+            xref='x',
+            yref='y',
             x=np.log10(0.25*(time_range[1])),
             y=np.log10(1.0*n.min()),
-            text="Coherent",
-            axref="x",
-            ayref="y",
+            text='Coherent',
+            axref='x',
+            ayref='y',
             ax=np.log10(0.50*(time_range[1])),
             ay=np.log10(1.0*n.min()),
             arrowhead=5,
         )
     
         fig.add_annotation(
-            xref="x",
-            yref="y",
+            xref='x',
+            yref='y',
             x=np.log10(0.5*(time_range[1])),
             y=np.log10(1.2*n.min()),
-            text="Thermalized",
-            axref="x",
-            ayref="y",
+            text='Thermalized',
+            axref='x',
+            ayref='y',
             ax=np.log10(0.3*(time_range[1])),
             ay=np.log10(1.2*n.min()),
             arrowhead=5,
@@ -229,18 +229,18 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time):
         fig_dict
     )
 
-    if display != "schedule":
+    if display != 'schedule':
 
         fig.add_trace(
             go.Scatter(
                 x=[anneal_time], 
                 y=[kink_density], 
-                xaxis="x1",
-                yaxis="y1",
+                xaxis='x1',
+                yaxis='y1',
                 showlegend=False,
                 marker=dict(size=10, 
-                            color="black",
-                            symbol="x",
+                            color='black',
+                            symbol='x',
                 )
             )
         )
@@ -287,7 +287,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
         showscale=False,
         colorscale=[[0, 'red'], [1, 'red']],
         hoverinfo=None,
-        sizemode="absolute",
+        sizemode='absolute',
         sizeref=cone_size
     )
 
@@ -302,7 +302,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
         showscale=False,
         colorscale=[[0, 'blue'], [1, 'blue']],
         hoverinfo=None,
-        sizemode="absolute",
+        sizemode='absolute',
         sizeref=cone_size
     )
 
@@ -310,7 +310,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
         data=[spins_up, spins_down],
         layout=go.Layout(
             #title=f'Spin States of {num_spins} Qubits in a 1D Ring',
-            title_font_color="rgb(243, 120, 32)",
+            title_font_color='rgb(243, 120, 32)',
             showlegend=False,
             margin=dict(b=0,l=0,r=0,t=40),
             scene=dict(
@@ -333,15 +333,15 @@ def plot_spin_orientation(num_spins=512, sample=None):
 
     fig.add_layout_image(
         dict(
-            source="assets/spin_states.png",
-            xref="paper", 
-            yref="paper",
+            source='assets/spin_states.png',
+            xref='paper', 
+            yref='paper',
             x=0.95, 
             y=0.05,
             sizex=0.4, 
             sizey=0.4,
-            xanchor="right", 
-            yanchor="bottom",
+            xanchor='right', 
+            yanchor='bottom',
         )
     )
 
