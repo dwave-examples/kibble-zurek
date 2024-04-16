@@ -18,29 +18,28 @@ from contextvars import copy_context, ContextVar
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-btn_simulate = ContextVar('btn_simulate')
+tooltips_show = ContextVar('tooltips_show')
 
-from app import alert_no_solver
+from app import activate_tooltips
+from helpers.tooltips import tool_tips
 
-@pytest.mark.parametrize("input_val, output_val",
-    [(0, True), (1, True), (0, False), (1, False)])
-def test_alert_no_solver(mocker, input_val, output_val):
-    """Test that a failed cloud-client client is identified."""
+turn_off = [dict(display='none') for _ in tool_tips.keys()]
+turn_on = [dict() for _ in tool_tips.keys()]
 
-    if output_val:
-        mocker.patch('app.client', None)
-    else:
-        mocker.patch('app.client', "dummy")
+@pytest.mark.parametrize("input_val, output_vals",
+    [('off', turn_off), ('on', turn_on)])
+def test_activate_tooltips(input_val, output_vals):
+    """Test tooltips are shown or not."""
 
     def run_callback():
         context_value.set(AttributeDict(**{"triggered_inputs":
-            [{"prop_id": "btn_simulate.n_clicks"}]}))
+            [{"prop_id": "tooltips_show.value"}]}))
 
-        return alert_no_solver(btn_simulate.get())
+        return activate_tooltips(tooltips_show.get())
 
-    btn_simulate.set(input_val)
+    tooltips_show.set(input_val)
 
     ctx = copy_context()
 
     output = ctx.run(run_callback)
-    assert output == output_val
+    assert list(output) == output_vals

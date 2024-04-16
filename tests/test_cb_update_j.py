@@ -1,4 +1,4 @@
-# Copyright 2024 D-Wave
+# Copyright 2024 D-Wave Systems Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -18,27 +18,22 @@ from contextvars import copy_context, ContextVar
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-btn_simulate = ContextVar('btn_simulate')
+coupling_strength = ContextVar('coupling_strength')
 
-from app import alert_no_solver
+from app import update_j_output
 
 @pytest.mark.parametrize("input_val, output_val",
-    [(0, True), (1, True), (0, False), (1, False)])
-def test_alert_no_solver(mocker, input_val, output_val):
-    """Test that a failed cloud-client client is identified."""
-
-    if output_val:
-        mocker.patch('app.client', None)
-    else:
-        mocker.patch('app.client', "dummy")
+    [(0, "J=-2.0"), (0.5, "J=-1.5"), (1.1234, "J=-0.9"), (2.99, "J=1.0")])
+def test_update_j_output(input_val, output_val):
+    """Test that J is correctly updated from knob input."""
 
     def run_callback():
         context_value.set(AttributeDict(**{"triggered_inputs":
-            [{"prop_id": "btn_simulate.n_clicks"}]}))
+            [{"prop_id": "coupling_strength.value"}]}))
 
-        return alert_no_solver(btn_simulate.get())
+        return update_j_output(coupling_strength.get())
 
-    btn_simulate.set(input_val)
+    coupling_strength.set(input_val)
 
     ctx = copy_context()
 
