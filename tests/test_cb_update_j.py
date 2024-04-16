@@ -18,9 +18,9 @@ from contextvars import copy_context, ContextVar
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-coupling_strength = ContextVar('coupling_strength')
-
 from app import update_j_output
+
+coupling_strength = ContextVar('coupling_strength')
 
 @pytest.mark.parametrize("input_val, output_val",
     [(0, "J=-2.0"), (0.5, "J=-1.5"), (1.1234, "J=-0.9"), (2.99, "J=1.0")])

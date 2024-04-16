@@ -18,10 +18,10 @@ from contextvars import copy_context, ContextVar
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-tooltips_show = ContextVar('tooltips_show')
-
 from app import activate_tooltips
 from helpers.tooltips import tool_tips
+
+tooltips_show = ContextVar('tooltips_show')
 
 turn_off = [dict(display='none') for _ in tool_tips.keys()]
 turn_on = [dict() for _ in tool_tips.keys()]
