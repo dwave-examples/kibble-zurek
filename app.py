@@ -38,8 +38,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 # Initialize: available QPUs, initial progress-bar status 
 try:
     client = Client.from_config(client='qpu')
-    # TODO: change to 'fast_anneal_time_range'
-    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedule=True)}
+    qpus = {qpu.name: qpu for qpu in client.get_solvers(fast_anneal_time_range__covers=[0.005, 0.1])}
     if len(qpus) < 1:
         raise Exception    
     init_job_status = 'READY'
