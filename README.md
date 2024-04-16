@@ -141,6 +141,15 @@ Note that as you increase the anneal time, you move from the coherent regime
 and the returned samples are increasingly affected by thermalization, pushing 
 the kink density away from the predicted value.  
 
+The [[1]](#1) Nature paper
+
+## References
+
+<a name="1">[1]</a> King, A.D., Suzuki, S., Raymond, J. et al. 
+Coherent quantum annealing in a programmable 2,000 qubit Ising chain. 
+Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
+
+
 ## <a name="Code"></a> Code
 
 Most the code related to configuring and analyzing the Ising problem is in the
