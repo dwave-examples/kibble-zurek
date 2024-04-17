@@ -31,7 +31,6 @@ from helpers.layouts_components import *
 from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips
-#from kz import build_bqm
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -49,7 +48,7 @@ except Exception:
 
 # Dashboard-organization section
 app.layout = dbc.Container([
-    dbc.Row([                       # Logo
+    dbc.Row([                       # Top: logo
         dbc.Col([
             html.Img(
                 src='assets/dwave_logo.png', 
