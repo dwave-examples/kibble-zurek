@@ -33,15 +33,12 @@ from helpers.qa import *
 from helpers.tooltips import tool_tips
 #from kz import build_bqm
 
-from zzz_TMP import placeholder_params      # TEMPORARY UNTIL SAPI ADDS FEATURE PARAMS
-
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Initialize: available QPUs, initial progress-bar status 
 try:
     client = Client.from_config(client='qpu')
-    # TODO: change to 'fast_anneal_time_range'
-    qpus = {qpu.name: qpu for qpu in client.get_solvers(anneal_schedule=True)}
+    qpus = {qpu.name: qpu for qpu in client.get_solvers(fast_anneal_time_range__covers=[0.005, 0.1])}
     if len(qpus) < 1:
         raise Exception    
     init_job_status = 'READY'
@@ -173,7 +170,7 @@ def set_schedule(qpu_name):
 
         for filename in [file for file in os.listdir('helpers') if 
                          'schedule.csv' in file.lower()]:
-
+                        
             if qpu_name.split('.')[0] in filename:  # Accepts & reddens older versions
             
                 schedule_filename = filename
@@ -340,15 +337,14 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cac
 
         bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
 
-        param_dict = {
-            'bqm': bqm_embedded,
-            'annealing_time': 0.001 * ta_ns,    # QPU's anneal time is in microsecs
-            'auto_scale': False, 
-            'answer_mode': 'raw',
-            'num_reads': 100, 
-            'label': f'Examples - KZ Simulation, submitted: {job_submit_time}',}
-        param_dict = placeholder_params(param_dict)
-        computation = solver.sample_bqm(**param_dict)      # Need final SAPI interface
+        computation = solver.sample_bqm(
+            bqm=bqm_embedded,
+            fast_anneal=True,
+            annealing_time=0.001*ta_ns,     # SAPI anneal time units is microseconds
+            auto_scale=False, 
+            answer_mode='raw',              # Easier than accounting for num_occurrences
+            num_reads=100, 
+            label=f'Examples - Kibble-Zurek Simulation, submitted: {job_submit_time}',)   
 
         return computation.wait_id()
 

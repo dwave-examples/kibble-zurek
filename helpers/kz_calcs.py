@@ -33,14 +33,14 @@ def theoretical_kink_density(annealing_times_ns, J, schedule):
 
     A = schedule['A(s) (GHz)']
     B = schedule['B(s) (GHz)']         
-    C = schedule['C (normalized)']
+    s = schedule['s']
 
     # https://www.nature.com/articles/s41567-022-01741-6 (https://arxiv.org/abs/2202.05847)
     # converts known analytical solutions for kink density statistics to the Hamiltonian form
     # used by D-Wave: https://docs.dwavesys.com/docs/latest/c_qpu_annealing.html 
 
-    A_tag = A.diff()/C.diff()       # Derivatives of the energies for fast anneal 
-    B_tag = B.diff()/C.diff()
+    A_tag = A.diff()/s.diff()       # Derivatives of the energies for fast anneal 
+    B_tag = B.diff()/s.diff()
 
     sc_indx = abs(A - B*abs(J)).idxmin()    # Anneal fraction, s, at the critical point
 
