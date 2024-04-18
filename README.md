@@ -184,7 +184,7 @@ The plot below from the paper shows  data for weak coupling, J=0.12, and strong
 coupling, J=−1.4, for a range of temperatures and anneal times. For strong 
 coupling and fast anneals, the kink density is unaffected by temperature and 
 agrees quantitatively with closed-system coherent quantum theory, shown as dotted 
-green lines
+green lines.
 
 ![experimental results](assets/experimental_results.png)
 
@@ -205,6 +205,33 @@ Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
 Most the code related to configuring and analyzing the Ising problem is in the
 [helpers/qa.py](helpers/qa.py) and [helpers/kz_calcs.py](helpers/kz_calcs.py) 
 files. The remaining files mostly support the user interface.
+
+The [helpers/qa.py](helpers/qa.py) file provides the following functions related 
+to the use of the quantum computer:
+
+*   ``create_bqm()`` generates a binary quadratic model (BQM) to represent the
+    ring of spins with a given coupling strength. 
+
+*   ``find_one_to_one_embedding()`` find a minor embedding for the problem with
+    a single qubit representing each logical spin in the ring. The function makes 
+    a few attempts to find such an embedding. This function is used only if no 
+    valid cached minor-embedding is available for the quantum computer. 
+
+*   Additional convenience functions.
+
+The [helpers/kz_calcs.py](helpers/kz_calcs.py) file provides the following 
+functions related to Kibble-Zurek calculations:
+
+*   ``theoretical_kink_density()`` calculates the kink density predicted for 
+    the configured the coupling strength and annealing time.
+
+*   ``kink_stats()`` calculates the kink density for the sample set returned 
+    from the quantum computer.
+
+You can find more information in the documentation and comments in those files. 
+
+TO DO: add note about adjusting schedule energy to compensate for it being a tad high. 
+Reference to section "Extracting annealing schedules" in [[1]](#1). 
 
 ---
 **Note:** Standard practice for submitting problems to Leap solvers is to use
