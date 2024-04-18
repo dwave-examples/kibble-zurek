@@ -29,7 +29,7 @@ The Kibble-Zurek mechanism relates, for a system driven through a
 [phase transition](#Phase-Transitions), the formation of 
 [topological defects](#Topological-Defects) to the 
 [transition rate](#Transition-Rate). This section provides an intuitive 
-understanding of the highlighted terms. 
+understanding of the mechanism. 
 
 ### <a name="Phase-Transitions"></a> Phase Transitions
 
@@ -51,7 +51,7 @@ states:
 
 Kibble's original formulation explained the transition of the hot post-Big Bang 
 universe from highly symmetric to its current state, with its non-uniform 
-distribution of galaxies.  
+distribution of galaxies etc.  
 
 ![Universe](assets/universe.png)
 
@@ -70,7 +70,7 @@ segments of up/down spins. Switches from one segment to the next are called
 ### Transition Rate
 
 For continuous or quantum phase transitions, the mechanism relates the density 
-of defects/kinks to the quench time as a universal scaling law.
+of defects (e.g. kinks) to the quench time as a universal scaling law.
 
 Consider two extreme cases:
 
@@ -79,7 +79,7 @@ Consider two extreme cases:
     At the end of a sufficiently slow anneal, the system ends in one of its two 
     ground states: all spins up or all spins down.
 
-![!D Spin Ring Adiabatic](assets/1D_adiabatic.png)
+![1D Spin Ring Adiabatic](assets/1D_adiabatic.png)
 
 
 2.  **Instantaneous quench**.
@@ -87,7 +87,7 @@ Consider two extreme cases:
     Each spin independently orients up or down (in an unbiased system, both 
     outcomes have equal probablility).
 
-![!D Spin Ring Instantaneous](assets/1D_instantaneous.png)
+![1D Spin Ring Instantaneous](assets/1D_instantaneous.png)
 
 In between these two extremes, for fast quenches, the system ends in a state 
 of alternating segments of up/down spins. The average length of these segments
@@ -95,7 +95,7 @@ increases with the quench/anneal time. For this example of a quantum phase
 transition (a 1D ring of spins), the Kibble-Zurek mechanism predicts that the 
 average length increases as a function of the square root of the anneal time.
 
-![!D Spin Ring Finite](assets/1D_finite.png)
+![1D Spin Ring Finite](assets/1D_finite.png)
 
 ## <a name="Installation"></a> Installation
 
@@ -136,14 +136,64 @@ to the Kibble-Zurek predictions.
 
 ## <a name="Model-Overview"></a> Model Overview
 
+Quantum simulation is valuable for demonstrating and understanding the 
+capabilities of quantum computers. For example, the simulation of nonequilibrium 
+dynamics of a magnetic spin system quenched through a quantum phase transition 
+requires classical resources that grow exponentially with system size. D-Wave's 
+quantum computers can enable such research as described in [[1]](#1), which 
+studied coherent evolution through a quantum phase transition for a 1D 
+transverse-field Ising chain. It observed, for long chains, the quantum 
+Kibble-Zurek mechanism with theoretically predicted kink statistics; in small 
+chains, excitation statistics validate the picture of a Landau-Zener transition 
+at a minimum gap. In both cases, results were in quantitative agreement with
+analytical solutions to the closed-system quantum model.
+
+Comparing the theoretically predicted kink density against such a simulation 
+on the quantum computer is done as follows.   
+
+To calculate kink density from samples returned from the quantum computer, 
+define a *kink operator*,
+
+![formula kink operator](assets/formula_kink_operator.png),
+
+where J is the coupling strength between qubits and 
+![formula sigma](assets/formula_sigma.png) is the Pauli operator on the i-th 
+qubit. 
+
+Put simply, for any sample returned from the quantum computer, the operator
+gives 1 if there is a kink between qubits i and i+1 (i.e., if the pair of qubits 
+at the end of the anneal have different values for negative J and identical 
+values for positive J). If there is no kink between the pair, the operator 
+gives 0.
+
+Define a *kink density operator* as,
+
+![formula kink density](assets/formula_kink_density.png),
+
+where L is the length of the chain of spins (the number of qubits coupled 
+together).
+
+Average kink density is obtained by sampling many times (the code in this 
+example sets ``num_reads=100``) and averaging.
+
+The research as described in [[1]](#1) performed a more sophisticated version 
+of this experiment: it employed advanced calibration techniques not used here
+and also varied the temperature. 
+
+The plot below from the paper shows  data for weak coupling, J=0.12, and strong 
+coupling, J=−1.4, for a range of temperatures and anneal times. For strong 
+coupling and fast anneals, the kink density is unaffected by temperature and 
+agrees quantitatively with closed-system coherent quantum theory, shown as dotted 
+green lines.
+
+![experimental results](assets/experimental_results.png)
 
 Note that as you increase the anneal time, you move from the coherent regime 
 and the returned samples are increasingly affected by thermalization, pushing 
 the kink density away from the predicted value.  
 
-The [[1]](#1) Nature paper
 
-## References
+### References
 
 <a name="1">[1]</a> King, A.D., Suzuki, S., Raymond, J. et al. 
 Coherent quantum annealing in a programmable 2,000 qubit Ising chain. 
@@ -155,6 +205,33 @@ Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
 Most the code related to configuring and analyzing the Ising problem is in the
 [helpers/qa.py](helpers/qa.py) and [helpers/kz_calcs.py](helpers/kz_calcs.py) 
 files. The remaining files mostly support the user interface.
+
+The [helpers/qa.py](helpers/qa.py) file provides the following functions related 
+to the use of the quantum computer:
+
+*   ``create_bqm()`` generates a binary quadratic model (BQM) to represent the
+    ring of spins with a given coupling strength. 
+
+*   ``find_one_to_one_embedding()`` find a minor embedding for the problem with
+    a single qubit representing each logical spin in the ring. The function makes 
+    a few attempts to find such an embedding. This function is used only if no 
+    valid cached minor-embedding is available for the quantum computer. 
+
+*   Additional convenience functions.
+
+The [helpers/kz_calcs.py](helpers/kz_calcs.py) file provides the following 
+functions related to Kibble-Zurek calculations:
+
+*   ``theoretical_kink_density()`` calculates the kink density predicted for 
+    the configured the coupling strength and annealing time.
+
+*   ``kink_stats()`` calculates the kink density for the sample set returned 
+    from the quantum computer.
+
+You can find more information in the documentation and comments in those files. 
+
+TO DO: add note about adjusting schedule energy to compensate for it being a tad high. 
+Reference to section "Extracting annealing schedules" in [[1]](#1). 
 
 ---
 **Note:** Standard practice for submitting problems to Leap solvers is to use
