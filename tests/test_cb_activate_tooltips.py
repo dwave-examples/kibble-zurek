@@ -26,14 +26,14 @@ tooltips_show = ContextVar('tooltips_show')
 turn_off = [dict(display='none') for _ in tool_tips.keys()]
 turn_on = [dict() for _ in tool_tips.keys()]
 
-@pytest.mark.parametrize("input_val, output_vals",
+@pytest.mark.parametrize('input_val, output_vals',
     [('off', turn_off), ('on', turn_on)])
 def test_activate_tooltips(input_val, output_vals):
     """Test tooltips are shown or not."""
 
     def run_callback():
-        context_value.set(AttributeDict(**{"triggered_inputs":
-            [{"prop_id": "tooltips_show.value"}]}))
+        context_value.set(AttributeDict(**{'triggered_inputs':
+            [{'prop_id': 'tooltips_show.value'}]}))
 
         return activate_tooltips(tooltips_show.get())
 

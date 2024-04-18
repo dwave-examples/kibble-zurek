@@ -22,14 +22,14 @@ from app import update_j_output
 
 coupling_strength = ContextVar('coupling_strength')
 
-@pytest.mark.parametrize("input_val, output_val",
-    [(0, "J=-2.0"), (0.5, "J=-1.5"), (1.1234, "J=-0.9"), (2.99, "J=1.0")])
+@pytest.mark.parametrize('input_val, output_val',
+    [(0, 'J=-2.0'), (0.5, 'J=-1.5'), (1.1234, 'J=-0.9'), (2.99, 'J=1.0')])
 def test_update_j_output(input_val, output_val):
     """Test that J is correctly updated from knob input."""
 
     def run_callback():
-        context_value.set(AttributeDict(**{"triggered_inputs":
-            [{"prop_id": "coupling_strength.value"}]}))
+        context_value.set(AttributeDict(**{'triggered_inputs':
+            [{'prop_id': 'coupling_strength.value'}]}))
 
         return update_j_output(coupling_strength.get())
 
