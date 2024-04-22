@@ -65,7 +65,7 @@ the system from a state of spins in superposition to a state that has alternatin
 segments of up/down spins. Switches from one segment to the next are called 
 "kinks". 
 
-![1D Spin Ring Kinks](assets/1D_kinks.png)
+<img src='assets/1D_kinks.jpg' alt='1D Spin Ring Kinks' width='400'/>
 
 ### Transition Rate
 
@@ -186,7 +186,7 @@ coupling and fast anneals, the kink density is unaffected by temperature and
 agrees quantitatively with closed-system coherent quantum theory, shown as dotted 
 green lines.
 
-![experimental results](assets/experimental_results.png)
+<img src='assets/experimental_results.png' alt='Experimental results' width='400'/>
 
 Note that as you increase the anneal time, you move from the coherent regime 
 and the returned samples are increasingly affected by thermalization, pushing 
