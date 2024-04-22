@@ -53,3 +53,28 @@ def test_simulate_button_press(spins_val, cached_embedding_lengths_val, submit_s
 
     assert output[0:5] == (True, False, 0.5*1000, 0, submit_state_out) 
     assert output[6] == embedding_found
+
+def mock_get_status(client, job_id, job_submit_time):
+
+    if job_id == 'first few attempts':
+        return None
+    if job_id == 'first returned status':
+        return 'PENDING'
+    if job_id == 'early returning statuses':
+        return 'PENDING'
+    if job_id == 'impossible input status':
+        return 'should make no difference'
+    if job_id == '1':
+        return 'IN_PROGRESS'
+    if job_id == '2':
+        return 'COMPLETED'
+    if job_id == '3':
+        return 'CANCELLED'
+    if job_id == '4':
+        return 'FAILED'
+
+parametrize_names = 'btn_simulate_clicks, wd_job_intervals, job_id_val, submit_state_in, ' +\
+' submit_time_in, btn_simulate_disabled, wd_job_disabled, wd_job_interval, ' + \
+'wd_job_n, submit_state_out, submit_time_out, cached_embedding_lengths, spins'
+
+# TO DO: add unit tests on job states 
