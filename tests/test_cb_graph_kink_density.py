@@ -18,13 +18,13 @@ from contextvars import copy_context, ContextVar
 from dash import no_update
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
+import numpy as np
 import plotly
 
 import dimod
 
-from app import display_graphics_spin_ring
+from app import display_graphics_kink_density
 
-spins = ContextVar('spins')
 job_submit_state = ContextVar('job_submit_state')
 embeddings_cached = ContextVar('embeddings_cached')
 
@@ -32,37 +32,29 @@ json_embeddings_file = { \
     "512": {"1": [11], "0": [10], "2": [12]}, \
     "5": {"1": [11], "0": [10], "2": [12], "3": [13], "4": [14]} }
 
+kz_graph_display = plotly.graph_objects.Figure({
+    'data': [{
+              'type': 'scatter',
+              'x': np.array([1, 2, 3], dtype=np.int64),
+              'xaxis': 'x',
+              'y': np.array([1, 2, 3], dtype=np.int64),
+              'yaxis': 'y'}],
+    'layout': {
+               'xaxis': {'anchor': 'y', 'domain': [0.0, 1.0], 'title': {'text': 'x'}},
+               'yaxis': {'anchor': 'x', 'domain': [0.0, 1.0], 'title': {'text': 'y'}}}
+})
+
 samples = dimod.as_samples([
     [-1, -1, -1, +1, +1], 
     [-1, -1, +1, +1, +1],
     [-1, -1, -1, +1, +1],])
 sampleset = dimod.SampleSet.from_samples(samples, 'SPIN', 0)
 
-parametrize_vals = [
-(512, 'SUBMITTED', json_embeddings_file), (5, 'COMPLETED', json_embeddings_file)]
+parametrize_vals = [('SUBMITTED'), ('COMPLETED')]
 
-@pytest.mark.parametrize('spins_val, job_submit_state_val, embeddings_cached_val', parametrize_vals)
-def test_graph_spins_spin_trigger(spins_val, job_submit_state_val, embeddings_cached_val):
-    """Test graph of spin ring: spins trigger."""
-
-    def run_callback():
-        context_value.set(AttributeDict(**
-            {'triggered_inputs': [{'prop_id': 'spins.value'},]}))
-
-        return display_graphics_spin_ring(spins.get(), job_submit_state.get(), '1234', 2.5, embeddings_cached.get())
-
-    spins.set(spins_val)
-    job_submit_state.set(job_submit_state_val)
-    embeddings_cached.set(embeddings_cached_val)
-
-    ctx = copy_context()
-
-    output = ctx.run(run_callback)
-    assert type(output) == plotly.graph_objects.Figure
-
-@pytest.mark.parametrize('spins_val, job_submit_state_val, embeddings_cached_val', parametrize_vals)
-def test_graph_spins_job_trigger(mocker, spins_val, job_submit_state_val, embeddings_cached_val):
-    """Test graph of spin ring: job-state trigger."""
+@pytest.mark.parametrize('job_submit_state_val', parametrize_vals)
+def test_graph_kink_density_job_trigger(mocker, job_submit_state_val):
+    """Test graph of kink density: job-state trigger."""
 
     mocker.patch('app.get_samples', return_value=sampleset)
 
@@ -70,11 +62,13 @@ def test_graph_spins_job_trigger(mocker, spins_val, job_submit_state_val, embedd
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'job_submit_state.children'},]}))
 
-        return display_graphics_spin_ring(spins.get(), job_submit_state.get(), '1234', 2.5, embeddings_cached.get())
+        return display_graphics_kink_density("both", 2.5, "schedule_filename", 
+                                          job_submit_state.get(), '1234', 5, 100, 7, 5, 
+                                          embeddings_cached.get(), kz_graph_display)
 
-    spins.set(spins_val)
+
     job_submit_state.set(job_submit_state_val)
-    embeddings_cached.set(embeddings_cached_val)
+    embeddings_cached.set(json_embeddings_file)
 
     ctx = copy_context()
 
