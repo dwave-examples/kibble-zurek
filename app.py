@@ -331,7 +331,7 @@ def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cac
 
         bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
-        embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+        embeddings_cached = json_to_dict(embeddings_cached)
         embedding = embeddings_cached[spins]
 
         bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)

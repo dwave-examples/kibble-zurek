@@ -16,7 +16,7 @@ import numpy as np
 
 __all__ = ['kink_stats', 'theoretical_kink_density']
 
-def theoretical_kink_density(annealing_times_ns, J, schedule):
+def theoretical_kink_density(annealing_times_ns, J, schedule, schedule_name):
     """
     Calculate the kink density predicted for given the coupling strength and annealing times. 
 
@@ -27,17 +27,21 @@ def theoretical_kink_density(annealing_times_ns, J, schedule):
 
         schedule: Anneal schedule for the selected QPU. 
 
+        schedule_name: Filename of anneal schedule. Used to compensate for schedule energy 
+        overestimate. 
+
     Returns:
         Kink density per anneal time, as a NumPy array.  
     """
 
-    A = schedule['A(s) (GHz)']
-    B = schedule['B(s) (GHz)']         
-    s = schedule['s']
+    # See the Code section of the README.md file for an explanation of the
+    # following code. 
 
-    # https://www.nature.com/articles/s41567-022-01741-6 (https://arxiv.org/abs/2202.05847)
-    # converts known analytical solutions for kink density statistics to the Hamiltonian form
-    # used by D-Wave: https://docs.dwavesys.com/docs/latest/c_qpu_annealing.html 
+    COMPENSATION_SCHEDULE_ENERGY = 0.8 if 'Advantage_system' in schedule_name else 1.0
+
+    A = COMPENSATION_SCHEDULE_ENERGY * schedule['A(s) (GHz)']
+    B = COMPENSATION_SCHEDULE_ENERGY * schedule['B(s) (GHz)']         
+    s = schedule['s']
 
     A_tag = A.diff()/s.diff()       # Derivatives of the energies for fast anneal 
     B_tag = B.diff()/s.diff()

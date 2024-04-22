@@ -230,8 +230,16 @@ functions related to Kibble-Zurek calculations:
 
 You can find more information in the documentation and comments in those files. 
 
-TO DO: add note about adjusting schedule energy to compensate for it being a tad high. 
-Reference to section "Extracting annealing schedules" in [[1]](#1). 
+Article [[1]](#1) converts known analytical solutions for kink-density statistics 
+to the [Hamiltonian form used by D-Wave](https://docs.dwavesys.com/docs/latest/c_qpu_annealing.html).
+The [published annealing schedules](https://docs.dwavesys.com/docs/latest/doc_physical_properties.html) 
+differ from the schedules tailored to a symmetric J=1 system of [[1]](#1) in the 
+vicinity of the quantum critical point: the difference in spectrum accounts for 
+a shift in energy scale (equivalently, time scale) of 0.80. Inclusion of this 
+factor, which is done in the ``theoretical_kink_density()`` function, allows 
+for good quantitative agreement in the kink density, as well as the 
+Kibble-Zurek exponent. See section "Extracting annealing schedules" in the 
+supplementary material of [[1]](#1) for detailed information.
 
 ---
 **Note:** Standard practice for submitting problems to Leap solvers is to use
