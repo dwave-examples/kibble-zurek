@@ -65,7 +65,7 @@ the system from a state of spins in superposition to a state that has alternatin
 segments of up/down spins. Switches from one segment to the next are called 
 "kinks". 
 
-![1D Spin Ring Kinks](assets/1D_kinks.png)
+<img src='assets/1D_kinks.jpg' alt='1D Spin Ring Kinks' width='400'/>
 
 ### Transition Rate
 
@@ -186,19 +186,11 @@ coupling and fast anneals, the kink density is unaffected by temperature and
 agrees quantitatively with closed-system coherent quantum theory, shown as dotted 
 green lines.
 
-![experimental results](assets/experimental_results.png)
+<img src='assets/experimental_results.png' alt='Experimental results' width='400'/>
 
 Note that as you increase the anneal time, you move from the coherent regime 
 and the returned samples are increasingly affected by thermalization, pushing 
 the kink density away from the predicted value.  
-
-
-### References
-
-<a name="1">[1]</a> King, A.D., Suzuki, S., Raymond, J. et al. 
-Coherent quantum annealing in a programmable 2,000 qubit Ising chain. 
-Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
-
 
 ## <a name="Code"></a> Code
 
@@ -230,8 +222,16 @@ functions related to Kibble-Zurek calculations:
 
 You can find more information in the documentation and comments in those files. 
 
-TO DO: add note about adjusting schedule energy to compensate for it being a tad high. 
-Reference to section "Extracting annealing schedules" in [[1]](#1). 
+Article [[2]](#2) predicts a characteristic energy scale that is 20% smaller 
+than that of the 
+[published annealing schedule](https://docs.dwavesys.com/docs/latest/doc_physical_properties.html) 
+for quantum computer ``Advantage_system4.1`` used the Kibble-Zurek calculation
+in the ``theoretical_kink_density()`` function. A comparable discrepancy between 
+the published and spectral-fit schedule is found in [[1]](#1) (see section 
+"Extracting annealing schedules" in the supplementary material) for frustrated 
+rings of various length and energy scales. The code in the 
+``theoretical_kink_density()`` function applies this correction of 0.80 
+to the published schedules.
 
 ---
 **Note:** Standard practice for submitting problems to Leap solvers is to use
@@ -249,6 +249,16 @@ as demonstrated in most the code examples of the
 [Ocean documentation](https://docs.ocean.dwavesys.com/en/stable/index.html).
 
 ---
+
+## References
+
+<a name="1">[1]</a> King, A.D., Suzuki, S., Raymond, J. et al. 
+Coherent quantum annealing in a programmable 2,000 qubit Ising chain. 
+Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
+
+<a name="2">[2]</a> King, A.D. et al.
+Computational supremacy in quantum simulation
+https://arxiv.org/abs/2403.00910
 
 ## License
 
