@@ -14,13 +14,11 @@
 
 import pytest
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from app import update_j_output
-
-coupling_strength = ContextVar('coupling_strength')
 
 @pytest.mark.parametrize('input_val, output_val',
     [(0, 'J=-2.0'), (0.5, 'J=-1.5'), (1.1234, 'J=-0.9'), (2.99, 'J=1.0')])
@@ -31,9 +29,7 @@ def test_update_j_output(input_val, output_val):
         context_value.set(AttributeDict(**{'triggered_inputs':
             [{'prop_id': 'coupling_strength.value'}]}))
 
-        return update_j_output(coupling_strength.get())
-
-    coupling_strength.set(input_val)
+        return update_j_output(input_val)
 
     ctx = copy_context()
 

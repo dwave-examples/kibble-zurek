@@ -14,7 +14,7 @@
 
 import pytest
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash import no_update
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
@@ -23,10 +23,6 @@ import plotly
 import dimod
 
 from app import display_graphics_spin_ring
-
-spins = ContextVar('spins')
-job_submit_state = ContextVar('job_submit_state')
-embeddings_cached = ContextVar('embeddings_cached')
 
 json_embeddings_file = { \
     "512": {"1": [11], "0": [10], "2": [12]}, \
@@ -49,11 +45,8 @@ def test_graph_spins_spin_trigger(spins_val, job_submit_state_val, embeddings_ca
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'spins.value'},]}))
 
-        return display_graphics_spin_ring(spins.get(), job_submit_state.get(), '1234', 2.5, embeddings_cached.get())
-
-    spins.set(spins_val)
-    job_submit_state.set(job_submit_state_val)
-    embeddings_cached.set(embeddings_cached_val)
+        return display_graphics_spin_ring(
+            spins_val, job_submit_state_val, '1234', 2.5, embeddings_cached_val)
 
     ctx = copy_context()
 
@@ -70,11 +63,8 @@ def test_graph_spins_job_trigger(mocker, spins_val, job_submit_state_val, embedd
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'job_submit_state.children'},]}))
 
-        return display_graphics_spin_ring(spins.get(), job_submit_state.get(), '1234', 2.5, embeddings_cached.get())
-
-    spins.set(spins_val)
-    job_submit_state.set(job_submit_state_val)
-    embeddings_cached.set(embeddings_cached_val)
+        return display_graphics_spin_ring(
+            spins_val, job_submit_state_val, '1234', 2.5, embeddings_cached_val)
 
     ctx = copy_context()
 

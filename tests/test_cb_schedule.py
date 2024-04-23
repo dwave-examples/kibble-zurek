@@ -14,13 +14,11 @@
 
 import pytest
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from app import set_schedule
-
-qpu_selection = ContextVar('qpu_selection')
 
 all_schedules = ['09-1263A-B_Advantage_system4.1_fast_annealing_schedule.csv',
                  '09-1273A-E_Advantage_system6.3_fast_annealing_schedule.csv',
@@ -57,9 +55,7 @@ def test_schedule_selection(mocker, qpu_selection_val, schedule_name, indx, styl
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'qpu_selection.value'}]}))
 
-        return set_schedule(qpu_selection.get())
-
-    qpu_selection.set(qpu_selection_val)
+        return set_schedule(qpu_selection_val)
 
     ctx = copy_context()
 

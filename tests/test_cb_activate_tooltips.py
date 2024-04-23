@@ -14,14 +14,12 @@
 
 import pytest
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from app import activate_tooltips
 from helpers.tooltips import tool_tips
-
-tooltips_show = ContextVar('tooltips_show')
 
 turn_off = [dict(display='none') for _ in tool_tips.keys()]
 turn_on = [dict() for _ in tool_tips.keys()]
@@ -35,9 +33,7 @@ def test_activate_tooltips(input_val, output_vals):
         context_value.set(AttributeDict(**{'triggered_inputs':
             [{'prop_id': 'tooltips_show.value'}]}))
 
-        return activate_tooltips(tooltips_show.get())
-
-    tooltips_show.set(input_val)
+        return activate_tooltips(input_val)
 
     ctx = copy_context()
 

@@ -14,16 +14,13 @@
 
 import pytest
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 from dash import no_update
 
 from app import disable_buttons
 from helpers.layouts_components import ring_lengths
-
-job_submit_state = ContextVar('job_submit_state')
-spins = ContextVar('spins')
 
 parametrize_names = ['job_submit_state_val', 'spins_val_in', 'anneal_duration_val',
         'coupling_strength_val', 'spins_val_out', 'qpu_selection_val']
@@ -50,10 +47,7 @@ def test_disable_buttons(job_submit_state_val, spins_val_in, anneal_duration_val
             {'triggered_inputs': [{'prop_id': 'job_submit_state.children'}],
              'state_values': [{'prop_id': 'spins.options'}]}))
 
-        return disable_buttons(job_submit_state.get(), spins.get())
-
-    job_submit_state.set(job_submit_state_val)
-    spins.set(spins_val_in)
+        return disable_buttons(job_submit_state_val, spins_val_in)
 
     ctx = copy_context()
 
