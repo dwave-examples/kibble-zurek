@@ -14,13 +14,11 @@
 
 import pytest
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from app import alert_no_solver
-
-btn_simulate = ContextVar('btn_simulate')
 
 @pytest.mark.parametrize('input_val, output_val',
     [(0, True), (1, True), (0, False), (1, False)])
@@ -36,9 +34,7 @@ def test_alert_no_solver(mocker, input_val, output_val):
         context_value.set(AttributeDict(**{'triggered_inputs':
             [{'prop_id': 'btn_simulate.n_clicks'}]}))
 
-        return alert_no_solver(btn_simulate.get())
-
-    btn_simulate.set(input_val)
+        return alert_no_solver(input_val)
 
     ctx = copy_context()
 

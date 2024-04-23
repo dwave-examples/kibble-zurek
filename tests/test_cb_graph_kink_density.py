@@ -14,7 +14,7 @@
 
 import pytest
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash import no_update
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
@@ -24,9 +24,6 @@ import plotly
 import dimod
 
 from app import display_graphics_kink_density
-
-kz_graph_display = ContextVar('kz_graph_display')
-job_submit_state = ContextVar('job_submit_state')
 
 json_embeddings_file = { \
     "512": {"1": [11], "0": [10], "2": [12]}, \
@@ -71,12 +68,8 @@ def test_graph_kink_density(mocker, trigger_val, kz_graph_display_val, job_submi
             {'triggered_inputs': [{'prop_id': trigger_val},]}))
 
         return display_graphics_kink_density(
-            kz_graph_display.get(), 2.5, "FALLBACK_SCHEDULE.csv", job_submit_state.get(), '1234', 
+            kz_graph_display_val, 2.5, "FALLBACK_SCHEDULE.csv", job_submit_state_val, '1234', 
             5, 100, 7, 5, json_embeddings_file, sample_vs_theory)
-
-
-    kz_graph_display.set(kz_graph_display_val)
-    job_submit_state.set(job_submit_state_val)
 
     ctx = copy_context()
 

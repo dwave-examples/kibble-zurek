@@ -14,14 +14,12 @@
 
 import pytest
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from app import set_progress_bar
 from helpers.layouts_components import job_bar_display
-
-job_submit_state = ContextVar('job_submit_state')
 
 parametrize_vals = [
 (f'{status}', job_bar_display[status][0], job_bar_display[status][1]) for status in job_bar_display.keys()]
@@ -36,9 +34,7 @@ def test_set_progress_bar(job_submit_state_val, bar_job_status_value, bar_job_st
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'job_submit_state.children'}]}))
 
-        return set_progress_bar(job_submit_state.get())
-
-    job_submit_state.set(job_submit_state_val)
+        return set_progress_bar(job_submit_state_val)
 
     ctx = copy_context()
 

@@ -12,20 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import pytest
-
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from app import submit_job
-
-job_submit_time = ContextVar('job_submit_time')
-qpu_name = ContextVar('qpu_name')
-spins = ContextVar('spins')
-J_offset = ContextVar('J_offset')
-ta_ns = ContextVar('ta_ns')
-embeddings_cached = ContextVar('embeddings_cached')
 
 json_embeddings_file = { \
     "3": {"1": [11], "0": [10], "2": [12]}, \
@@ -64,15 +55,7 @@ def test_job_submission(mocker,):
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'job_submit_time.children'},]}))
 
-        return submit_job(job_submit_time.get(), qpu_name.get(), spins.get(), 
-                                J_offset.get(), ta_ns.get(), embeddings_cached.get())
-
-    job_submit_time.set('11:45')
-    qpu_name.set('Advantage_system88.4')
-    spins.set(3)
-    J_offset.set(2.3)
-    ta_ns.set(7)
-    embeddings_cached.set(json_embeddings_file)
+        return submit_job('11:45AM', 'Advantage_system88.4', 3, 2.3, 7, json_embeddings_file)
 
     ctx = copy_context()
     output = ctx.run(run_callback)

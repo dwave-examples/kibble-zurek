@@ -15,16 +15,12 @@
 import pytest
 from io import StringIO
 
-from contextvars import copy_context, ContextVar
+from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 from dash import no_update
 
 from app import cache_embeddings
-
-qpu_name = ContextVar('qpu_name')
-embeddings_found = ContextVar('embeddings_found')
-embeddings_cached = ContextVar('embeddings_cached')
 
 embedding_filenames = [
     'emb_Advantage_system4.1.json',
@@ -75,11 +71,7 @@ def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_e
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'qpu_selection.value'},]}))
 
-        return cache_embeddings(qpu_name.get(), embeddings_found.get(), embeddings_cached.get())
-
-    qpu_name.set(qpu_name_val)
-    embeddings_found.set('dummy')
-    embeddings_cached.set('dummy')
+        return cache_embeddings(qpu_name_val, 'dummy', 'dummy')
 
     ctx = copy_context()
     output = ctx.run(run_callback)
@@ -110,11 +102,7 @@ def test_cache_embeddings_found_embedding(embeddings_found_val, embeddings_cache
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'embeddings_found.data'},]}))
 
-        return cache_embeddings(qpu_name.get(), embeddings_found.get(), embeddings_cached.get())
-
-    qpu_name.set("dummy")
-    embeddings_found.set(embeddings_found_val)
-    embeddings_cached.set(embeddings_cached_val)
+        return cache_embeddings('dummy', embeddings_found_val, embeddings_cached_val)
 
     ctx = copy_context()
     output = ctx.run(run_callback)
