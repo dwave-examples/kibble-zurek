@@ -58,8 +58,6 @@ def mock_get_status(client, job_id, job_submit_time):
         return 'PENDING'
     if job_id == 'early returning statuses':
         return 'PENDING'
-    if job_id == 'impossible input status':
-        return 'should make no difference'
     if job_id == '-1':
         return 'ERROR'
     if job_id == '0':
@@ -73,6 +71,22 @@ def mock_get_status(client, job_id, job_submit_time):
     if job_id == '4':
         return 'FAILED'
 
+class mock_qpu_edges():
+    def __init__(self, edges):
+        self.edges = edges
+
+class mock_qpu(object):
+    def __init__(self):
+        self.edges_per_qpu = {'Advantage_system4.3': "dummy"}
+    def __getitem__(self, indx):
+        return mock_qpu_edges(self.edges_per_qpu[indx])
+
+def mock_find_embedding(spins, dummy_edges):
+    if spins == 'yes':
+        return {1: [10], 2: [20]}
+    if spins == 'no':
+        return {}
+
 parametrize_names = 'job_id_val, job_submit_state_in, cached_embedding_lengths_val, ' +  \
     'spins_val, embeddings_found_in, btn_simulate_disabled_out, wd_job_disabled_out, ' + \
     'wd_job_intervals_out, wd_job_n_out, job_submit_state_out, job_submit_time_out, ' + \
@@ -82,7 +96,27 @@ parametrize_vals = [
     (-1, 'READY', [512, 1024], 512, 'dummy embeddings found', False, True, 
      0, 0, 'ERROR', no_update, no_update),
     ('first few attempts', 'SUBMITTED', [512, 1024], 512, 'dummy embeddings found', True, False, 
-     0.2*1000, 0, 'SUBMITTED', no_update, no_update)]
+     0.2*1000, 0, 'SUBMITTED', no_update, no_update),
+     ('first returned status', 'SUBMITTED', [512, 1024], 512, 'dummy embeddings found', True, False, 
+     1*1000, 0, 'PENDING', no_update, no_update),
+     ('1', 'PENDING', [512, 1024], 512, 'dummy embeddings found', True, False, 
+     1*1000, 0, 'IN_PROGRESS', no_update, no_update),
+     ('1', 'IN_PROGRESS', [512, 1024], 512, 'dummy embeddings found', True, False, 
+     1*1000, 0, 'IN_PROGRESS', no_update, no_update),
+     ('2', 'IN_PROGRESS', [512, 1024], 512, 'dummy embeddings found', True, False, 
+     1*1000, 0, 'COMPLETED', no_update, no_update),
+     ('2', 'COMPLETED', [512, 1024], 512, 'dummy embeddings found', False, True, 
+     0.1*1000, 0, no_update, no_update, no_update),
+     ('3', 'CANCELLED', [512, 1024], 512, 'dummy embeddings found', False, True, 
+     0.1*1000, 0, no_update, no_update, no_update),
+     ('4', 'FAILED', [512, 1024], 512, 'dummy embeddings found', False, True, 
+     0.1*1000, 0, no_update, no_update, no_update),
+     ('dummy', 'EMBEDDING', [512, 1024], 'yes', 'needed', True, False, 
+     0.2*1000, 0, 'EMBEDDING', before_test, {'yes': {1: [10], 2: [20]}}),
+     ('dummy', 'EMBEDDING', [512, 1024], 'no', 'needed', True, False, 
+     0.2*1000, 0, 'FAILED', before_test, 'not found'),
+     ('dummy', 'EMBEDDING', [512, 1024], 'no', 'not needed', True, False, 
+     0.2*1000, 0, 'SUBMITTED', before_test, no_update)]
 
 @pytest.mark.parametrize(parametrize_names, parametrize_vals)
 def test_simulate_states(mocker, job_id_val, job_submit_state_in, cached_embedding_lengths_val, 
@@ -92,6 +126,8 @@ def test_simulate_states(mocker, job_id_val, job_submit_state_in, cached_embeddi
     """Test transitions between states."""
 
     mocker.patch('app.get_job_status', new=mock_get_status)
+    mocker.patch('app.qpus', new=mock_qpu())
+    mocker.patch('app.find_one_to_one_embedding', new=mock_find_embedding)
 
     def run_callback():
         context_value.set(AttributeDict(
@@ -107,3 +143,5 @@ def test_simulate_states(mocker, job_id_val, job_submit_state_in, cached_embeddi
 
     assert output[0:5] == (btn_simulate_disabled_out, wd_job_disabled_out, wd_job_intervals_out, 
                            wd_job_n_out, job_submit_state_out)
+    assert output[6] == embedding_found_out
+    # One could test ``job_submit_time_out >= before_test`` to little gain, much complication
