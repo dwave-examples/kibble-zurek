@@ -15,13 +15,15 @@
 import pytest
 import pandas as pd
 
+import dimod
+
 from helpers.kz_calcs import *
 
 schedule = pd.read_csv('helpers/FALLBACK_SCHEDULE.csv')
 
 @pytest.mark.parametrize('t_a_ns, J1, J2',
     [([7, 25], -1.0, -0.3), ([10, 30], 1.0, 0.3), ])
-def test_theory(t_a_ns, J1, J2):
+def test_kz_theory(t_a_ns, J1, J2):
     """Test predicted kink density."""
 
     output1 = theoretical_kink_density(
@@ -39,3 +41,23 @@ def test_theory(t_a_ns, J1, J2):
     assert output1[0] > output1[1]
     assert output1[0] < output2[0]
     assert output1[1] < output2[1]
+
+def test_kz_stats():
+    """Test kink density statistics."""
+
+    samples = dimod.as_samples([
+        [-1, -1, -1, +1, +1], 
+        [-1, -1, +1, +1, +1],
+        [-1, -1, -1, +1, +1],])
+
+    sampleset = dimod.SampleSet.from_samples(samples, 'SPIN', 0)
+
+    output = kink_stats(sampleset, J=-1.0)
+
+    assert list(output[0]) == [2, 2, 2]
+    assert output[1] == 0.4
+
+    output = kink_stats(sampleset, J=0.5)
+
+    assert list(output[0]) == [3, 3, 3]
+    assert output[1] == 0.6
