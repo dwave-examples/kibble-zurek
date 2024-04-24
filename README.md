@@ -57,13 +57,13 @@ distribution of galaxies etc.
 
 Zurek expanded the idea to condensed matter and quantum phase transitions.   
 
-A simple example of topological defects are kinks in a ring of 
-ferromagnetically-coupled spins. A *quench* (a control parameter changing
-at a high rate compared to system dynamics; with D-Wave's fast-anneal protocol, 
-the anneal schedule can be fast compared to thermalization times) transitions 
-the system from a state of spins in superposition to a state that has alternating 
-segments of up/down spins. Switches from one segment to the next are called 
-"kinks". 
+A *quench* is when a control parameter changes at a high rate compared to system 
+dynamics; with D-Wave's fast-anneal protocol, the anneal schedule can be fast 
+compared to thermalization times. For the simple system of a ring of 
+ferromagnetically coupled spins, quenching (fast annealing) causes a transition 
+from a state of spins in superposition to a state that has alternating segments 
+of up/down spins. Switches from one segment to the next are called "kinks" (an 
+example of topological defects).  
 
 <img src='assets/1D_kinks.jpg' alt='1D Spin Ring Kinks' width='400'/>
 
@@ -139,13 +139,14 @@ to the Kibble-Zurek predictions.
 Quantum simulation is valuable for demonstrating and understanding the 
 capabilities of quantum computers. For example, the simulation of nonequilibrium 
 dynamics of a magnetic spin system quenched through a quantum phase transition 
-requires classical resources that grow exponentially with system size. D-Wave's 
-quantum computers can enable such research as described in [[1]](#1), which 
-studied coherent evolution through a quantum phase transition for a 1D 
-transverse-field Ising chain. It observed, for long chains, the quantum 
-Kibble-Zurek mechanism with theoretically predicted kink statistics; in small 
-chains, excitation statistics validate the picture of a Landau-Zener transition 
-at a minimum gap. In both cases, results were in quantitative agreement with
+requires classical resources that grow exponentially with system size 
+(see [[2]](#2)). D-Wave's quantum computers can enable such research as 
+described in [[1]](#1), which studied coherent evolution through a quantum 
+phase transition for a 1D transverse-field Ising chain. It observed, for long 
+chains, the quantum Kibble-Zurek mechanism with theoretically predicted kink 
+statistics; in small chains, excitation statistics validate the picture of a 
+[Landau-Zener transition](https://en.wikipedia.org/wiki/Landau%E2%80%93Zener_formula) 
+at a minimum gap. In both cases, results were in quantitative agreement with 
 analytical solutions to the closed-system quantum model.
 
 Comparing the theoretically predicted kink density against such a simulation 
@@ -158,15 +159,13 @@ define a *kink operator*,
 
 where J is the coupling strength between qubits and 
 ![formula sigma](assets/formula_sigma.png) is the Pauli operator on the i-th 
-qubit. 
+qubit. Put simply, for any sample returned from the quantum computer, the 
+operator gives 1 if there is a kink between qubits i and i+1 (i.e., if the 
+pair of qubits at the end of the anneal have different values for negative J 
+and identical values for positive J). If there is no kink between the pair, 
+the operator gives 0.
 
-Put simply, for any sample returned from the quantum computer, the operator
-gives 1 if there is a kink between qubits i and i+1 (i.e., if the pair of qubits 
-at the end of the anneal have different values for negative J and identical 
-values for positive J). If there is no kink between the pair, the operator 
-gives 0.
-
-Define a *kink density operator* as,
+Define a *kink-density operator* as,
 
 ![formula kink density](assets/formula_kink_density.png),
 
@@ -176,7 +175,7 @@ together).
 Average kink density is obtained by sampling many times (the code in this 
 example sets ``num_reads=100``) and averaging.
 
-The research as described in [[1]](#1) performed a more sophisticated version 
+The research described in [[1]](#1) performed a more sophisticated version 
 of this experiment: it employed advanced calibration techniques not used here
 and also varied the temperature. 
 
@@ -215,7 +214,7 @@ The [helpers/kz_calcs.py](helpers/kz_calcs.py) file provides the following
 functions related to Kibble-Zurek calculations:
 
 *   ``theoretical_kink_density()`` calculates the kink density predicted for 
-    the configured the coupling strength and annealing time.
+    the configured coupling strength and annealing time.
 
 *   ``kink_stats()`` calculates the kink density for the sample set returned 
     from the quantum computer.
@@ -225,7 +224,7 @@ You can find more information in the documentation and comments in those files.
 Article [[2]](#2) predicts a characteristic energy scale that is 20% smaller 
 than that of the 
 [published annealing schedule](https://docs.dwavesys.com/docs/latest/doc_physical_properties.html) 
-for quantum computer ``Advantage_system4.1`` used the Kibble-Zurek calculation
+for quantum computer ``Advantage_system4.1`` used by the Kibble-Zurek calculation
 in the ``theoretical_kink_density()`` function. A comparable discrepancy between 
 the published and spectral-fit schedule is found in [[1]](#1) (see section 
 "Extracting annealing schedules" in the supplementary material) for frustrated 
@@ -257,7 +256,7 @@ Coherent quantum annealing in a programmable 2,000 qubit Ising chain.
 Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
 
 <a name="2">[2]</a> King, A.D. et al.
-Computational supremacy in quantum simulation
+Computational supremacy in quantum simulation.
 https://arxiv.org/abs/2403.00910
 
 ## License
