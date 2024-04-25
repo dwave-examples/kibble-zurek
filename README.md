@@ -79,15 +79,14 @@ Consider two extreme cases:
     At the end of a sufficiently slow anneal, the system ends in one of its two 
     ground states: all spins up or all spins down.
 
-![1D Spin Ring Adiabatic](assets/1D_adiabatic.png)
-
+<img src='assets/1D_adiabatic.jpg' alt='1D Spin Ring Adiabatic' width='400'/>
 
 2.  **Instantaneous quench**.
 
     Each spin independently orients up or down (in an unbiased system, both 
     outcomes have equal probablility).
 
-![1D Spin Ring Instantaneous](assets/1D_instantaneous.png)
+<img src='assets/1D_instantaneous.jpg' alt='1D Spin Ring Instantaneous' width='400'/>
 
 In between these two extremes, for fast quenches, the system ends in a state 
 of alternating segments of up/down spins. The average length of these segments
@@ -95,7 +94,7 @@ increases with the quench/anneal time. For this example of a quantum phase
 transition (a 1D ring of spins), the Kibble-Zurek mechanism predicts that the 
 average length increases as a function of the square root of the anneal time.
 
-![1D Spin Ring Finite](assets/1D_finite.png)
+<img src='assets/1D_finite.jpg' alt='1D Spin Ring Finite' width='400'/>
 
 ## <a name="Installation"></a> Installation
 
