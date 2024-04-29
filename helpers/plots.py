@@ -123,16 +123,15 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
             'text': 'Normalized Fast-Anneal Fraction, s', 
             'standoff': 0,
         }, 
-        side='top', 
-        type='log', 
-        range=[-1, 0],  # Minimal s=0.1 seems reasonable 
+        side='top' if display != 'schedule' else 'bottom', 
+        type='log' if display != 'schedule' else 'linear', 
+        range=[-1, 0] if display != 'schedule' else [0, 1],  # Minimal s=0.1 for log seems reasonable 
     )
     
     y_axis2 = dict(
         title='Energy [Joule]',  
-        side='right', 
+        side='right' if display != 'schedule' else 'left', 
         type='linear', 
-        range=[0, np.max(B_joule)],
     )
 
     if display == 'kink_density':
@@ -173,7 +172,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
     )
 
     fig.update_layout(
-        legend=dict(x=0.1, y=0.1),  
+        legend=dict(x=0.7, y=0.9),  
         margin=dict(b=5,l=5,r=20,t=10)  
     )
 
