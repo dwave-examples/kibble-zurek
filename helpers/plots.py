@@ -44,8 +44,8 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         schedule = pd.read_csv('helpers/FALLBACK_SCHEDULE.csv')
 
     A_ghz = schedule['A(s) (GHz)']
-    B_ghz = schedule['B(s) (GHz)']         
-    C = schedule['C (normalized)']
+    B_ghz = schedule['B(s) (GHz)']    
+    s = schedule['s']     
 
     # Display in Joule
     A_joule = A_ghz/1.5092E24     
@@ -86,10 +86,10 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         opacity = 1
 
     energy_transverse = go.Scatter(
-        x=C, # to get time_range[1]*C where C=1 equals max(t_a); also for problem plot     
+        x=s,     
         y=A_joule, 
         mode='lines',
-        name='A(C(s))', 
+        name='A(s)', 
         xaxis=x_axis,
         yaxis=y_axis,
         line_color='blue',
@@ -97,10 +97,10 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
     )
 
     energy_problem = go.Scatter(
-        x=C, # see above comment     
+        x=s,      
         y=abs(coupling_strength) * B_joule, 
         mode='lines',
-        name='B(C(s))', 
+        name='B(s)', 
         xaxis=x_axis,
         yaxis=y_axis,
         line_color='red',
@@ -120,12 +120,12 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
     x_axis2 = dict(
         title={
-            'text': 'C(s)', 
+            'text': 'Normalized Fast-Anneal Fraction, s', 
             'standoff': 0,
         }, 
         side='top', 
         type='log', 
-        range=[-1, 0],  # Minimal C=0.1 seems reasonable 
+        range=[-1, 0],  # Minimal s=0.1 seems reasonable 
     )
     
     y_axis2 = dict(
