@@ -13,8 +13,7 @@
 #    limitations under the License.
 
 import dash_bootstrap_components as dbc 
-from dash.dcc import Checklist, Dropdown, Input, Link, RadioItems
-from dash_daq import Knob
+from dash.dcc import Checklist, Dropdown, Input, Link, RadioItems, Slider
 from dash import html
 
 __all__ = ['config_anneal_duration', 'config_kz_graph', 'config_spins', 
@@ -73,36 +72,30 @@ config_spins = RadioItems(
     inline=True,    # Currently requires above 'inline-block'
 )
 
+j_marks = {round(0.1*val, 1): {'label': f'{round(0.1*val, 1)}', 'style': {'color': 'blue'}} if 
+           round(0.1*val, 0) != 0.1*val else 
+           {'label': f'{round(0.1*val)}', 'style': {'color': 'blue'}} 
+           for val in range(-18, 0, 2)}
+j_marks.update({round(0.1*val, 1): {'label': f'{round(0.1*val, 1)}', 'style': {'color': 'red'}} if 
+                round(0.1*val, 0) != 0.1*val else 
+                {'label': f'{round(0.1*val)}', 'style': {'color': 'red'}}
+                for val in range(2, 10, 2)})
+# Dash Slider has some issue with int values having a zero after the decimal point
+j_marks[-2] = {'label': '-2', 'style': {'color': 'blue'}}
+del j_marks[-1.0]
+j_marks[-1] = {'label': '-1', 'style': {'color': 'blue'}}
+j_marks[1] = {'label': '1', 'style': {'color': 'red'}}
 config_coupling_strength = dbc.Row([
-    dbc.Col([
+    dbc.Col(
         html.Div([
-            Knob(
+            Slider(
                 id='coupling_strength',
-                color={'default': 'rgb(243, 120, 32)'},
-                size=50,
-                scale={'custom': {
-                        0: {'label': '-2', 'style': {'fontSize': 20}}, 
-                        2: {'label': '0', 'style': {'fontSize': 20}}, 
-                        3: {'label': '1', 'style': {'fontSize': 20}}
-                                }, 
-                        },
-                style={'marginBottom': 0},
-                min=0,  # This component doesn't like a negative to positive range
-                max=3,
-                value=-1.4+2
+                value=-1.4,
+                marks=j_marks,
+                step=None,
             )
         ]),
-    ],
-    width=4,
-    ),
-    dbc.Col([        
-        html.Div(
-            id='coupling_strength_display',
-            style={'width': '100%', 'color': 'white', 'marginLeft': 40, 'marginTop': 0}
-        ),
-    ],
-    width=8,
-    ),
+    ),    
 ])
 
 def config_qpu_selection(solvers):

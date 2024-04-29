@@ -145,15 +145,6 @@ def disable_buttons(job_submit_state, spins_options):
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
 @app.callback(
-    Output('coupling_strength_display', 'children'), 
-    Input('coupling_strength', 'value'))
-def update_j_output(J_offset):
-    """Shift from knob range to QPU J range."""
-
-    J = J_offset - 2        # See comment on Knob component      
-    return f'J={J:.1f}'
-
-@app.callback(
     Output('quench_schedule_filename', 'children'),
     Output('quench_schedule_filename', 'style'),
     Input('qpu_selection', 'value'),)
@@ -243,14 +234,12 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
     State('spins', 'value'),
     State('embeddings_cached', 'data'),
     State('sample_vs_theory', 'figure'),)
-def display_graphics_kink_density(kz_graph_display, J_offset, schedule_filename, \
+def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
     job_submit_state, job_id, ta_min, ta_max, ta, \
     spins, embeddings_cached, figure):
     """Generate graphics for kink density based on theory and QPU samples."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
-
-    J = J_offset - 2        # See comment on Knob component
 
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
         
@@ -283,12 +272,10 @@ def display_graphics_kink_density(kz_graph_display, J_offset, schedule_filename,
     State('job_id', 'children'),
     State('coupling_strength', 'value'),
     State('embeddings_cached', 'data'),)
-def display_graphics_spin_ring(spins, job_submit_state, job_id, J_offset, embeddings_cached):
+def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_cached):
     """Generate graphics for spin-ring display."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
-
-    J = J_offset - 2        # See comment on Knob component
    
     if trigger_id == 'job_submit_state': 
     
@@ -318,12 +305,10 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J_offset, embedd
     State('coupling_strength', 'value'),
     State('anneal_duration', 'value'),
     State('embeddings_cached', 'data'),)
-def submit_job(job_submit_time, qpu_name, spins, J_offset, ta_ns, embeddings_cached):
+def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
     """Submit job and provide job ID."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
-
-    J = J_offset - 2        # See comment on Knob component
 
     if trigger_id =='job_submit_time':
 
