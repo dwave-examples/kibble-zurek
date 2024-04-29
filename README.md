@@ -166,7 +166,7 @@ the operator gives 0.
 
 Define a *kink-density operator* as,
 
-![formula kink density](assets/formula_kink_density.png),
+![formula kink densityoperator](assets/formula_kink_density_operator.png),
 
 where L is the length of the chain of spins (the number of qubits coupled 
 together).
