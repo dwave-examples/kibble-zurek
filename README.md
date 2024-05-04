@@ -37,7 +37,7 @@ Some macroscopic phase transitions are familiar: a changing temperature will
 transition water (a liquid) to ice (a solid); it can also change the magnetic 
 properties of metal. 
 
-![Phase Transitions](assets/phase_transitions.png)
+<img src='assets/phase_transitions.png' alt='Phase Transitions' width='500'/>
 
 In both cases, the material transitions between **disorderly** and **orderly** 
 states: 
@@ -53,7 +53,7 @@ Kibble's original formulation explained the transition of the hot post-Big Bang
 universe from highly symmetric to its current state, with its non-uniform 
 distribution of galaxies etc.  
 
-![Universe](assets/universe.png)
+<img src='assets/universe.png' alt='Big bang to Current Universe' width='500'/>
 
 Zurek expanded the idea to condensed matter and quantum phase transitions.   
 
