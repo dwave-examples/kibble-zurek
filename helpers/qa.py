@@ -88,9 +88,7 @@ def get_job_status(client, job_id, job_submit_time):
 
             return status.status.value
         
-        else:
-
-            return None
+        return None
     
     except exceptions.ResourceNotFoundError:
 

@@ -83,10 +83,8 @@ def kink_stats(sampleset, J):
 
         return switches_per_sample, kink_density
     
-    else:
+    non_switches_per_sample = np.count_nonzero(sign_switches==0, 1)
+    kink_density = np.mean(non_switches_per_sample) / sampleset.record.sample.shape[1]
 
-        non_switches_per_sample = np.count_nonzero(sign_switches==0, 1)
-        kink_density = np.mean(non_switches_per_sample) / sampleset.record.sample.shape[1]
-    
-        return non_switches_per_sample, kink_density
+    return non_switches_per_sample, kink_density
     

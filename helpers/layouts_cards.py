@@ -113,14 +113,14 @@ of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
                     id='btn_simulate', 
                     color='primary', 
                     className='me-1',
-                    style={'marginTop':'5px'}
+                    style={'marginTop':'5px', 'width':'100%', "height": "60px"}
                 ),
                 dbc.Progress(
                     id='bar_job_status', 
                     value=0,
                     color='link', 
                     className='mb-3',
-                    style={'width': '60%'}
+                    style={'color': job_status_color, 'fontSize': 12, 'marginTop': '10px'}
                 ),
                 html.P([
                     'Status: ',
@@ -172,10 +172,11 @@ of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
         ),
     ], 
         body=True, 
-        color='dark'
+        color='dark',
+        style={'height': "100%", "minHeight": "50rem"},
     )
 
-graphic_header_style = {'color': 'rgb(243, 120, 32)', 'marginTop': '5px', 'backgroundColor': 'white'}
+graphic_header_style = {'color': 'rgb(243, 120, 32)', 'margin': '15px 0px 0px 15px', 'backgroundColor': 'white'}
 
 def graphs_card():
     return dbc.Card([
@@ -194,7 +195,7 @@ def graphs_card():
                 dcc.Graph(
                     id='spin_orientation', 
                     figure=go.Figure(),
-                    style={'height': '40vh'},
+                    style={'height': '40vh', "minHeight": "20rem"},
                 ),
             ], 
                 width=12,
@@ -220,7 +221,7 @@ def graphs_card():
                 dcc.Graph(
                     id='sample_vs_theory',
                     figure=go.Figure(),
-                    style={'height': '40vh'},
+                    style={'height': '40vh', "minHeight": "20rem"},
                     
                 )
             ], 
@@ -230,4 +231,5 @@ def graphs_card():
         ),
     ], 
         color='white',
+        style={'height': "100%", "minHeight": "50rem"},
     )
