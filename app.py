@@ -53,7 +53,7 @@ app.layout = dbc.Container([
             html.Img(
                 src='assets/dwave_logo.png', 
                 height='25px',
-                style={'textAlign': 'left'}
+                style={'textAlign': 'left', 'margin': '10px 0px 15px 0px'}
             )
         ],
             width=3,
@@ -71,11 +71,13 @@ app.layout = dbc.Container([
             message, target=target, id=f'tooltip_{target}', style = dict())
             for target, message in tool_tips.items()]
             ],
-            width=4,   
+            width=4,
+            style={'minWidth': "30rem"},
         ),
         dbc.Col(                    # Right: display area
             graphs_card(),
             width=8,
+            style={'minWidth': "60rem"},
         ),
     ]),
 ],
@@ -125,8 +127,7 @@ def disable_buttons(job_submit_state, spins_options):
     if trigger_id !='job_submit_state':
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
-    if any(job_submit_state == status for status in 
-           ['EMBEDDING', 'SUBMITTED', 'PENDING', 'IN_PROGRESS']):
+    if job_submit_state in ['EMBEDDING', 'SUBMITTED', 'PENDING', 'IN_PROGRESS']:
         
         for inx, _ in enumerate(spins_options): 
             
@@ -134,7 +135,7 @@ def disable_buttons(job_submit_state, spins_options):
         
         return  True, True, spins_options, True
 
-    elif any(job_submit_state == status for status in ['COMPLETED', 'CANCELLED', 'FAILED']):
+    elif job_submit_state in ['COMPLETED', 'CANCELLED', 'FAILED']:
 
         for inx, _ in enumerate(spins_options): 
             spins_options[inx]['disabled'] = False
