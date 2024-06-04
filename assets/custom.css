@@ -1,0 +1,8 @@
+body {
+    color: rgb(3, 184, 255);
+    background-color: #074c91;
+}
+
+.row {
+    flex-wrap: nowrap;
+}
