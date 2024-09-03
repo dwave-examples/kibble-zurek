@@ -258,7 +258,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
         Plotly figure of orientation for all spins in the ring.
     """
     
-    cone_size = num_spins/20    # Based on how it looks
+    cone_size = 0.5 # Based on how it looks
 
     z = np.linspace(0, 10, num_spins)
     x, y = z * np.cos(5 * z), z * np.sin(5 * z)
@@ -286,7 +286,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
         showscale=False,
         colorscale=[[0, 'red'], [1, 'red']],
         hoverinfo=None,
-        sizemode='absolute',
+        sizemode='raw',
         sizeref=cone_size
     )
 
@@ -301,7 +301,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
         showscale=False,
         colorscale=[[0, 'blue'], [1, 'blue']],
         hoverinfo=None,
-        sizemode='absolute',
+        sizemode='raw',
         sizeref=cone_size
     )
 
