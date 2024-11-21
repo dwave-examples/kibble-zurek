@@ -24,6 +24,7 @@ import dimod
 from dwave.cloud import Client
 from dwave.embedding import embed_bqm, is_valid_embedding
 from dwave.system import DWaveSampler
+from dwave.samplers import SimulatedAnnealingSampler
 
 from helpers.kz_calcs import *
 from helpers.layouts_cards import *
@@ -35,6 +36,7 @@ from helpers.tooltips import tool_tips
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Initialize: available QPUs, initial progress-bar status 
+
 try:
     client = Client.from_config(client='qpu')
     qpus = {qpu.name: qpu for qpu in client.get_solvers(fast_anneal_time_range__covers=[0.005, 0.1])}
@@ -45,6 +47,11 @@ except Exception:
     qpus = {}
     client = None
     init_job_status = 'NO SOLVER'
+if os.getenv('ZNE') == "YES":
+    qpus['simulated_annealing_solver'] = SimulatedAnnealingSampler() 
+    init_job_status = 'READY'
+    if not client:
+        client = 'dummy'
 
 # Dashboard-organization section
 app.layout = dbc.Container([
@@ -173,11 +180,19 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
     """Cache embeddings for the selected QPU."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
- 
+
     if trigger_id == 'qpu_selection':
 
+        if qpu_name == 'simulated_annealing_solver':
+            filename = [file for file in os.listdir('helpers') if 
+                            '.json' in file and 'emb_' in file][0]
+            with open(f'helpers/{filename}', 'r') as fp:
+                        embeddings_cached = json.load(fp)
+            embeddings_cached = json_to_dict(embeddings_cached)
+            return embeddings_cached, list()
+
         embeddings_cached = {}  # Wipe out previous QPU's embeddings
-          
+
         for filename in [file for file in os.listdir('helpers') if 
                          '.json' in file and 'emb_' in file]:
 
@@ -308,19 +323,25 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
 
         bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
-        embeddings_cached = json_to_dict(embeddings_cached)
-        embedding = embeddings_cached[spins]
+        if qpu_name == 'simulated_annealing_solver':
+            sampleset = qpus['simulated_annealing_solver'].sample(bqm)
+            return json.dumps(sampleset.to_serializable())
 
-        bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
+        else:
 
-        computation = solver.sample_bqm(
-            bqm=bqm_embedded,
-            fast_anneal=True,
-            annealing_time=0.001*ta_ns,     # SAPI anneal time units is microseconds
-            auto_scale=False, 
-            answer_mode='raw',              # Easier than accounting for num_occurrences
-            num_reads=100, 
-            label=f'Examples - Kibble-Zurek Simulation, submitted: {job_submit_time}',)   
+            embeddings_cached = json_to_dict(embeddings_cached)
+            embedding = embeddings_cached[spins]
+
+            bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
+
+            computation = solver.sample_bqm(
+                bqm=bqm_embedded,
+                fast_anneal=True,
+                annealing_time=0.001*ta_ns,     # SAPI anneal time units is microseconds
+                auto_scale=False, 
+                answer_mode='raw',              # Easier than accounting for num_occurrences
+                num_reads=100, 
+                label=f'Examples - Kibble-Zurek Simulation, submitted: {job_submit_time}',)   
 
         return computation.wait_id()
 
@@ -355,9 +376,11 @@ def simulate(dummy1, dummy2, job_id, job_submit_state, job_submit_time, \
 
     if trigger_id == 'btn_simulate':
 
-        if spins in cached_embedding_lengths:   
+        if spins in cached_embedding_lengths or qpu_name == 'simulated_annealing_solver':
 
             submit_time = datetime.datetime.now().strftime('%c')
+            if qpu_name == 'simulated_annealing_solver':    # Hack to fix switch from SA to QPU
+                submit_time = 'SA'
             job_submit_state = 'SUBMITTED'
             embedding = dash.no_update
 

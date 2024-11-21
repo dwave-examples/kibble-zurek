@@ -12,6 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import json 
+
 import dimod
 from dwave.cloud.api import exceptions, Problems
 from dwave.embedding import unembed_sampleset
@@ -77,22 +79,26 @@ def get_job_status(client, job_id, job_submit_time):
         Embedding, as a dict of format ``{spin: [qubit]}``.
     """
 
-    p = Problems.from_config(client.config)
+    if '"type": "SampleSet"' in job_id and job_submit_time == 'SA':
+        return 'COMPLETED'
 
-    try:
+    else:
+        p = Problems.from_config(client.config)
 
-        status = p.get_problem_status(job_id)
-        label_time = dict(status)['label'].split('submitted: ')[1]
+        try:
 
-        if label_time == job_submit_time:
+            status = p.get_problem_status(job_id)
+            label_time = dict(status)['label'].split('submitted: ')[1]
 
-            return status.status.value
+            if label_time == job_submit_time:
+
+                return status.status.value
+            
+            return None
         
-        return None
-    
-    except exceptions.ResourceNotFoundError:
+        except exceptions.ResourceNotFoundError:
 
-        return None
+            return None
 
 def get_samples(client, job_id, num_spins, J, embedding):
     """Retrieve an unembedded sample set for a given job ID. 
@@ -114,11 +120,15 @@ def get_samples(client, job_id, num_spins, J, embedding):
         Unembedded dimod sample set. 
     """
     
-    sampleset = client.retrieve_answer(job_id).sampleset
+    if '"type": "SampleSet"' in job_id:
+        return dimod.SampleSet.from_serializable(json.loads(job_id))
+
+    else:
+        sampleset = client.retrieve_answer(job_id).sampleset
             
-    bqm = create_bqm(num_spins=num_spins, coupling_strength=J)
-    
-    return  unembed_sampleset(sampleset, embedding, bqm)
+        bqm = create_bqm(num_spins=num_spins, coupling_strength=J)
+        
+        return  unembed_sampleset(sampleset, embedding, bqm)
 
 def json_to_dict(emb_json):
     """Retrieve an unembedded sampleset for a given job ID. 
