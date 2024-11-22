@@ -40,8 +40,7 @@ class MockKibbleZurekSampler(MockDWaveSampler):
             exact_solver_cutoff=exact_solver_cutoff,
         )
         self.sampler_type = 'mock'
-        self.mocked_parameters.add('annealing_time')
-
+        
     def sample(self, bqm, **kwargs):
 
         # Extract flux biases from kwargs (if provided)
