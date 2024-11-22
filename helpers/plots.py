@@ -135,7 +135,8 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
     )
 
     x_axis3 = dict(
-        title='<b>Coupling Strength<b>'
+        title='<b>Coupling Strength<b>',
+        type='log',
     )
     if display == 'kink_density':
 
@@ -162,6 +163,8 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         )
 
         fig_data = [predicted_plus, predicted_minus]
+
+
     else:   # Display both plots together
 
         x_axis2.update({'overlaying': 'x1'})
@@ -216,7 +219,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
     return fig
 
-def plot_kink_density(display, fig_dict, kink_density, anneal_time):
+def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
     """Add kink density from QPU samples to plot.
 
     Args:
@@ -240,6 +243,23 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time):
         fig_dict
     )
 
+    if display == 'coupling':
+
+        fig.add_trace(
+            go.Scatter(
+                x=[J], 
+                y=[kink_density], 
+                xaxis='x3',
+                yaxis='y1',
+                showlegend=False,
+                marker=dict(size=10, 
+                            color='black',
+                            symbol='x',
+                )
+            )
+        )
+        return fig
+    
     fig.add_trace(
         go.Scatter(
             x=[anneal_time], 
