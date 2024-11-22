@@ -41,8 +41,10 @@ import plotly.graph_objects as go
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# Initialize: available QPUs, initial progress-bar status 
+# global variable for a default J value
+J_baseline = -1.8
 
+# Initialize: available QPUs, initial progress-bar status 
 try:
     client = Client.from_config(client='qpu')
     qpus = {qpu.name: qpu for qpu in client.get_solvers(fast_anneal_time_range__covers=[0.005, 0.1])}
