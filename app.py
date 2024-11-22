@@ -24,6 +24,7 @@ import dimod
 from dwave.cloud import Client
 from dwave.embedding import embed_bqm, is_valid_embedding
 from dwave.system import DWaveSampler
+from MockKibbleZurekSampler import MockKibbleZurekSampler
 from dwave.samplers import SimulatedAnnealingSampler
 
 from helpers.kz_calcs import *
@@ -32,6 +33,9 @@ from helpers.layouts_components import *
 from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips
+
+import networkx as nx
+from minorminer.subgraph import find_subgraph
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -48,7 +52,7 @@ except Exception:
     client = None
     init_job_status = 'NO SOLVER'
 if os.getenv('ZNE') == "YES":
-    qpus['simulated_annealing_solver'] = SimulatedAnnealingSampler() 
+    qpus['mock_dwave_solver'] = MockKibbleZurekSampler(topology_type='pegasus', topology_shape=[16]) # Change sampler to mock
     init_job_status = 'READY'
     if not client:
         client = 'dummy'
@@ -175,21 +179,29 @@ def set_schedule(qpu_name):
     Output('embedding_is_cached', 'value'),
     Input('qpu_selection', 'value'),
     Input('embeddings_found', 'data'),
-    State('embeddings_cached', 'data'),)
-def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
+    State('embeddings_cached', 'data'),
+    State('spins', 'value'))
+def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     """Cache embeddings for the selected QPU."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
 
     if trigger_id == 'qpu_selection':
 
-        if qpu_name == 'simulated_annealing_solver':
-            filename = [file for file in os.listdir('helpers') if 
-                            '.json' in file and 'emb_' in file][0]
-            with open(f'helpers/{filename}', 'r') as fp:
-                        embeddings_cached = json.load(fp)
-            embeddings_cached = json_to_dict(embeddings_cached)
-            return embeddings_cached, list()
+        if qpu_name == 'mock_dwave_solver':
+            embeddings_cached = {}
+            L = spins
+            edges = [(i, (i + 1)%L) for i in range(L)]
+            emb = find_subgraph(target=qpus['mock_dwave_solver'].to_networkx_graph(), source=nx.from_edgelist(edges))
+            emb = {u: [v] for u, v in emb.items()}  # Wrap target nodes in lists
+            embeddings_cached[spins] = emb  # Store embedding in cache
+            return embeddings_cached, [spins]
+            # filename = [file for file in os.listdir('helpers') if 
+            #                 '.json' in file and 'emb_' in file][0]
+            # with open(f'helpers/{filename}', 'r') as fp:
+            #             embeddings_cached = json.load(fp)
+            # embeddings_cached = json_to_dict(embeddings_cached)
+            # return embeddings_cached, list()
 
         embeddings_cached = {}  # Wipe out previous QPU's embeddings
 
@@ -323,8 +335,16 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
 
         bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
-        if qpu_name == 'simulated_annealing_solver':
-            sampleset = qpus['simulated_annealing_solver'].sample(bqm)
+        if qpu_name == 'mock_dwave_solver':
+            embedding = embeddings_cached
+            emb = find_subgraph(
+                    target=qpus['mock_dwave_solver'].to_networkx_graph(), 
+                    source=dimod.to_networkx_graph(bqm))
+            emb = {u: [v] for u, v in emb.items()}
+            bqm_embedded = embed_bqm(bqm, emb, MockKibbleZurekSampler(topology_type='pegasus', topology_shape=[16]).adjacency)
+            # Calculate annealing_time in microseconds as per your setup
+            annealing_time = ta_ns / 1000  # ta_ns is in nanoseconds
+            sampleset = qpus['mock_dwave_solver'].sample(bqm_embedded, annealing_time=annealing_time)
             return json.dumps(sampleset.to_serializable())
 
         else:
@@ -376,10 +396,10 @@ def simulate(dummy1, dummy2, job_id, job_submit_state, job_submit_time, \
 
     if trigger_id == 'btn_simulate':
 
-        if spins in cached_embedding_lengths or qpu_name == 'simulated_annealing_solver':
+        if spins in cached_embedding_lengths or qpu_name == 'mock_dwave_solver':
 
             submit_time = datetime.datetime.now().strftime('%c')
-            if qpu_name == 'simulated_annealing_solver':    # Hack to fix switch from SA to QPU
+            if qpu_name == 'mock_dwave_solver':    # Hack to fix switch from SA to QPU
                 submit_time = 'SA'
             job_submit_state = 'SUBMITTED'
             embedding = dash.no_update
