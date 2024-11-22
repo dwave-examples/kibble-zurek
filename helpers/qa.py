@@ -120,15 +120,14 @@ def get_samples(client, job_id, num_spins, J, embedding):
         Unembedded dimod sample set. 
     """
     
-    if '"type": "SampleSet"' in job_id:
-        return dimod.SampleSet.from_serializable(json.loads(job_id))
+    bqm = create_bqm(num_spins=num_spins, coupling_strength=J)
 
+    if '"type": "SampleSet"' in job_id:  # See modifications to submit_job
+        sampleset = dimod.SampleSet.from_serializable(json.loads(job_id))
     else:
         sampleset = client.retrieve_answer(job_id).sampleset
-            
-        bqm = create_bqm(num_spins=num_spins, coupling_strength=J)
         
-        return  unembed_sampleset(sampleset, embedding, bqm)
+    return  unembed_sampleset(sampleset, embedding, bqm)
 
 def json_to_dict(emb_json):
     """Retrieve an unembedded sampleset for a given job ID. 
@@ -144,4 +143,3 @@ def json_to_dict(emb_json):
 
     return {int(key): {int(node): qubits for node, qubits in emb.items()} 
                 for key, emb in emb_json.items()}
-   
