@@ -42,28 +42,23 @@ class MockKibbleZurekSampler(MockDWaveSampler):
         self.sampler_type = 'mock'
         
     def sample(self, bqm, **kwargs):
+        _kwargs = kwargs.copy()  # We will modify arguments
+        _bqm = bqm.change_vartype('SPIN', inplace=False)  # We will modify the bqm
+        
+        # Extract annealing_time from kwargs (if provided)
+        annealing_time = _kwargs.pop('annealing_time', 20)  # 20us default.
+        _kwargs['num_sweeps'] = int(annealing_time * 1000)  # 1000 sweeps per microsecond
 
         # Extract flux biases from kwargs (if provided)
-        flux_biases = kwargs.get('flux_biases', {})
-        if flux_biases:
-            # Remove flux_biases from kwargs to avoid passing it to substitute_sampler
-            kwargs = kwargs.copy()
-            del kwargs['flux_biases']
-
-        annealing_time = kwargs.pop('annealing_time', None)
-        if annealing_time is not None:
-            num_sweeps = int(annealing_time * 1000)
-            kwargs['num_sweeps'] = num_sweeps
-
-        # Adjust the BQM to include flux biases
-        bqm_effective = bqm.change_vartype('SPIN', inplace=False)
-
+        # flux_biases = kwargs.pop('flux_biases', {})
         # flux_to_h_factor = fluxbias_to_h()
-        # for v in bqm_effective.variables:
-        #     bias = bqm_effective.get_linear(v)
-        #     bqm_effective.set_linear(v, bias + flux_to_h_factor * flux_biases[v])
+        # for v in _bqm.variables:
+        #     bias = _bqm.get_linear(v)
+        #     _bqm.set_linear(v, bias + flux_to_h_factor * flux_biases[v])
 
-        ss = super().sample(bqm=bqm_effective, **kwargs)
+        # TO DO: corrupt bqm with noise proportional to annealing_time
+        
+        ss = super().sample(bqm=_bqm, **kwargs)
 
         ss.change_vartype(bqm.vartype)
 
