@@ -247,7 +247,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
 @app.callback(
     Output('sample_vs_theory', 'figure'),
     Input('kz_graph_display', 'value'),
-    Input('coupling_strength', 'value'),
+    State('coupling_strength', 'value'), # previously input 
     Input('quench_schedule_filename', 'children'),
     Input('job_submit_state', 'children'),
     State('job_id', 'children'),
@@ -266,8 +266,8 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
 
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
         
-       
-        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J, schedule_filename)
+       # Use global J
+        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename)
 
         return fig
     
@@ -286,7 +286,8 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
         else:
             return dash.no_update
         
-    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J, schedule_filename)
+        # use global J value
+    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename)
     return fig
 
 @app.callback(
