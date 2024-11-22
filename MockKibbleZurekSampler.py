@@ -54,9 +54,6 @@ class MockKibbleZurekSampler(MockDWaveSampler):
         if annealing_time is not None:
             num_sweeps = int(annealing_time * 1000)
             kwargs['num_sweeps'] = num_sweeps
-        else:
-            # Default number of sweeps if annealing_time is not provided
-            kwargs['num_sweeps'] = kwargs.get('num_sweeps', 1000)
 
         # Adjust the BQM to include flux biases
         bqm_effective = bqm.change_vartype('SPIN', inplace=False)
