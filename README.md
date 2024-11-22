@@ -118,6 +118,17 @@ Your development environment should be configured to
 You can see information about supported IDEs and authorizing access to your 
 Leap account [here](https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html).  
 
+The default configuration uses `DWaveSampler` with specific models accessed through the Leap API. To run experiments using `MockDKibbleZurekSampler` locally, set the environment variable in your terminal before running the application.
+
+**Windows terminal**:
+```
+set ZNE=YES
+```
+**Unix terminal**:
+```
+export ZNE=YES
+```
+
 To run the demo:
 
 ```bash
