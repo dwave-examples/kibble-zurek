@@ -14,11 +14,11 @@
 
 import dash_bootstrap_components as dbc 
 from dash.dcc import Checklist, Dropdown, Input, Link, RadioItems, Slider
-from dash import html
+from dash import html, dcc
 
 __all__ = ['config_anneal_duration', 'config_kz_graph', 'config_spins', 
     'config_coupling_strength', 'config_qpu_selection', 'dbc_modal', 'embeddings',
-    'job_bar_display', 'ring_lengths', 'tooltips_activate', ]
+    'job_bar_display', 'ring_lengths', 'tooltips_activate']
 
 ring_lengths = [512, 1024, 2048]
 
@@ -49,7 +49,12 @@ config_kz_graph = RadioItems(
             'label': 'Schedule', 
             'value': 'schedule', 
             'disabled': False
-        }, 
+        },
+        {
+            'label': 'Coupling Strength',
+            'value': 'coupling',
+            'disabled': False
+        }
     ],
     value='both',
     inputStyle={'margin-right': '10px', 'margin-bottom': '5px'},
@@ -192,3 +197,4 @@ tooltips_activate  = RadioItems(
     labelStyle={'color': 'white', 'font-size': 12, 'display': 'inline-block', 'marginLeft': 20},
     inline=True,    # Currently requires above 'inline-block'
 )
+
