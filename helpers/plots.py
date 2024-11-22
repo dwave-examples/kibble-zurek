@@ -134,6 +134,9 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         type='linear', 
     )
 
+    x_axis3 = dict(
+        title='<b>Coupling Strength<b>'
+    )
     if display == 'kink_density':
 
         fig_layout = go.Layout(
@@ -151,7 +154,14 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         )
 
         fig_data = [energy_transverse, energy_problem]
+    elif display == 'coupling':
 
+        fig_layout = go.Layout(
+            xaxis=x_axis3,
+            yaxis=y_axis1,
+        )
+
+        fig_data = [predicted_plus, predicted_minus]
     else:   # Display both plots together
 
         x_axis2.update({'overlaying': 'x1'})

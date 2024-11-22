@@ -36,6 +36,8 @@ from helpers.tooltips import tool_tips
 
 import networkx as nx
 from minorminer.subgraph import find_subgraph
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -262,6 +264,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
 
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
         
+       
         fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J, schedule_filename)
 
         return fig
