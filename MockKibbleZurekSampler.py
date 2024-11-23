@@ -20,13 +20,12 @@ class MockKibbleZurekSampler(MockDWaveSampler):
         exact_solver_cutoff=0,
     ):
         if substitute_sampler is None:
-            self.substitute_sampler = SimulatedAnnealingSampler()
+            substitute_sampler = SimulatedAnnealingSampler()
         if substitute_kwargs is None:
-            self.substitute_kwargs = {'beta_range': [0.01, 100],
-                                      'beta_schedule_type': 'geometric',
-                                      'num_sweeps': 1,
-                                      'randomize_order': True,
-                                      'proposal_acceptance_criteria': 'Gibbs'}
+            substitute_kwargs = {'beta_range': [100, 100],  # Quench
+                                  'beta_schedule_type': 'geometric',
+                                  'randomize_order': True,
+                                  'proposal_acceptance_criteria': 'Gibbs'}
         super().__init__(
             nodelist=nodelist,
             edgelist=edgelist,
@@ -42,26 +41,26 @@ class MockKibbleZurekSampler(MockDWaveSampler):
         )
         self.sampler_type = 'mock'
         self.mocked_parameters.add('annealing_time')
+        self.mocked_parameters.add('num_sweeps')
         self.parameters.update({'num_sweeps': []})
         
     def sample(self, bqm, **kwargs):
+        # TO DO: corrupt bqm with noise proportional to annealing_time
         _bqm = bqm.change_vartype('SPIN', inplace=False)
-        
+
         # Extract annealing_time from kwargs (if provided)
         annealing_time = kwargs.pop('annealing_time', 20)  # 20us default.
-        num_sweeps = int(annealing_time * 1000//5)  # 1000 sweeps per microsecond
+        num_sweeps = int(annealing_time * 1000)  # 1000 sweeps per microsecond
         # Extract flux biases from kwargs (if provided)
         # flux_biases = kwargs.pop('flux_biases', {})
         # flux_to_h_factor = fluxbias_to_h()
         # for v in _bqm.variables:
         #     bias = _bqm.get_linear(v)
         #     _bqm.set_linear(v, bias + flux_to_h_factor * flux_biases[v])
-
-        # TO DO: corrupt bqm with noise proportional to annealing_time
         
         ss = super().sample(bqm=_bqm, num_sweeps=num_sweeps, **kwargs)
 
-        ss.change_vartype(bqm.vartype)
+        ss.change_vartype(bqm.vartype)  # Not required (but safe) this case ... 
 
         ss = SampleSet.from_samples_bqm(ss, bqm)
 
