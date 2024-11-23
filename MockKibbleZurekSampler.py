@@ -3,6 +3,7 @@ from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system.temperatures import fluxbias_to_h
 from dwave.system.testing import MockDWaveSampler
 
+
 class MockKibbleZurekSampler(MockDWaveSampler):
     def __init__(
         self,
@@ -19,13 +20,13 @@ class MockKibbleZurekSampler(MockDWaveSampler):
         exact_solver_cutoff=0,
     ):
         if substitute_sampler is None:
-            substitute_sampler = SimulatedAnnealingSampler()
+            self.substitute_sampler = SimulatedAnnealingSampler()
         if substitute_kwargs is None:
-            substitute_kwargs = {'beta_range': [0, 3],
-                                 'beta_schedule_type': 'linear',
-                                 'num_sweeps': 100,
-                                 'randomize_order': True,
-                                 'proposal_acceptance_criteria': 'Gibbs'}
+            self.substitute_kwargs = {'beta_range': [0.01, 100],
+                                      'beta_schedule_type': 'geometric',
+                                      'num_sweeps': 1,
+                                      'randomize_order': True,
+                                      'proposal_acceptance_criteria': 'Gibbs'}
         super().__init__(
             nodelist=nodelist,
             edgelist=edgelist,
@@ -40,15 +41,15 @@ class MockKibbleZurekSampler(MockDWaveSampler):
             exact_solver_cutoff=exact_solver_cutoff,
         )
         self.sampler_type = 'mock'
+        self.mocked_parameters.add('annealing_time')
+        self.parameters.update({'num_sweeps': []})
         
     def sample(self, bqm, **kwargs):
-        _kwargs = kwargs.copy()  # We will modify arguments
-        _bqm = bqm.change_vartype('SPIN', inplace=False)  # We will modify the bqm
+        _bqm = bqm.change_vartype('SPIN', inplace=False)
         
         # Extract annealing_time from kwargs (if provided)
-        annealing_time = _kwargs.pop('annealing_time', 20)  # 20us default.
-        _kwargs['num_sweeps'] = int(annealing_time * 1000)  # 1000 sweeps per microsecond
-
+        annealing_time = kwargs.pop('annealing_time', 20)  # 20us default.
+        num_sweeps = int(annealing_time * 1000//5)  # 1000 sweeps per microsecond
         # Extract flux biases from kwargs (if provided)
         # flux_biases = kwargs.pop('flux_biases', {})
         # flux_to_h_factor = fluxbias_to_h()
@@ -58,7 +59,7 @@ class MockKibbleZurekSampler(MockDWaveSampler):
 
         # TO DO: corrupt bqm with noise proportional to annealing_time
         
-        ss = super().sample(bqm=_bqm, **kwargs)
+        ss = super().sample(bqm=_bqm, num_sweeps=num_sweeps, **kwargs)
 
         ss.change_vartype(bqm.vartype)
 
