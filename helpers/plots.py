@@ -162,9 +162,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
             yaxis=y_axis1,
         )
 
-        fig_data = [predicted_plus, predicted_minus]
-
-
+        fig_data = []
     else:   # Display both plots together
 
         x_axis2.update({'overlaying': 'x1'})
@@ -189,7 +187,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         margin=dict(b=5,l=5,r=20,t=10)  
     )
 
-    if display != 'schedule':
+    if display != 'schedule' and display != 'coupling':
 
         fig.add_annotation(
             xref='x',
@@ -244,10 +242,11 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
     )
 
     if display == 'coupling':
-
+        
+        kappa = -1.8/J
         fig.add_trace(
             go.Scatter(
-                x=[J], 
+                x=[kappa], 
                 y=[kink_density], 
                 xaxis='x3',
                 yaxis='y1',
