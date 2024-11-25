@@ -135,7 +135,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
     )
 
     x_axis3 = dict(
-        title='<b>Coupling Strength<b>',
+        title='<b>lambda<b>',
         type='log',
     )
     if display == 'kink_density':

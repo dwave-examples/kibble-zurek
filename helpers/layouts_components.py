@@ -51,7 +51,7 @@ config_kz_graph = RadioItems(
             'disabled': False
         },
         {
-            'label': 'Coupling Strength',
+            'label': 'Noise level (lambda)',
             'value': 'coupling',
             'disabled': False
         }
