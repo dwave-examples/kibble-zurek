@@ -16,6 +16,7 @@ from dash import no_update
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from numpy.polynomial.polynomial import Polynomial
 
 from helpers.kz_calcs import theoretical_kink_density
 
@@ -135,7 +136,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
     )
 
     x_axis3 = dict(
-        title='<b>lambda<b>',
+        title='<b>kappa<b>',
         type='log',
     )
     if display == 'kink_density':
@@ -233,7 +234,6 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
     Returns:
         Updated Plotly figure with a marker at (anneal time, kink-density).
     """
-    
     if display == 'schedule':
         return no_update
     
