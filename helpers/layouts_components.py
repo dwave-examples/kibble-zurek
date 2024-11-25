@@ -98,6 +98,8 @@ config_coupling_strength = dbc.Row([
                 value=-1.4,
                 marks=j_marks,
                 step=None,
+                min=-1.8,
+                max=-0.6
             )
         ]),
     ),    
