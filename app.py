@@ -20,6 +20,10 @@ import json
 import numpy as np
 import os
 
+from dash import dcc
+from collections import defaultdict
+from numpy.polynomial.polynomial import Polynomial
+
 import dimod
 from dwave.cloud import Client
 from dwave.embedding import embed_bqm, is_valid_embedding
@@ -95,6 +99,8 @@ app.layout = dbc.Container([
             style={'minWidth': "60rem"},
         ),
     ]),
+    # store coupling data points 
+    dcc.Store(id='coupling_data', data={}),
 ],
     fluid=True,
 )
@@ -246,6 +252,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
 
 @app.callback(
     Output('sample_vs_theory', 'figure'),
+    Output('coupling_data', 'data'), # store data using dcc
     Input('kz_graph_display', 'value'),
     State('coupling_strength', 'value'), # previously input 
     Input('quench_schedule_filename', 'children'),
@@ -256,10 +263,12 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     State('anneal_duration', 'value'),
     State('spins', 'value'),
     State('embeddings_cached', 'data'),
-    State('sample_vs_theory', 'figure'),)
+    State('sample_vs_theory', 'figure'),
+    State('coupling_data', 'data'), # access previously stored data 
+    )
 def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
     job_submit_state, job_id, ta_min, ta_max, ta, \
-    spins, embeddings_cached, figure):
+    spins, embeddings_cached, figure, coupling_data):
     """Generate graphics for kink density based on theory and QPU samples."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
@@ -269,7 +278,11 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
        # Use global J
         fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename)
 
-        return fig
+        # reset couplingd ata storage if other plot are displayed
+        if kz_graph_display != 'coupling':
+            coupling_data = {}
+
+        return fig, coupling_data 
     
     if trigger_id == 'job_submit_state':
 
@@ -281,7 +294,54 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
             _, kink_density = kink_stats(sampleset_unembedded, J)
             
             fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J)
-            return fig
+
+            if kz_graph_display == 'coupling':
+                # Calculate kappa
+                kappa = -1.8 / J
+                
+                # Initialize the list for this anneal_time if not present
+                ta_str = str(ta)
+                if ta_str not in coupling_data:
+                    coupling_data[ta_str] = []
+                
+                # Append the new data point
+                coupling_data[ta_str].append({'kappa': kappa, 'kink_density': kink_density})
+                
+                # Check if more than two data points exist for this anneal_time
+                if len(coupling_data[ta_str]) > 2:
+                    # Perform a polynomial fit (e.g., linear)
+                    data_points = coupling_data[ta_str]
+                    x = np.array([point['kappa'] for point in data_points])
+                    y = np.array([point['kink_density'] for point in data_points])
+                    
+                    # Ensure there are enough unique x values for fitting
+                    if len(np.unique(x)) > 1:
+                        # Fit a 1st degree polynomial (linear fit)
+                        coeffs = Polynomial.fit(x, y, deg=1).convert().coef
+                        p = Polynomial(coeffs)
+                        
+                        # Generate fit curve points
+                        x_fit = np.linspace(min(x), max(x), 100)
+                        y_fit = p(x_fit)
+                        
+                        # Remove existing fitting curve traces to prevent duplication
+                        fig.data = [trace for trace in fig.data if trace.name != 'Fitting Curve']
+                        
+                        # Add the new fitting curve
+                        fit_trace = go.Scatter(
+                            x=x_fit,
+                            y=y_fit,
+                            mode='lines',
+                            name='Fitting Curve',
+                            line=dict(color='green', dash='dash'),
+                            showlegend=True,
+                            xaxis='x3',  
+                            yaxis='y1', 
+                        )
+                        
+                        fig.add_trace(fit_trace)
+
+            return fig, coupling_data
         
         else:
             return dash.no_update
