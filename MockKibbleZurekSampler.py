@@ -1,3 +1,5 @@
+import numpy as np
+
 from dimod import SampleSet
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system.temperatures import fluxbias_to_h
@@ -5,39 +7,37 @@ from dwave.system.testing import MockDWaveSampler
 
 
 class MockKibbleZurekSampler(MockDWaveSampler):
+    """ Perform a quench (fixed beta = 1/temperature) evolution.
+    
+    The MockSampler is configured to use standard Markov Chain Monte Carlo
+    with Gibbs acceptance criteria from a random initial condition.
+    Defects diffuse (power law 1/2) and eliminate, but are also
+    created by thermal excitations. We will seek to take a limit of high
+    coupling strength where thermal excitations are removed, leaving only the 
+    diffusion.
+    """
+    
     def __init__(
         self,
-        nodelist=None,
-        edgelist=None,
-        properties=None,
-        broken_nodes=None,
-        broken_edges=None,
         topology_type='pegasus',
         topology_shape=[16],
-        parameter_warnings=True,
-        substitute_sampler=None,
-        substitute_kwargs=None,
-        exact_solver_cutoff=0,
+        kink_density_limit_absJ1=0.04
     ):
-        if substitute_sampler is None:
-            substitute_sampler = SimulatedAnnealingSampler()
-        if substitute_kwargs is None:
-            substitute_kwargs = {'beta_range': [100, 100],  # Quench
-                                  'beta_schedule_type': 'geometric',
-                                  'randomize_order': True,
-                                  'proposal_acceptance_criteria': 'Gibbs'}
+        substitute_sampler = SimulatedAnnealingSampler()
+        # At equilibrium <xi xj> = (t^{L-1} + t)/(1 + t^L), t = -tanh(beta J)
+        # At large time (equilibrium) for long chains
+        # <x_i x_{i+1}> lessthansimilarto t, 
+        # At J=-1 we want a kink density to bottom out. Therefore:
+        beta = np.atanh(1 - 2*kink_density_limit_absJ1)
+        substitute_kwargs = {'beta_range': [beta, beta],  # Quench
+                             'randomize_order': True,
+                             'num_reads': 1000,
+                             'proposal_acceptance_criteria': 'Gibbs'}
         super().__init__(
-            nodelist=nodelist,
-            edgelist=edgelist,
-            properties=properties,
-            broken_nodes=broken_nodes,
-            broken_edges=broken_edges,
             topology_type=topology_type,
             topology_shape=topology_shape,
-            parameter_warnings=parameter_warnings,
             substitute_sampler=substitute_sampler,
             substitute_kwargs=substitute_kwargs,
-            exact_solver_cutoff=exact_solver_cutoff,
         )
         self.sampler_type = 'mock'
         self.mocked_parameters.add('annealing_time')
@@ -47,10 +47,10 @@ class MockKibbleZurekSampler(MockDWaveSampler):
     def sample(self, bqm, **kwargs):
         # TO DO: corrupt bqm with noise proportional to annealing_time
         _bqm = bqm.change_vartype('SPIN', inplace=False)
-
+        
         # Extract annealing_time from kwargs (if provided)
         annealing_time = kwargs.pop('annealing_time', 20)  # 20us default.
-        num_sweeps = int(annealing_time * 1000)  # 1000 sweeps per microsecond
+        num_sweeps = int(annealing_time * 3000)  # 3000 sweeps per microsecond
         # Extract flux biases from kwargs (if provided)
         # flux_biases = kwargs.pop('flux_biases', {})
         # flux_to_h_factor = fluxbias_to_h()
