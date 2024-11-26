@@ -22,7 +22,7 @@ from helpers.kz_calcs import theoretical_kink_density
 
 __all__ = ['plot_kink_densities_bg', 'plot_kink_density', 'plot_spin_orientation', ]
 
-def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name, fitting_curve=None):
+def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name):
     """
     Plot background of theoretical kink-density and QPU energy scales. 
 
@@ -164,16 +164,6 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         )
 
         fig_data = []
-        if fitting_curve:
-            fit_trace = go.Scatter(
-                x=fitting_curve['x'],
-                y=fitting_curve['y'],
-                mode='lines',
-                name='Fitting Curve',
-                line=dict(color='green', dash='dash'),
-                showlegend=True
-            )
-            fig_data.append(fit_trace)
     else:   # Display both plots together
 
         x_axis2.update({'overlaying': 'x1'})
@@ -228,7 +218,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
     return fig
 
-def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, fitting_curve=None):
+def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
     """Add kink density from QPU samples to plot.
 
     Args:
@@ -267,17 +257,6 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, fitting_c
                 )
             )
         )
-        if fitting_curve:
-            fit_trace = go.Scatter(
-                x=fitting_curve['x'],
-                y=fitting_curve['y'],
-                mode='lines',
-                name='Fitting Curve',
-                line=dict(color='green', dash='dash'),
-                showlegend=True
-            )
-            fig.add_trace(fit_trace)
-            
         return fig
     
     fig.add_trace(
