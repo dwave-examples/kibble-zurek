@@ -101,6 +101,9 @@ app.layout = dbc.Container([
     ]),
     # store coupling data points 
     dcc.Store(id='coupling_data', data={}),
+    dcc.Store(id='kink_density_data', data={}),
+    # store zero noise extrapolation
+    dcc.Store(id='zne_estimates', data={}),
 ],
     fluid=True,
 )
@@ -253,6 +256,8 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
 @app.callback(
     Output('sample_vs_theory', 'figure'),
     Output('coupling_data', 'data'), # store data using dcc
+    Output('zne_estimates', 'data'),  # update zne_estimates
+    Output('kink_density_data', 'data'),  # update kink density data
     Input('kz_graph_display', 'value'),
     State('coupling_strength', 'value'), # previously input 
     Input('quench_schedule_filename', 'children'),
@@ -265,10 +270,12 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     State('embeddings_cached', 'data'),
     State('sample_vs_theory', 'figure'),
     State('coupling_data', 'data'), # access previously stored data 
+    State('zne_estimates', 'data'),  # Access ZNE estimates
+    State('kink_density_data', 'data'),
     )
 def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
     job_submit_state, job_id, ta_min, ta_max, ta, \
-    spins, embeddings_cached, figure, coupling_data):
+    spins, embeddings_cached, figure, coupling_data, zne_estimates, kink_density_data):
     """Generate graphics for kink density based on theory and QPU samples."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
@@ -281,8 +288,9 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
         # reset couplingd ata storage if other plot are displayed
         if kz_graph_display != 'coupling':
             coupling_data = {}
+            zne_estimates = {}
 
-        return fig, coupling_data 
+        return fig, coupling_data, zne_estimates, kink_density_data
     
     if trigger_id == 'job_submit_state':
 
@@ -320,6 +328,9 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                         coeffs = Polynomial.fit(x, y, deg=1).convert().coef
                         p = Polynomial(coeffs)
                         
+                        a = p(0)  # p(kappa=0) = a + b*0 = a
+                        zne_estimates[ta_str] = a
+
                         # Generate fit curve points
                         x_fit = np.linspace(min(x), max(x), 100)
                         y_fit = p(x_fit)
@@ -341,14 +352,66 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                         
                         fig.add_trace(fit_trace)
 
-            return fig, coupling_data
+                        # Add the ZNE point at kappa=0
+                        zne_trace = go.Scatter(
+                            x=[0],
+                            y=[a],
+                            mode='markers',
+                            name='ZNE Estimate',
+                            marker=dict(size=12, color='purple', symbol='diamond'),
+                            showlegend=False,
+                            xaxis='x3',
+                            yaxis='y1',
+                        )
+                        
+                        fig.add_trace(zne_trace)
+
+            elif kz_graph_display == 'kink_density':
+                # Initialize the list for this anneal_time if not present
+                ta_str = str(ta)
+                if ta_str not in kink_density_data:
+                    kink_density_data[ta_str] = []
+                
+                # Append the new data point
+                kink_density_data[ta_str].append({'ta': ta, 'kink_density': kink_density})
+                ta_str = str(ta)
+                # Check if more than two data points exist for this anneal_time
+                if len(kink_density_data[ta_str]) > 2:
+                    # Perform a polynomial fit (e.g., linear)
+                    data_points = kink_density_data[ta_str]
+                    x = np.array([point['ta'] for point in data_points])
+                    y = np.array([point['kink_density'] for point in data_points])
+                    coeffs = Polynomial.fit(x, y, deg=1).convert().coef
+                    p = Polynomial(coeffs)
+                    
+                    a = p(0)  # p(kappa=0) = a + b*0 = a
+                    zne_estimates[ta_str] = a
+                    # Generate fit curve points
+                    x_fit = np.linspace(min(x), max(x), 100)
+                    y_fit = p(x_fit)
+                    
+                   # Add the ZNE point at kappa=0
+                    zne_trace = go.Scatter(
+                        x=[0],
+                        y=[a],
+                        mode='markers',
+                        name='ZNE Estimate',
+                        marker=dict(size=12, color='purple', symbol='diamond'),
+                        xaxis='x1',
+                        yaxis='y1',
+                        showlegend=False,
+                    )
+                    
+                    fig.add_trace(zne_trace)
+            
+            return fig, coupling_data, zne_estimates, kink_density_data
         
         else:
             return dash.no_update
         
         # use global J value
     fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename)
-    return fig
+    return fig, coupling_data, zne_estimates, kink_density
 
 @app.callback(
     Output('spin_orientation', 'figure'),
