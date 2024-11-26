@@ -110,11 +110,14 @@ config_coupling_strength = dbc.Row([
     ),    
 ])
 
-def config_qpu_selection(solvers):
+
+def config_qpu_selection(solvers, default='mock_dwave_solver'):
+    default = 'mock_dwave_solver' if 'mock_dwave_solver' in solvers else None
     return Dropdown(
         id='qpu_selection',
         options=[{'label': qpu_name, 'value': qpu_name} for qpu_name in solvers],
-        placeholder='Select a quantum computer'
+        placeholder='Select a quantum computer',
+        #value=default
     )
 
 job_bar_display = {

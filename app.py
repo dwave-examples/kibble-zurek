@@ -65,6 +65,7 @@ if os.getenv('ZNE') == "YES":
     if not client:
         client = 'dummy'
 
+
 # Dashboard-organization section
 app.layout = dbc.Container([
     dbc.Row([                       # Top: logo
