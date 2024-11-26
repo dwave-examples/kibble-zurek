@@ -263,7 +263,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     State('coupling_strength', 'value'), # previously input 
     Input('quench_schedule_filename', 'children'),
     Input('job_submit_state', 'children'),
-    State('job_id', 'children'),
+    Input('job_id', 'children'),
     # State('anneal_duration', 'min'),
     # State('anneal_duration', 'max'),
     State('anneal_duration', 'value'),
