@@ -263,8 +263,8 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Input('quench_schedule_filename', 'children'),
     Input('job_submit_state', 'children'),
     State('job_id', 'children'),
-    State('anneal_duration', 'min'),
-    State('anneal_duration', 'max'),
+    # State('anneal_duration', 'min'),
+    # State('anneal_duration', 'max'),
     State('anneal_duration', 'value'),
     State('spins', 'value'),
     State('embeddings_cached', 'data'),
@@ -274,7 +274,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     State('kink_density_data', 'data'),
     )
 def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
-    job_submit_state, job_id, ta_min, ta_max, ta, \
+    job_submit_state, job_id, ta, \
     spins, embeddings_cached, figure, coupling_data, zne_estimates, kink_density_data):
     """Generate graphics for kink density based on theory and QPU samples."""
 
@@ -282,6 +282,9 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
 
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
         
+        ta_min = 2
+        ta_max = 350
+
        # Use global J
         fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename)
 
