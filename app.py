@@ -341,6 +341,8 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                         
                         # Remove existing fitting curve traces to prevent duplication
                         fig.data = [trace for trace in fig.data if trace.name != 'Fitting Curve']
+                        # Remove existing ZNE Estimate traces to prevent duplication
+                        fig.data = [trace for trace in fig.data if trace.name != 'ZNE Estimate']
                         
                         # Add the new fitting curve
                         fit_trace = go.Scatter(
