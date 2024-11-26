@@ -22,13 +22,18 @@ __all__ = ['config_anneal_duration', 'config_kz_graph', 'config_spins',
 
 ring_lengths = [512, 1024, 2048]
 
-config_anneal_duration = Input(
+config_anneal_duration = dcc.Dropdown(
     id='anneal_duration',
-    type='number',
-    min=5,
-    max=100,
-    step=1,
-    value=7,
+    options=[
+        {'label': '5 µs', 'value': 5},
+        {'label': '10 µs', 'value': 10},
+        {'label': '20 µs', 'value': 20},
+        {'label': '40 µs', 'value': 40},
+        {'label': '80 µs', 'value': 80},
+        {'label': '160 µs', 'value': 160},
+        {'label': '320 µs', 'value': 320},
+    ],
+    value=5, # default value
     style={'max-width': '95%'}
 )
 
