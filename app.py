@@ -23,16 +23,13 @@ import os
 import warnings
 
 from dash import dcc
-from collections import defaultdict
 from numpy.polynomial.polynomial import Polynomial
-import plotly.express as px
 
 import dimod
 from dwave.cloud import Client
 from dwave.embedding import embed_bqm, is_valid_embedding
 from dwave.system import DWaveSampler
 from MockKibbleZurekSampler import MockKibbleZurekSampler
-from dwave.samplers import SimulatedAnnealingSampler
 
 from helpers.kz_calcs import *
 from helpers.layouts_cards import *
@@ -43,7 +40,6 @@ from helpers.tooltips import tool_tips
 
 import networkx as nx
 from minorminer.subgraph import find_subgraph
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
