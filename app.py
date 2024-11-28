@@ -302,7 +302,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
             sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
             _, kink_density = kink_stats(sampleset_unembedded, J)
             
-            fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J)
+            fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J, color_theme)
 
             if kz_graph_display == 'coupling':
                 # Calculate kappa

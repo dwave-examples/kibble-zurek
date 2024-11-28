@@ -278,7 +278,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
     return fig
 
-def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
+def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, color_theme):
     """Add kink density from QPU samples to plot.
 
     Args:
@@ -301,6 +301,9 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
         fig_dict
     )
 
+    ta_value = float(anneal_time)
+    color = color_theme[ta_value]
+    
     if display == 'coupling':
         
         kappa = -1.8/J
@@ -312,7 +315,7 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
                 yaxis='y1',
                 showlegend=False,
                 marker=dict(size=10, 
-                            color='black',
+                            color=color,
                             symbol='x',
                 )
             )
@@ -327,7 +330,7 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
             yaxis='y1',
             showlegend=False,
             marker=dict(size=10, 
-                        color='black',
+                        color=color,
                         symbol='x',
             )
         )
