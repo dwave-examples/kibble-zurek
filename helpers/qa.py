@@ -19,8 +19,12 @@ from dwave.cloud.api import exceptions, Problems
 from dwave.embedding import unembed_sampleset
 import minorminer
 
-__all__ = ['create_bqm', 'find_one_to_one_embedding', 'get_job_status', 'get_samples', 
+__all__ = ['lmbda', 'create_bqm', 'find_one_to_one_embedding', 'get_job_status', 'get_samples', 
            'json_to_dict', ]
+
+
+def lmbda(coupling_strength):
+    return -1.8/coupling_strength
 
 def create_bqm(num_spins=512, coupling_strength=-1.4):
     """
