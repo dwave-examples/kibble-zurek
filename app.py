@@ -18,7 +18,9 @@ from dash import html, Input, Output, State
 import datetime
 import json
 import numpy as np
+import scipy
 import os
+import warnings
 
 from dash import dcc
 from collections import defaultdict
@@ -267,6 +269,39 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
 
     return embeddings_cached, list(embeddings_cached.keys())
 
+def fitted_function(xdata, ydata, method=('polynomial', 1)):
+    """ """
+    if type(method) is tuple and method[0] == 'polynomial':
+        coeffs = Polynomial.fit(xdata, ydata, deg=method[1]).convert().coef
+        def y_func_x(x):
+            return np.polyval(coeffs, x)
+    elif method == 'pure_quadratic':
+        # y = a + b x**2
+        coeffs = Polynomial.fit(xdata**2, ydata, deg=1).convert().coef
+        def y_func_x(x):
+            return np.polyval(coeffs, x**2)
+    elif method == 'mixture_of_exponentials':
+        # The no thermal noise case has two sources.
+        # Kink-probability(T=0, t) ~ A t^{-1/2} ~ (1 - tanh(beta_eff))/2
+        # Kink-probability(T, Inf) ~ (1 - tanh(beta J))/2
+        # Kink-probability(T, t) ~ ? mixture of exponents
+        # Two independent sources: Const1 +  Const2 exp(Const3*x)
+        # This type of function is quite difficult to fit.
+        def mixture_of_exponentials(x, p_0, p_1, p_2):
+            return p_2/2*(1 + p_1*np.exp(np.exp(p_0)*x))
+        # Take p_1 = 1; p_2 = min(x); take max(y) occurs at max(x)
+        maxy = np.max(ydata)
+        maxx = np.max(xdata)
+        miny = np.min(ydata)
+        p0 = [np.log(np.log(2*maxy/miny - 1)/(maxx-1)), 1, miny]
+        p, _ = scipy.optimize.curve_fit(
+            f=mixture_of_exponentials, xdata=xdata, ydata=ydata, p0=p0)
+        def y_func_x(x):
+            return mixture_of_exponentials(x, *p)
+    else:
+        raise ValueError('Unknown method')
+    return y_func_x
+    
 @app.callback(
     Output('sample_vs_theory', 'figure'),
     Output('coupling_data', 'data'), # store data using dcc
@@ -325,6 +360,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                 # Check if more than two data points exist for this anneal_time
                 if len(coupling_data[ta_str]) > 2:
                     # Perform a polynomial fit (e.g., linear)
+
                     data_points = coupling_data[ta_str]
                     x = np.array([point['kappa'] for point in data_points])
                     y = np.array([point['kink_density'] for point in data_points])
@@ -332,15 +368,18 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                     # Ensure there are enough unique x values for fitting
                     if len(np.unique(x)) > 1:
                         # Fit a 1st degree polynomial (linear fit)
-                        coeffs = Polynomial.fit(x, y, deg=1).convert().coef
-                        p = Polynomial(coeffs)
-                        
-                        a = p(0)  # p(kappa=0) = a + b*0 = a
-                        zne_estimates[ta_str] = a
+                        if client is None or True:
+                            warnings.warn('WIP: Execute for mock_sampler only, somethings wrong...')
+                            y_func_x = fitted_function(x, y, method='mixture_of_exponentials')
+                        else:
+                            warnings.warn('WIP: Execute for QPU only')
+                            # Pure quadratic # y = a + b x^2
+                            y_func_x = fitted_function(x, y, method='pure_quadratic')
 
+                        zne_estimates[ta_str] = y_func_x(0)
                         # Generate fit curve points
                         x_fit = np.linspace(0, max(x), 100)
-                        y_fit = p(x_fit)
+                        y_fit = y_func_x(x_fit)
                         
                         # Remove existing fitting curve traces to prevent duplication
                         fig.data = [trace for trace in fig.data if trace.name != 'Fitting Curve']
