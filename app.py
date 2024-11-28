@@ -50,13 +50,13 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 J_baseline = -1.8
 
 color_theme = {
-    5.: '#1B5E20',  # Dark Green
-    10.: '#0D47A1',  # Dark Blue
-    20.: '#B71C1C',  # Dark Red
-    40.: '#004D40',  # Teal Green
-    80.: '#283593',  # Indigo
-    160.: '#880E4F',  # Maroon
-    320.: '#2E7D32',  # Forest Green
+    5: '#1F77B4',  # Dark Blue
+    10: '#FF7F0E',  # Dark Orange
+    20: '#2CA02C',  # Dark Green
+    40: '#D62728',  # Dark Red
+    80: '#9467BD',  # Dark Purple
+    160: '#8C564B',  # Brown
+    320: '#E377C2',  # Dark Pink
 }
 
 # Initialize: available QPUs, initial progress-bar status 
@@ -269,7 +269,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Input('job_id', 'children'),
     # State('anneal_duration', 'min'),
     # State('anneal_duration', 'max'),
-    State('anneal_duration', 'value'),
+    Input('anneal_duration', 'value'),
     State('spins', 'value'),
     State('embeddings_cached', 'data'),
     State('sample_vs_theory', 'figure'),
@@ -282,13 +282,11 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
     """Generate graphics for kink density based on theory and QPU samples."""
 
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    ta_min = 2
+    ta_max = 350
 
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
-        
-        ta_min = 2
-        ta_max = 350
 
-       # Use global J
         fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, color_theme)
 
         return fig, coupling_data, zne_estimates
@@ -355,6 +353,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                         )
                         
                         for ta_str, a in zne_estimates.items():
+                            #print(f'anneal itme: {ta_str}, a: {a}')
                             fig.add_trace(
                                 # Add the ZNE point at kappa=0
                                 go.Scatter(
@@ -375,7 +374,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
             return dash.no_update
         
         # use global J value
-    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename)
+    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, color_theme)
     return fig, coupling_data, zne_estimates
 
 @app.callback(
