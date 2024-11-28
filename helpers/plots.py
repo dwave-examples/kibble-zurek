@@ -16,13 +16,12 @@ from dash import no_update
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from numpy.polynomial.polynomial import Polynomial
 
 from helpers.kz_calcs import theoretical_kink_density
 
-__all__ = ['plot_kink_densities_bg', 'plot_kink_density', 'plot_spin_orientation', ]
-
-def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name):
+__all__ = ['plot_kink_densities_bg', 'plot_kink_density', 'plot_spin_orientation']
+    
+def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name, coupling_data, zne_estimates, color_theme):
     """
     Plot background of theoretical kink-density and QPU energy scales. 
 
@@ -137,16 +136,47 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
     x_axis3 = dict(
         title='<b>kappa<b>',
-        type='log',
     )
     if display == 'kink_density':
-
         fig_layout = go.Layout(
             xaxis=x_axis1,
             yaxis=y_axis1,
         )
+        fig_data = []
+        for ta_str, data_points in coupling_data.items():
+            ta_value = float(ta_str)
+            color = color_theme[ta_value]
+            for point in data_points:
+                kink_density = point['kink_density']
+                fig_data.append(
+                    go.Scatter(
+                    x=[ta_str],
+                    y=[kink_density],
+                    xaxis='x1',
+                    yaxis='y1',
+                    showlegend=False,
+                    marker=dict(size=10, color=color, symbol='x')
+                    
+                    )
+                )
+            # Plot ZNE estimates
+            for ta_str, a in zne_estimates.items():
+                fig_data.append(
+                    go.Scatter(
+                    x=[ta_str],
+                    y=[a],
+                    mode='markers',
+                    name='ZNE Estimate',
+                    marker=dict(size=12, color='purple', symbol='diamond'),
+                    showlegend=False,
+                    xaxis='x1',
+                    yaxis='y1',
+                    
+                    )
+                )
+                
 
-        fig_data = [predicted_plus, predicted_minus]
+        fig_data.extend([predicted_plus, predicted_minus]) 
 
     elif display == 'schedule':
 
@@ -164,6 +194,39 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         )
 
         fig_data = []
+
+        # Plot data points from 'coupling_data'
+        for ta_str, data_points in coupling_data.items():
+            ta_value = float(ta_str)
+            color = color_theme[ta_value]
+            for point in data_points:
+                kappa = point['kappa']
+                kink_density = point['kink_density']
+                fig_data.append(
+                    go.Scatter(
+                        x=[kappa],
+                        y=[kink_density],
+                        xaxis='x3',
+                        yaxis='y1',
+                        showlegend=False,
+                        marker=dict(size=10, color=color, symbol='x')
+                    )
+                )
+        # Plot ZNE estimates
+        for ta_str, a in zne_estimates.items():
+            fig_data.append(
+                go.Scatter(
+                    x=[0],
+                    y=[a],
+                    mode='markers',
+                    name='ZNE Estimate',
+                    marker=dict(size=12, color='purple', symbol='diamond'),
+                    showlegend=False,
+                    xaxis='x3',
+                    yaxis='y1',
+                )
+            )
+
     else:   # Display both plots together
 
         x_axis2.update({'overlaying': 'x1'})

@@ -23,6 +23,7 @@ import os
 from dash import dcc
 from collections import defaultdict
 from numpy.polynomial.polynomial import Polynomial
+import plotly.express as px
 
 import dimod
 from dwave.cloud import Client
@@ -47,6 +48,16 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # global variable for a default J value
 J_baseline = -1.8
+
+color_theme = {
+    5.: '#1B5E20',  # Dark Green
+    10.: '#0D47A1',  # Dark Blue
+    20.: '#B71C1C',  # Dark Red
+    40.: '#004D40',  # Teal Green
+    80.: '#283593',  # Indigo
+    160.: '#880E4F',  # Maroon
+    320.: '#2E7D32',  # Forest Green
+}
 
 # Initialize: available QPUs, initial progress-bar status 
 try:
@@ -284,73 +295,8 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
         ta_max = 350
 
        # Use global J
-        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename)
+        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, color_theme)
 
-        # reset couplingd ata storage if other plot are displayed
-        # if kz_graph_display != 'coupling':
-        #     coupling_data = {}
-        #     zne_estimates = {}    
-        # Add stored data points back to the figure
-        if kz_graph_display != 'schedule':
-            if kz_graph_display == 'coupling':
-                # Plot data points from 'coupling_data'
-                for ta_str, data_points in coupling_data.items():
-                    for point in data_points:
-                        kappa = point['kappa']
-                        kink_density = point['kink_density']
-                        fig.add_trace(
-                            go.Scatter(
-                                x=[kappa],
-                                y=[kink_density],
-                                xaxis='x3',
-                                yaxis='y1',
-                                showlegend=False,
-                                marker=dict(size=10, color='black', symbol='x')
-                            )
-                        )
-                # Plot ZNE estimates
-                for ta_str, a in zne_estimates.items():
-                    fig.add_trace(
-                        go.Scatter(
-                            x=[0],
-                            y=[a],
-                            mode='markers',
-                            name='ZNE Estimate',
-                            marker=dict(size=12, color='purple', symbol='diamond'),
-                            showlegend=False,
-                            xaxis='x3',
-                            yaxis='y1',
-                        )
-                    )
-            
-            if kz_graph_display == 'kink_density':
-                  for ta_str, data_points in coupling_data.items():
-                    for point in data_points:
-                        kink_density = point['kink_density']
-                        fig.add_trace(
-                            go.Scatter(
-                                x=[ta_str],
-                                y=[kink_density],
-                                xaxis='x1',
-                                yaxis='y1',
-                                showlegend=False,
-                                marker=dict(size=10, color='black', symbol='x')
-                            )
-                        )
-                    # Plot ZNE estimates
-                    for ta_str, a in zne_estimates.items():
-                        fig.add_trace(
-                            go.Scatter(
-                                x=[ta_str],
-                                y=[a],
-                                mode='markers',
-                                name='ZNE Estimate',
-                                marker=dict(size=12, color='purple', symbol='diamond'),
-                                showlegend=False,
-                                xaxis='x1',
-                                yaxis='y1',
-                            )
-                        )
         return fig, coupling_data, zne_estimates
     
     if trigger_id == 'job_submit_state':
@@ -392,7 +338,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                         zne_estimates[ta_str] = a
 
                         # Generate fit curve points
-                        x_fit = np.linspace(min(x), max(x), 100)
+                        x_fit = np.linspace(0, max(x), 100)
                         y_fit = p(x_fit)
                         
                         # Remove existing fitting curve traces to prevent duplication
