@@ -535,7 +535,7 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
             computation = solver.sample_bqm(
                 bqm=bqm_embedded,
                 fast_anneal=True,
-                annealing_time=0.001*ta_ns,     # SAPI anneal time units is microseconds
+                annealing_time=lmbda(J)*ta_ns,     # Changed to lambda calculations 
                 auto_scale=False, 
                 answer_mode='raw',              # Easier than accounting for num_occurrences
                 num_reads=100, 
