@@ -321,8 +321,11 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, ta_color_
         )
         return fig
     
+    if display == 'kink_density':
+        color = coupling_color_theme[J]
+    else:
+        color = 'black'
 
-    color = coupling_color_theme[J]
     fig.add_trace(
         go.Scatter(
             x=[anneal_time], 
