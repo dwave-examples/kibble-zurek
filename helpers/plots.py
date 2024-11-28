@@ -136,6 +136,8 @@ def plot_kink_densities_bg(display, time_range, J_base, schedule_name, coupling_
 
     x_axis3 = dict(
         title='<b>kappa<b>',
+        type='linear',
+        range=[-3, 1.5]
     )
     if display == 'kink_density':
         fig_layout = go.Layout(
