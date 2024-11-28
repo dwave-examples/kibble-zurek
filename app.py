@@ -312,7 +312,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                 ta_str = str(ta)
                 if ta_str not in coupling_data:
                     coupling_data[ta_str] = []
-                
+
                 # Append the new data point
                 coupling_data[ta_str].append({'kappa': kappa, 'kink_density': kink_density})
                 # Check if more than two data points exist for this anneal_time
@@ -341,33 +341,34 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                         fig.data = [trace for trace in fig.data if trace.name != 'ZNE Estimate']
                         
                         # Add the new fitting curve
-                        fit_trace = go.Scatter(
-                            x=x_fit,
-                            y=y_fit,
-                            mode='lines',
-                            name='Fitting Curve',
-                            line=dict(color='green', dash='dash'),
-                            showlegend=True,
-                            xaxis='x3',  
-                            yaxis='y1', 
+                        fig.add_trace(
+                                go.Scatter(
+                                x=x_fit,
+                                y=y_fit,
+                                mode='lines',
+                                name='Fitting Curve',
+                                line=dict(color='green', dash='dash'),
+                                showlegend=True,
+                                xaxis='x3',  
+                                yaxis='y1', 
+                            )
                         )
                         
-                        fig.add_trace(fit_trace)
+                        for ta_str, a in zne_estimates.items():
+                            fig.add_trace(
+                                # Add the ZNE point at kappa=0
+                                go.Scatter(
+                                    x=[0],
+                                    y=[a],
+                                    mode='markers',
+                                    name='ZNE Estimate',
+                                    marker=dict(size=12, color='purple', symbol='diamond'),
+                                    showlegend=False,
+                                    xaxis='x3',
+                                    yaxis='y1',
+                                )
+                            )
 
-                        # Add the ZNE point at kappa=0
-                        zne_trace = go.Scatter(
-                            x=[0],
-                            y=[a],
-                            mode='markers',
-                            name='ZNE Estimate',
-                            marker=dict(size=12, color='purple', symbol='diamond'),
-                            showlegend=False,
-                            xaxis='x3',
-                            yaxis='y1',
-                        )
-                        
-                        fig.add_trace(zne_trace)
-            
             return fig, coupling_data, zne_estimates
         
         else:
