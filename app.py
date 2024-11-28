@@ -49,7 +49,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 # global variable for a default J value
 J_baseline = -1.8
 
-color_theme = {
+ta_color_theme = {
     5: '#1F77B4',  # Dark Blue
     10: '#FF7F0E',  # Dark Orange
     20: '#2CA02C',  # Dark Green
@@ -57,6 +57,15 @@ color_theme = {
     80: '#9467BD',  # Dark Purple
     160: '#8C564B',  # Brown
     320: '#E377C2',  # Dark Pink
+}
+coupling_color_theme = {
+    -1.8: '#1F77B4',  # Dark Blue
+    -1.6: '#FF7F0E',  # Dark Orange
+    -1.4: '#E377C2',  # Dark Pink
+    -1.2: '#2CA02C',  # Dark Green
+    -1: '#D62728',  # Dark Red
+    -0.8: '#9467BD',  # Dark Purple
+    -0.6: '#8C564B',  # Brown
 }
 
 # Initialize: available QPUs, initial progress-bar status 
@@ -287,7 +296,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
 
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
 
-        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, color_theme)
+        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, ta_color_theme, coupling_color_theme)
 
         return fig, coupling_data, zne_estimates
     
@@ -300,7 +309,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
             sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
             _, kink_density = kink_stats(sampleset_unembedded, J)
             
-            fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J, color_theme)
+            fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J,  ta_color_theme, coupling_color_theme)
 
             if kz_graph_display == 'coupling':
                 # Calculate kappa
@@ -312,7 +321,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                     coupling_data[ta_str] = []
 
                 # Append the new data point
-                coupling_data[ta_str].append({'kappa': kappa, 'kink_density': kink_density})
+                coupling_data[ta_str].append({'kappa': kappa, 'kink_density': kink_density, 'coupling_strength':J})
                 # Check if more than two data points exist for this anneal_time
                 if len(coupling_data[ta_str]) > 2:
                     # Perform a polynomial fit (e.g., linear)
@@ -374,7 +383,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
             return dash.no_update
         
         # use global J value
-    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, color_theme)
+    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates,  ta_color_theme, coupling_color_theme)
     return fig, coupling_data, zne_estimates
 
 @app.callback(

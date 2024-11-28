@@ -21,7 +21,7 @@ from helpers.kz_calcs import theoretical_kink_density
 
 __all__ = ['plot_kink_densities_bg', 'plot_kink_density', 'plot_spin_orientation']
     
-def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name, coupling_data, zne_estimates, color_theme):
+def plot_kink_densities_bg(display, time_range, J_base, schedule_name, coupling_data, zne_estimates, ta_color_theme, coupling_color_theme):
     """
     Plot background of theoretical kink-density and QPU energy scales. 
 
@@ -51,7 +51,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
     A_joule = A_ghz/1.5092E24     
     B_joule = B_ghz/1.5092E24
 
-    n = theoretical_kink_density(time_range, coupling_strength, schedule, schedule_name)
+    n = theoretical_kink_density(time_range, J_base, schedule, schedule_name)
     
     predicted_plus = go.Scatter(
         x=np.asarray(time_range), 
@@ -98,7 +98,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
     energy_problem = go.Scatter(
         x=s,      
-        y=abs(coupling_strength) * B_joule, 
+        y=abs(J_base) * B_joule, 
         mode='lines',
         name='B(s)', 
         xaxis=x_axis,
@@ -144,9 +144,8 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         )
         fig_data = [predicted_plus, predicted_minus]
         for ta_str, data_points in coupling_data.items():
-            ta_value = float(ta_str)
-            color = color_theme[ta_value]
             for point in data_points:
+                color = coupling_color_theme[point['coupling_strength']]
                 kink_density = point['kink_density']
                 fig_data.append(
                     go.Scatter(
@@ -195,7 +194,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
         # Plot data points from 'coupling_data'
         for ta_str, data_points in coupling_data.items():
             ta_value = float(ta_str)
-            color = color_theme[ta_value]
+            color = ta_color_theme[ta_value]
             for point in data_points:
                 kappa = point['kappa']
                 kink_density = point['kink_density']
@@ -278,7 +277,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
 
     return fig
 
-def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, color_theme):
+def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, ta_color_theme, coupling_color_theme):
     """Add kink density from QPU samples to plot.
 
     Args:
@@ -302,10 +301,10 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, color_the
     )
 
     ta_value = float(anneal_time)
-    color = color_theme[ta_value]
+   
     
     if display == 'coupling':
-        
+        color = ta_color_theme[ta_value]
         kappa = -1.8/J
         fig.add_trace(
             go.Scatter(
@@ -322,6 +321,8 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, color_the
         )
         return fig
     
+
+    color = coupling_color_theme[J]
     fig.add_trace(
         go.Scatter(
             x=[anneal_time], 
