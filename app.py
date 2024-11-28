@@ -381,7 +381,7 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
 
             if kz_graph_display == 'coupling':
                 # Calculate kappa
-                kappa = -1.8 / J
+                kappa = lmbda(J)
                 
                 # Initialize the list for this anneal_time if not present
                 ta_str = str(ta)
