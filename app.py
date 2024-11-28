@@ -288,14 +288,21 @@ def fitted_function(xdata, ydata, method=('polynomial', 1)):
         # Two independent sources: Const1 +  Const2 exp(Const3*x)
         # This type of function is quite difficult to fit.
         def mixture_of_exponentials(x, p_0, p_1, p_2):
-            return p_2/2*(1 + p_1*np.exp(np.exp(p_0)*x))
+            # Strictly positive form.
+            # To do: Change to force saturation. Large x should go sigmoidally
+            # towards 0.5
+            return np.exp(p_2)/2*(1 + np.exp(p_1 + np.exp(p_0)*x))
         # Take p_1 = 1; p_2 = min(x); take max(y) occurs at max(x)
         maxy = np.max(ydata)
         maxx = np.max(xdata)
         miny = np.min(ydata)
-        p0 = [np.log(np.log(2*maxy/miny - 1)/(maxx-1)), 1, miny]
-        p, _ = scipy.optimize.curve_fit(
-            f=mixture_of_exponentials, xdata=xdata, ydata=ydata, p0=p0)
+        p0 = [np.log(np.log(2*maxy/miny - 1)/(maxx-1)), 0, np.log(miny)]
+        try:
+            p, _ = scipy.optimize.curve_fit(
+                f=mixture_of_exponentials, xdata=xdata, ydata=ydata, p0=p0)
+        except:
+            warnings.warn('Should modify to check exception is no solution')
+            p = p0
         def y_func_x(x):
             return mixture_of_exponentials(x, *p)
     else:
