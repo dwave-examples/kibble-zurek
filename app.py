@@ -379,17 +379,16 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
             
             fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J,  ta_color_theme, coupling_color_theme)
 
+            # Calculate kappa
+            kappa = lmbda(J)
+            # Initialize the list for this anneal_time if not present
+            ta_str = str(ta)
+            if ta_str not in coupling_data:
+                coupling_data[ta_str] = []
+            # Append the new data point
+            coupling_data[ta_str].append({'kappa': kappa, 'kink_density': kink_density, 'coupling_strength':J})
+            
             if kz_graph_display == 'coupling':
-                # Calculate kappa
-                kappa = lmbda(J)
-                
-                # Initialize the list for this anneal_time if not present
-                ta_str = str(ta)
-                if ta_str not in coupling_data:
-                    coupling_data[ta_str] = []
-
-                # Append the new data point
-                coupling_data[ta_str].append({'kappa': kappa, 'kink_density': kink_density, 'coupling_strength':J})
                 # Check if more than two data points exist for this anneal_time
                 if len(coupling_data[ta_str]) > 2:
                     # Perform a polynomial fit (e.g., linear)
