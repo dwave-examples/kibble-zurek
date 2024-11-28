@@ -161,6 +161,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
                 )
             # Plot ZNE estimates
             for ta_str, a in zne_estimates.items():
+                print(f'anneal time : {ta_str}, a: {a}')
                 fig_data.append(
                     go.Scatter(
                     x=[ta_str],
