@@ -20,7 +20,7 @@ from dwave.embedding import unembed_sampleset
 import minorminer
 
 __all__ = ['lmbda', 'create_bqm', 'find_one_to_one_embedding', 'get_job_status', 'get_samples', 
-           'json_to_dict', ]
+           'json_to_dict', 'fitted_function']
 
 
 def lmbda(coupling_strength):
@@ -147,3 +147,73 @@ def json_to_dict(emb_json):
 
     return {int(key): {int(node): qubits for node, qubits in emb.items()} 
                 for key, emb in emb_json.items()}
+
+def fitted_function(xdata, ydata, method=('polynomial', 1)):
+    """ """
+    if type(method) is tuple and method[0] == 'polynomial':
+        coeffs = Polynomial.fit(xdata, ydata, deg=method[1]).convert().coef
+        def y_func_x(x):
+            return np.polyval(coeffs, x)
+    elif method == 'pure_quadratic':
+        # y = a + b x**2
+        coeffs = Polynomial.fit(xdata**2, ydata, deg=1).convert().coef
+        def y_func_x(x):
+            return np.polyval(coeffs, x**2)
+    elif method == 'mixture_of_exponentials':
+        # The no thermal noise case has two sources.
+        # Kink-probability(T=0, t) ~ A t^{-1/2} ~ (1 - tanh(beta_eff))/2
+        # Kink-probability(T, Inf) ~ (1 - tanh(beta J))/2
+        # Kink-probability(T, t) ~ ? mixture of exponents
+        # Two independent sources: Const1 +  Const2 exp(Const3*x)
+        # This type of function is quite difficult to fit.
+        def mixture_of_exponentials(x, p_0, p_1, p_2):
+            # Strictly positive form.
+            # To do: Change to force saturation. Large x should go sigmoidally
+            # towards 0.5
+            return np.exp(p_2)/2*(1 + np.exp(p_1 + np.exp(p_0)*x))
+        # Take p_1 = 1; p_2 = min(x); take max(y) occurs at max(x)
+        maxy = np.max(ydata)
+        maxx = np.max(xdata)
+        miny = np.min(ydata)
+        p0 = [np.log(np.log(2*maxy/miny - 1)/(maxx-1)), 0, np.log(miny)]
+        try:
+            p, _ = scipy.optimize.curve_fit(
+                f=mixture_of_exponentials, xdata=xdata, ydata=ydata, p0=p0)
+        except:
+            warnings.warn('Should modify to check exception is no solution')
+            p = p0
+        def y_func_x(x):
+            return mixture_of_exponentials(x, *p)
+    elif method == 'sigmoidal_crossover':
+        # Kink-probability(T, t) ~ sigmoidal crossover. 
+        # Better? Requires atleast 4 points! Not tested.
+        # Sigmoidal cross-over between two positive limits.
+        # This type of function is quite difficult to fit.
+        def sigmoidal_crossover(x, p_0, p_1, p_2, p_3):
+            # Strictly positive form.
+            # To do: Change to force saturation. Large x should go sigmoidally
+            # towards 0.5
+            return np.exp(p_3)*(1 + np.exp(p_2)*np.tanh(np.exp(p_1)*(x - np.exp(p_0))))
+        # Small lp1 << lp0, and lp0= (maxx-minxx)/2; We can linearize:
+        # lp3*(1 + lp2( lp1 x - lp0)) = lp0*lp2*lp3 + lp1*lp2*lp3 x # WIP
+        # lp2 = lp3: equal parts constant and crossover
+        # x=0 -> miny therefore lp0*lp2*lp3 = miny
+        # x=maxx -> maxy therefore (maxy - miny)/maxx = lp1*lp2*lp3
+        maxy = np.max(ydata)
+        maxx = np.max(xdata)
+        miny = np.min(ydata)
+        lp0 = (maxx+1)/2
+        lp1 = lp0/10  # Should really choose rate 1/10 to satisfy final condition.
+        lp2lp3 = miny/lp0
+        p0 = (np.log(lp0), np.log(lp1), np.log(np.sqrt(lp2lp3)), np.log(np.sqrt(lp2lp3))) 
+        try:
+            p, _ = scipy.optimize.curve_fit(
+                f=sigmoidal_crossover, xdata=xdata, ydata=ydata, p0=p0)
+        except:
+            warnings.warn('Should modify to check exception is no solution')
+            p = p0
+        def y_func_x(x):
+            return sigmoidal_crossover(x, *p)
+    else:
+        raise ValueError('Unknown method')
+    return y_func_x
