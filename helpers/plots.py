@@ -142,7 +142,7 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
             xaxis=x_axis1,
             yaxis=y_axis1,
         )
-        fig_data = []
+        fig_data = [predicted_plus, predicted_minus]
         for ta_str, data_points in coupling_data.items():
             ta_value = float(ta_str)
             color = color_theme[ta_value]
@@ -174,9 +174,6 @@ def plot_kink_densities_bg(display, time_range, coupling_strength, schedule_name
                     
                     )
                 )
-                
-
-        fig_data.extend([predicted_plus, predicted_minus]) 
 
     elif display == 'schedule':
 
