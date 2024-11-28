@@ -220,12 +220,6 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
             emb = {u: [v] for u, v in emb.items()}  # Wrap target nodes in lists
             embeddings_cached[spins] = emb  # Store embedding in cache
             return embeddings_cached, [spins]
-            # filename = [file for file in os.listdir('helpers') if 
-            #                 '.json' in file and 'emb_' in file][0]
-            # with open(f'helpers/{filename}', 'r') as fp:
-            #             embeddings_cached = json.load(fp)
-            # embeddings_cached = json_to_dict(embeddings_cached)
-            # return embeddings_cached, list()
 
         embeddings_cached = {}  # Wipe out previous QPU's embeddings
 
@@ -373,40 +367,6 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                         )
                         
                         fig.add_trace(zne_trace)
-
-            # elif kz_graph_display == 'kink_density':
-            #     # Initialize the list for this anneal_time if not present
-            #     ta_str = str(ta)
-                
-
-            #     # Check if more than two data points exist for this anneal_time
-            #     if len(kink_density_data[ta_str]) > 2:
-            #         # Perform a polynomial fit (e.g., linear)
-            #         data_points = kink_density_data[ta_str]
-            #         x = np.array([point['ta'] for point in data_points])
-            #         y = np.array([point['kink_density'] for point in data_points])
-            #         coeffs = Polynomial.fit(x, y, deg=1).convert().coef
-            #         p = Polynomial(coeffs)
-                    
-            #         a = p(0)  # p(kappa=0) = a + b*0 = a
-            #         zne_estimates[ta_str] = a
-            #         # Generate fit curve points
-            #         x_fit = np.linspace(min(x), max(x), 100)
-            #         y_fit = p(x_fit)
-                    
-            #        # Add the ZNE point at kappa=0
-            #         zne_trace = go.Scatter(
-            #             x=[0],
-            #             y=[a],
-            #             mode='markers',
-            #             name='ZNE Estimate',
-            #             marker=dict(size=12, color='purple', symbol='diamond'),
-            #             xaxis='x1',
-            #             yaxis='y1',
-            #             showlegend=False,
-            #         )
-                    
-            #         fig.add_trace(zne_trace)
             
             return fig, coupling_data, zne_estimates
         
