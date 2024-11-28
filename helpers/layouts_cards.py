@@ -108,12 +108,30 @@ of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
                     'Simulation',
                     style=control_header_style
                 ),
-                 dbc.Button(
-                    'Run', 
-                    id='btn_simulate', 
-                    color='primary', 
-                    className='me-1',
-                    style={'marginTop':'5px'}
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            dbc.Button(
+                                'Run',
+                                id='btn_simulate',
+                                color='primary',
+                                className='me-2',  # Adds spacing between buttons
+                                style={'marginTop': '10px'}  # Adds some vertical spacing
+                            ),
+                            width='auto'
+                        ),
+                        dbc.Col(
+                            dbc.Button(
+                                'Reset',
+                                id='btn_reset',
+                                color='danger',
+                                style={'marginTop': '10px'}
+                            ),
+                            width='auto'
+                        ),
+                    ],
+                    justify='start',  # Aligns buttons to the left
+                    align='center'    # Vertically centers buttons
                 ),
                 dbc.Progress(
                     id='bar_job_status', 
