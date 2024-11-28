@@ -18,12 +18,10 @@ from dash import html, Input, Output, State
 import datetime
 import json
 import numpy as np
-import scipy
 import os
 import warnings
 
 from dash import dcc
-from numpy.polynomial.polynomial import Polynomial
 
 import dimod
 from dwave.cloud import Client
@@ -269,13 +267,12 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Output('sample_vs_theory', 'figure'),
     Output('coupling_data', 'data'), # store data using dcc
     Output('zne_estimates', 'data'),  # update zne_estimates
+    Input('qpu_selection', 'value'),
     Input('kz_graph_display', 'value'),
     State('coupling_strength', 'value'), # previously input 
     Input('quench_schedule_filename', 'children'),
     Input('job_submit_state', 'children'),
     Input('job_id', 'children'),
-    # State('anneal_duration', 'min'),
-    # State('anneal_duration', 'max'),
     Input('anneal_duration', 'value'),
     State('spins', 'value'),
     State('embeddings_cached', 'data'),
@@ -283,7 +280,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     State('coupling_data', 'data'), # access previously stored data 
     State('zne_estimates', 'data'),  # Access ZNE estimates
     )
-def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
+def display_graphics_kink_density(qpu_name, kz_graph_display, J, schedule_filename, \
     job_submit_state, job_id, ta, \
     spins, embeddings_cached, figure, coupling_data, zne_estimates):
     """Generate graphics for kink density based on theory and QPU samples."""
@@ -330,8 +327,8 @@ def display_graphics_kink_density(kz_graph_display, J, schedule_filename, \
                     # Ensure there are enough unique x values for fitting
                     if len(np.unique(x)) > 1:
                         # Fit a 1st degree polynomial (linear fit)
-                        if client is None or True:
-                            warnings.warn('WIP: Execute for mock_sampler only, somethings wrong...')
+                        if qpu_name == 'mock_dwave_solver':
+                            warnings.warn('WIP: Execute for mock_sampler only')
                             y_func_x = fitted_function(x, y, method='mixture_of_exponentials')
                         else:
                             warnings.warn('WIP: Execute for QPU only')
