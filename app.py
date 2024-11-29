@@ -218,6 +218,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     if trigger_id == 'qpu_selection':
 
         if qpu_name == 'mock_dwave_solver':
+            
             embeddings_cached = {}
             L = spins
             edges = [(i, (i + 1)%L) for i in range(L)]
@@ -230,7 +231,13 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
 
         for filename in [file for file in os.listdir('helpers') if 
                          '.json' in file and 'emb_' in file]:
-
+            
+            # if qpu_name == 'mock_dwave_solver' and 'Advantage_system6.4' in filename:
+            #     with open(f'helpers/{filename}', 'r') as fp:
+            #         embeddings_cached = json.load(fp)
+            #     print(filename)
+            #     embeddings_cached = json_to_dict(embeddings_cached)
+                
             if qpu_name.split('.')[0] in filename:
 
                 with open(f'helpers/{filename}', 'r') as fp:
@@ -268,6 +275,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Output('coupling_data', 'data'), # store data using dcc
     Output('zne_estimates', 'data'),  # update zne_estimates
     Input('qpu_selection', 'value'),
+    Input('btn_reset', 'n_clicks'),
     Input('kz_graph_display', 'value'),
     State('coupling_strength', 'value'), # previously input 
     Input('quench_schedule_filename', 'children'),
@@ -280,7 +288,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     State('coupling_data', 'data'), # access previously stored data 
     State('zne_estimates', 'data'),  # Access ZNE estimates
     )
-def display_graphics_kink_density(qpu_name, kz_graph_display, J, schedule_filename, \
+def display_graphics_kink_density(dummy, qpu_name, kz_graph_display, J, schedule_filename, \
     job_submit_state, job_id, ta, \
     spins, embeddings_cached, figure, coupling_data, zne_estimates):
     """Generate graphics for kink density based on theory and QPU samples."""
@@ -289,6 +297,14 @@ def display_graphics_kink_density(qpu_name, kz_graph_display, J, schedule_filena
     ta_min = 2
     ta_max = 350
 
+    if trigger_id == 'btn_reset':
+        coupling_data = {}
+        zne_estimates = {}
+
+        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, ta_color_theme, coupling_color_theme)
+
+        return fig, coupling_data, zne_estimates
+    
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
 
         fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, ta_color_theme, coupling_color_theme)
