@@ -13,18 +13,34 @@
 #    limitations under the License.
 
 import json 
+import numpy as np
+from numpy.polynomial.polynomial import Polynomial
+import scipy
 
 import dimod
 from dwave.cloud.api import exceptions, Problems
 from dwave.embedding import unembed_sampleset
 import minorminer
 
-__all__ = ['lmbda', 'create_bqm', 'find_one_to_one_embedding', 'get_job_status', 'get_samples', 
+__all__ = ['calc_lambda', 'calc_kappa', 'create_bqm', 'find_one_to_one_embedding', 'get_job_status', 'get_samples', 
            'json_to_dict', 'fitted_function']
 
 
-def lmbda(coupling_strength):
-    return -1.8/coupling_strength
+def calc_kappa(coupling_strength, J_baseline=-1.8):
+    """Downgraded energy scale, see paper.
+
+    """
+    return abs(J_baseline/coupling_strength)
+
+def calc_lambda(coupling_strength, J_baseline=-1.8):
+    """Time rescaling factor (relative to J_baseline)
+
+    lambda is approximately linear in kappa (see paper).
+    kappa used as a placeholder (update later)
+    """
+    kappa = calc_kappa(coupling_strength, J_baseline)
+    return kappa
+
 
 def create_bqm(num_spins=512, coupling_strength=-1.4):
     """
