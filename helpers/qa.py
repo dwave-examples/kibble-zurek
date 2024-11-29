@@ -169,12 +169,12 @@ def fitted_function(xdata, ydata, method=('polynomial', 1)):
     if type(method) is tuple and method[0] == 'polynomial':
         coeffs = Polynomial.fit(xdata, ydata, deg=method[1]).convert().coef
         def y_func_x(x):
-            return np.polyval(coeffs, x)
+            return np.polynomial.polynomial.polyval(x, coeffs)
     elif method == 'pure_quadratic':
         # y = a + b x**2
         coeffs = Polynomial.fit(xdata**2, ydata, deg=1).convert().coef
         def y_func_x(x):
-            return np.polyval(coeffs, x**2)
+            return np.polynomial.polynomial.polyval(x**2, coeffs)
     elif method == 'mixture_of_exponentials':
         # The no thermal noise case has two sources.
         # Kink-probability(T=0, t) ~ A t^{-1/2} ~ (1 - tanh(beta_eff))/2
