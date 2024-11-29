@@ -20,8 +20,27 @@ import plotly.graph_objects as go
 from helpers.kz_calcs import theoretical_kink_density
 
 __all__ = ['plot_kink_densities_bg', 'plot_kink_density', 'plot_spin_orientation']
-    
-def plot_kink_densities_bg(display, time_range, J_base, schedule_name, coupling_data, zne_estimates, ta_color_theme, coupling_color_theme):
+
+ta_color_theme = {
+    5: '#1F77B4',  # Dark Blue
+    10: '#FF7F0E',  # Dark Orange
+    20: '#2CA02C',  # Dark Green
+    40: '#D62728',  # Dark Red
+    80: '#9467BD',  # Dark Purple
+    160: '#8C564B',  # Brown
+    320: '#E377C2',  # Dark Pink
+}
+coupling_color_theme = {
+    -1.8: '#1F77B4',  # Dark Blue
+    -1.6: '#FF7F0E',  # Dark Orange
+    -1.4: '#E377C2',  # Dark Pink
+    -1.2: '#2CA02C',  # Dark Green
+    -1: '#D62728',  # Dark Red
+    -0.8: '#9467BD',  # Dark Purple
+    -0.6: '#8C564B',  # Brown
+}
+
+def plot_kink_densities_bg(display, time_range, J_base, schedule_name, coupling_data, zne_estimates):
     """
     Plot background of theoretical kink-density and QPU energy scales. 
 
@@ -308,7 +327,7 @@ def plot_kink_densities_bg(display, time_range, J_base, schedule_name, coupling_
 
     return fig
 
-def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, ta_color_theme, coupling_color_theme):
+def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
     """Add kink density from QPU samples to plot.
 
     Args:

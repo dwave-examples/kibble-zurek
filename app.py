@@ -45,25 +45,6 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 # global variable for a default J value
 J_baseline = -1.8
 
-ta_color_theme = {
-    5: '#1F77B4',  # Dark Blue
-    10: '#FF7F0E',  # Dark Orange
-    20: '#2CA02C',  # Dark Green
-    40: '#D62728',  # Dark Red
-    80: '#9467BD',  # Dark Purple
-    160: '#8C564B',  # Brown
-    320: '#E377C2',  # Dark Pink
-}
-coupling_color_theme = {
-    -1.8: '#1F77B4',  # Dark Blue
-    -1.6: '#FF7F0E',  # Dark Orange
-    -1.4: '#E377C2',  # Dark Pink
-    -1.2: '#2CA02C',  # Dark Green
-    -1: '#D62728',  # Dark Red
-    -0.8: '#9467BD',  # Dark Purple
-    -0.6: '#8C564B',  # Brown
-}
-
 # Initialize: available QPUs, initial progress-bar status 
 try:
     client = Client.from_config(client='qpu')
@@ -274,8 +255,8 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Output('sample_vs_theory', 'figure'),
     Output('coupling_data', 'data'), # store data using dcc
     Output('zne_estimates', 'data'),  # update zne_estimates
-    Input('qpu_selection', 'value'),
     Input('btn_reset', 'n_clicks'),
+    Input('qpu_selection', 'value'),
     Input('kz_graph_display', 'value'),
     State('coupling_strength', 'value'), # previously input 
     Input('quench_schedule_filename', 'children'),
@@ -301,13 +282,13 @@ def display_graphics_kink_density(dummy, qpu_name, kz_graph_display, J, schedule
         coupling_data = {}
         zne_estimates = {}
 
-        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, ta_color_theme, coupling_color_theme)
+        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates)
 
         return fig, coupling_data, zne_estimates
     
     if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
 
-        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, ta_color_theme, coupling_color_theme)
+        fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates)
 
         return fig, coupling_data, zne_estimates
     
@@ -320,7 +301,7 @@ def display_graphics_kink_density(dummy, qpu_name, kz_graph_display, J, schedule
             sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
             _, kink_density = kink_stats(sampleset_unembedded, J)
             
-            fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J,  ta_color_theme, coupling_color_theme)
+            fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J)
 
             # Calculate kappa
             kappa = lmbda(J)
@@ -397,7 +378,7 @@ def display_graphics_kink_density(dummy, qpu_name, kz_graph_display, J, schedule
             return dash.no_update
         
         # use global J value
-    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates,  ta_color_theme, coupling_color_theme)
+    fig = plot_kink_densities_bg(kz_graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates)
     return fig, coupling_data, zne_estimates
 
 @app.callback(
