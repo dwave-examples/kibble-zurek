@@ -201,6 +201,16 @@ Note that as you increase the anneal time, you move from the coherent regime
 and the returned samples are increasingly affected by thermalization, pushing 
 the kink density away from the predicted value.  
 
+## <a name="ZNE"></a> Zero-Noise Extrapolation
+
+Another feature showcased in this demo is the result achieved in Quantum Error Mitigation. In this paper, we demonstrate a practical implementation of zero-noise extrapolation as a method of quantum error mitigation specifically used for quantum annealing.
+
+
+For various coupling strengths at the same annealing time, we used a fitting function—quadratic for the Advantage solver and a multi-polynomial for the MockDwaveSampler—to calculate the theoretical zero-noise point. As the experiment runs for a longer time, we expect this zero-noise point to follow the same trend as the other data points.
+
+<img src='assets/ZNE_fig2.png' alt='Experimental results' width='400'/>
+
+
 ## <a name="Code"></a> Code
 
 Most the code related to configuring and analyzing the Ising problem is in the
