@@ -214,21 +214,37 @@ def plot_kink_densities_bg(display, time_range, J_base, schedule_name, coupling_
 
         # Plot data points from 'coupling_data'
         for ta_str, data_points in coupling_data.items():
+            label = False
             ta_value = float(ta_str)
             color = ta_color_theme[ta_value]
             for point in data_points:
                 kappa = point['kappa']
                 kink_density = point['kink_density']
-                fig_data.append(
-                    go.Scatter(
-                        x=[kappa],
-                        y=[kink_density],
-                        xaxis='x3',
-                        yaxis='y1',
-                        showlegend=False,
-                        marker=dict(size=10, color=color, symbol='x')
+                if not label:
+                    fig_data.append(
+                        go.Scatter(
+                            x=[kappa],
+                            y=[kink_density],
+                            xaxis='x3',
+                            yaxis='y1',
+                            mode='markers',
+                            name=f"Anneal Time: {ta_value} ns",
+                            showlegend=True,
+                            marker=dict(size=10, color=color, symbol='x')
+                        )
                     )
-                )
+                    label = True
+                else:
+                    fig_data.append(
+                        go.Scatter(
+                            x=[kappa],
+                            y=[kink_density],
+                            xaxis='x3',
+                            yaxis='y1',
+                            showlegend=False,
+                            marker=dict(size=10, color=color, symbol='x')
+                        )
+                    )
         # Plot ZNE estimates
         for ta_str, a in zne_estimates.items():
             fig_data.append(
