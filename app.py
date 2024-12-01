@@ -389,12 +389,14 @@ def display_graphics_kink_density(
                     # Ensure there are enough unique x values for fitting
                     if len(np.unique(x)) > 1:
                         # Fit a 1st degree polynomial (linear fit)
-                        if qpu_name == 'mock_dwave_solver':
+                        if qpu_name == "mock_dwave_solver":
                             # Fancy non-linear function
-                            y_func_x = fitted_function(x, y, method='mixture_of_exponentials')
+                            y_func_x = fitted_function(
+                                x, y, method="mixture_of_exponentials"
+                            )
                         else:
                             # Pure quadratic (see paper) # y = a + b x^2
-                            y_func_x = fitted_function(x, y, method='pure_quadratic')
+                            y_func_x = fitted_function(x, y, method="pure_quadratic")
 
                         zne_estimates[ta_str] = y_func_x(0)
                         # Generate fit curve points
@@ -548,11 +550,12 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
             computation = solver.sample_bqm(
                 bqm=bqm_embedded,
                 fast_anneal=True,
-                annealing_time=calc_lambda(J, J_baseline)*(ta_ns/1000),
-                auto_scale=False, 
-                answer_mode='raw',              # Easier than accounting for num_occurrences
-                num_reads=100, 
-                label=f'Examples - Kibble-Zurek Simulation, submitted: {job_submit_time}',)   
+                annealing_time=calc_lambda(J, J_baseline) * (ta_ns / 1000),
+                auto_scale=False,
+                answer_mode="raw",  # Easier than accounting for num_occurrences
+                num_reads=100,
+                label=f"Examples - Kibble-Zurek Simulation, submitted: {job_submit_time}",
+            )
 
         return computation.wait_id()
 

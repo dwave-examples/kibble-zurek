@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import json 
+import json
 import numpy as np
 from numpy.polynomial.polynomial import Polynomial
 import scipy
@@ -22,15 +22,22 @@ from dwave.cloud.api import exceptions, Problems
 from dwave.embedding import unembed_sampleset
 import minorminer
 
-__all__ = ['calc_lambda', 'calc_kappa', 'create_bqm', 'find_one_to_one_embedding', 'get_job_status', 'get_samples', 
-           'json_to_dict', 'fitted_function']
+__all__ = [
+    "calc_lambda",
+    "calc_kappa",
+    "create_bqm",
+    "find_one_to_one_embedding",
+    "get_job_status",
+    "get_samples",
+    "json_to_dict",
+    "fitted_function",
+]
 
 
 def calc_kappa(coupling_strength, J_baseline=-1.8):
-    """Downgraded energy scale, see paper.
+    """Downgraded energy scale, see paper."""
+    return abs(J_baseline / coupling_strength)
 
-    """
-    return abs(J_baseline/coupling_strength)
 
 def calc_lambda(coupling_strength, J_baseline=-1.8):
     """Time rescaling factor (relative to J_baseline)
@@ -178,13 +185,15 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
 
         def y_func_x(x):
             return np.polynomial.polynomial.polyval(x, coeffs)
-    elif method == 'pure_quadratic':
+
+    elif method == "pure_quadratic":
         # y = a + b x**2
         coeffs = Polynomial.fit(xdata**2, ydata, deg=1).convert().coef
 
         def y_func_x(x):
             return np.polynomial.polynomial.polyval(x**2, coeffs)
-    elif method == 'mixture_of_exponentials':
+
+    elif method == "mixture_of_exponentials":
         # The no thermal noise case has two sources.
         # Kink-probability(T=0, t) ~ A t^{-1/2} ~ (1 - tanh(beta_eff))/2
         # Kink-probability(T, Inf) ~ (1 - tanh(beta J))/2
