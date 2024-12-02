@@ -42,7 +42,7 @@ config_anneal_duration = dcc.Dropdown(
         {"label": "160 ns", "value": 160},
         {"label": "320 ns", "value": 320},
     ],
-    value=5,  # default value
+    value=80,  # default value
     style={"max-width": "95%"},
 )
 
@@ -112,7 +112,7 @@ config_coupling_strength = dbc.Row(
                 [
                     Slider(
                         id="coupling_strength",
-                        value=-1.4,
+                        value=-1.8,
                         marks=j_marks,
                         step=None,
                         min=-1.8,
