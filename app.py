@@ -220,30 +220,17 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
 
     if trigger_id == "qpu_selection":
 
-        # if qpu_name == "mock_dwave_solver":
-
-        #     embeddings_cached = {}
-        #     L = spins
-        #     edges = [(i, (i + 1) % L) for i in range(L)]
-        #     emb = find_subgraph(
-        #         target=qpus["mock_dwave_solver"].to_networkx_graph(),
-        #         source=nx.from_edgelist(edges),
-        #     )
-        #     emb = {u: [v] for u, v in emb.items()}  # Wrap target nodes in lists
-        #     embeddings_cached[spins] = emb  # Store embedding in cache
-        #     return embeddings_cached, [spins]
-
         embeddings_cached = {}  # Wipe out previous QPU's embeddings
 
         for filename in [
             file for file in os.listdir("helpers") if ".json" in file and "emb_" in file
         ]:
 
-            if qpu_name == 'mock_dwave_solver':
-                _qpu_name = 'Advantage_system6.4'
+            if qpu_name == "mock_dwave_solver":
+                _qpu_name = "Advantage_system6.4"
             else:
                 _qpu_name = qpu_name
-                
+
             # splitting seemed unsafe since the graph can change between versions
             if _qpu_name in filename:
 
@@ -516,39 +503,24 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
 
         bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
+        embeddings_cached = json_to_dict(embeddings_cached)
+        embedding = embeddings_cached[spins]
+        annealing_time = calc_lambda(J, J_baseline) * (ta_ns / 1000)
+
         if qpu_name == "mock_dwave_solver":
-            # Seems like we are calculating the embeddings on the fly in both cached_embedding and submit_job.
-            # If mock sampler is using Advantage embeddings, we should simply follow the code in the else block
-            embeddings_cached = json_to_dict(embeddings_cached)
-            embedding = embeddings_cached[spins]
-            # emb = find_subgraph(
-            #     target=qpus["mock_dwave_solver"].to_networkx_graph(),
-            #     source=dimod.to_networkx_graph(bqm),
-            # )
-            # emb = {u: [v] for u, v in emb.items()}
-            # bqm_embedded = embed_bqm(
-            #     bqm,
-            #     emb,
-            #     MockKibbleZurekSampler(
-            #         topology_type="pegasus", topology_shape=[16]
-            #     ).adjacency,
-            # )
+
             bqm_embedded = embed_bqm(
                 bqm,
                 embedding,
                 qpus["mock_dwave_solver"].adjacency,
             )
-            # Calculate annealing_time in microseconds as per your setup
-            annealing_time = ta_ns / 1000  # ta_ns is in nanoseconds
+
             sampleset = qpus["mock_dwave_solver"].sample(
                 bqm_embedded, annealing_time=annealing_time
             )
             return json.dumps(sampleset.to_serializable())
 
         else:
-
-            embeddings_cached = json_to_dict(embeddings_cached)
-            embedding = embeddings_cached[spins]
 
             bqm_embedded = embed_bqm(
                 bqm, embedding, DWaveSampler(solver=solver.name).adjacency
@@ -557,7 +529,7 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
             computation = solver.sample_bqm(
                 bqm=bqm_embedded,
                 fast_anneal=True,
-                annealing_time=calc_lambda(J, J_baseline) * (ta_ns / 1000),
+                annealing_time=annealing_time,
                 auto_scale=False,
                 answer_mode="raw",  # Easier than accounting for num_occurrences
                 num_reads=100,
@@ -751,7 +723,18 @@ def activate_tooltips(tooltips_show):
                 dict(display="none"),
             )
 
-    return dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict()
+    return (
+        dict(),
+        dict(),
+        dict(),
+        dict(),
+        dict(),
+        dict(),
+        dict(),
+        dict(),
+        dict(),
+        dict(),
+    )
 
 
 if __name__ == "__main__":
