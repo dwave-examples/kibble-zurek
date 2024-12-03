@@ -39,7 +39,7 @@ coupling_color_theme = {
     -0.8: "#9467BD",  # Dark Purple
     -0.6: "#8C564B",  # Brown
 }
-
+coupling_label = {-1.8: False,-1.6:False, -1.4:False,-1.2:False,-1:False, -0.8:False, -0.6:False}
 
 def plot_kink_densities_bg(
     display, time_range, J_base, schedule_name, coupling_data, zne_estimates
@@ -164,16 +164,16 @@ def plot_kink_densities_bg(
             xaxis=x_axis1,
             yaxis=y_axis1,
         )
-        coupling_label = {-1.8: False,-1.6:False, -1.4:False,-1.2:False,-1:False, -0.8:False, -0.6:False}
+        _coupling_label = {-1.8: False,-1.6:False, -1.4:False,-1.2:False,-1:False, -0.8:False, -0.6:False}
         fig_data = [predicted_plus, predicted_minus]
         for ta_str, data_points in coupling_data.items():
             for point in data_points:
                 _J = point["coupling_strength"]
                 color = coupling_color_theme[_J]
 
-                if not coupling_label[_J]:
+                if not _coupling_label[_J]:
                     legend = True
-                    coupling_label[_J] = True
+                    _coupling_label[_J] = True
                 else:
                     legend = False
 
@@ -393,6 +393,12 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
         color = coupling_color_theme[J]
     else:
         color = "black"
+    
+    if not coupling_label[J]:
+        legend = True
+        coupling_label[J] = True
+    else:
+        legend = False
 
     fig.add_trace(
         go.Scatter(
@@ -400,7 +406,9 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
             y=[kink_density],
             xaxis="x1",
             yaxis="y1",
-            showlegend=False,
+            mode="markers",
+            name=f"Coupling Strength: {J}",
+            showlegend=legend,
             marker=dict(
                 size=10,
                 color=color,
