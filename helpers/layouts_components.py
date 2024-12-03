@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 import dash_bootstrap_components as dbc
-from dash.dcc import Checklist, Dropdown, Input, Link, RadioItems, Slider
+from dash.dcc import Checklist, Dropdown, Link, RadioItems, Slider
 from dash import html, dcc
 
 __all__ = [
