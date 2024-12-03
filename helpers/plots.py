@@ -164,18 +164,30 @@ def plot_kink_densities_bg(
             xaxis=x_axis1,
             yaxis=y_axis1,
         )
+        coupling_label = {-1.8: False,-1.6:False, -1.4:False,-1.2:False,-1:False, -0.8:False, -0.6:False}
         fig_data = [predicted_plus, predicted_minus]
         for ta_str, data_points in coupling_data.items():
             for point in data_points:
-                color = coupling_color_theme[point["coupling_strength"]]
+                _J = point["coupling_strength"]
+                color = coupling_color_theme[_J]
+
+                if not coupling_label[_J]:
+                    legend = True
+                    coupling_label[_J] = True
+                else:
+                    legend = False
+
                 kink_density = point["kink_density"]
+
                 fig_data.append(
                     go.Scatter(
                         x=[ta_str],
                         y=[kink_density],
                         xaxis="x1",
                         yaxis="y1",
-                        showlegend=False,
+                        mode="markers",
+                        name=f"Coupling Strength: {_J}",
+                        showlegend=legend,
                         marker=dict(size=10, color=color, symbol="x"),
                     )
                 )
