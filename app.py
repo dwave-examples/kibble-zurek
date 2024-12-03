@@ -20,7 +20,6 @@ import datetime
 import json
 import numpy as np
 import os
-import warnings
 
 import dimod
 from dwave.cloud import Client
@@ -35,8 +34,6 @@ from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips
 
-import networkx as nx
-from minorminer.subgraph import find_subgraph
 import plotly.graph_objects as go
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
