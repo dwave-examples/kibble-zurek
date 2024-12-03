@@ -220,18 +220,18 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
 
     if trigger_id == "qpu_selection":
 
-        if qpu_name == "mock_dwave_solver":
+        # if qpu_name == "mock_dwave_solver":
 
-            embeddings_cached = {}
-            L = spins
-            edges = [(i, (i + 1) % L) for i in range(L)]
-            emb = find_subgraph(
-                target=qpus["mock_dwave_solver"].to_networkx_graph(),
-                source=nx.from_edgelist(edges),
-            )
-            emb = {u: [v] for u, v in emb.items()}  # Wrap target nodes in lists
-            embeddings_cached[spins] = emb  # Store embedding in cache
-            return embeddings_cached, [spins]
+        #     embeddings_cached = {}
+        #     L = spins
+        #     edges = [(i, (i + 1) % L) for i in range(L)]
+        #     emb = find_subgraph(
+        #         target=qpus["mock_dwave_solver"].to_networkx_graph(),
+        #         source=nx.from_edgelist(edges),
+        #     )
+        #     emb = {u: [v] for u, v in emb.items()}  # Wrap target nodes in lists
+        #     embeddings_cached[spins] = emb  # Store embedding in cache
+        #     return embeddings_cached, [spins]
 
         embeddings_cached = {}  # Wipe out previous QPU's embeddings
 
@@ -517,18 +517,26 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
         bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
         if qpu_name == "mock_dwave_solver":
-            embedding = embeddings_cached
-            emb = find_subgraph(
-                target=qpus["mock_dwave_solver"].to_networkx_graph(),
-                source=dimod.to_networkx_graph(bqm),
-            )
-            emb = {u: [v] for u, v in emb.items()}
+            # Seems like we are calculating the embeddings on the fly in both cached_embedding and submit_job.
+            # If mock sampler is using Advantage embeddings, we should simply follow the code in the else block
+            embeddings_cached = json_to_dict(embeddings_cached)
+            embedding = embeddings_cached[spins]
+            # emb = find_subgraph(
+            #     target=qpus["mock_dwave_solver"].to_networkx_graph(),
+            #     source=dimod.to_networkx_graph(bqm),
+            # )
+            # emb = {u: [v] for u, v in emb.items()}
+            # bqm_embedded = embed_bqm(
+            #     bqm,
+            #     emb,
+            #     MockKibbleZurekSampler(
+            #         topology_type="pegasus", topology_shape=[16]
+            #     ).adjacency,
+            # )
             bqm_embedded = embed_bqm(
                 bqm,
-                emb,
-                MockKibbleZurekSampler(
-                    topology_type="pegasus", topology_shape=[16]
-                ).adjacency,
+                embedding,
+                qpus["mock_dwave_solver"].adjacency,
             )
             # Calculate annealing_time in microseconds as per your setup
             annealing_time = ta_ns / 1000  # ta_ns is in nanoseconds
