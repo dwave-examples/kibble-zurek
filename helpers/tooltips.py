@@ -14,14 +14,14 @@
 
 tool_tips = {
     "anneal_duration":
-f"""Duration of the quantum anneal. Range of 5 to 100 nanoseconds.""",
+f"""Duration of the quantum anneal. Range of 5 to 320 nanoseconds.""",
     "kz_graph_display":
-f"""Plot selection: Kibble-Zurek prediction and/or QPU energies (either separate or combined).""",
+f"""Plot selection: Defects vs anneal duration or defects vs noise level""",
     "spins":
 f"""Number of spins in the 1D ring.""",
     "coupling_strength":
-f"""Coupling strength, J, between spins in the ring. 
-Range of -2 (ferromagnetic) to +1 (anti-ferromagnetic).
+f"""Coupling strength, J, between spins in the ferromagnetic ring. 
+Range of -1.8 to -0.6.
 """,
     "qpu_selection":
 f"""Selection from quantum computers available to your account/project token.""",
@@ -42,4 +42,6 @@ https://docs.dwavesys.com/docs/latest/doc_physical_properties.html
 """,
     "job_submit_state":
 f"""Status of the last submission to the quantum computer (or initial state).""",
+    "btn_reset":
+f"""Clear all existing data stored for the current run and reset all plots.""",
 }

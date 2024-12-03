@@ -239,13 +239,13 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
             file for file in os.listdir("helpers") if ".json" in file and "emb_" in file
         ]:
 
-            # if qpu_name == 'mock_dwave_solver' and 'Advantage_system6.4' in filename:
-            #     with open(f'helpers/{filename}', 'r') as fp:
-            #         embeddings_cached = json.load(fp)
-            #     print(filename)
-            #     embeddings_cached = json_to_dict(embeddings_cached)
-
-            if qpu_name.split(".")[0] in filename:
+            if qpu_name == 'mock_dwave_solver':
+                _qpu_name = 'Advantage_system6.4'
+            else:
+                _qpu_name = qpu_name
+                
+            # splitting seemed unsafe since the graph can change between versions
+            if _qpu_name in filename:
 
                 with open(f"helpers/{filename}", "r") as fp:
                     embeddings_cached = json.load(fp)
@@ -258,13 +258,12 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
                     source_graph = dimod.to_networkx_graph(
                         create_bqm(num_spins=length)
                     ).edges
-                    target_graph = qpus[qpu_name].edges
+                    target_graph = qpus[_qpu_name].edges
                     emb = embeddings_cached[length]
 
                     if not is_valid_embedding(emb, source_graph, target_graph):
 
                         del embeddings_cached[length]
-
     if trigger_id == "embeddings_found":
 
         if not isinstance(
@@ -744,7 +743,7 @@ def activate_tooltips(tooltips_show):
                 dict(display="none"),
             )
 
-    return dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict()
+    return dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict()
 
 
 if __name__ == "__main__":
