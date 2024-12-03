@@ -53,14 +53,13 @@ def control_card(solvers={}, init_job_status="READY"):
                     dbc.Col(
                         [
                             html.H4(
-                                "Coherent Annealing: KZ Simulation",
+                                "Coherent Annealing: Zero-Noise Extrapolation",
                                 className="card-title",
                                 style={"color": "rgb(243, 120, 32)"},
                             ),
                             html.P(
                                 """
-Use a quantum computer to simulate the formation of topological defects in a 1D ring 
-of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
+Simulate zero-temperature and zero-time extrapolations on a quantum computer, leveraging the Kibble-Zurek mechanism.
 """,
                                 style={"color": "white", "fontSize": 14},
                             ),
