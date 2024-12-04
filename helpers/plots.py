@@ -137,9 +137,13 @@ def plot_kink_densities_bg(
         range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],
     )
 
+    y_min = (0.9 * n).min()
+    y_max = (1.1 * n).max()
+
     y_axis1 = dict(
         title="<b>Kink Density<b>",
         type="log",
+        range=[np.log10(y_min), np.log10(y_max)],
     )
 
     x_axis2 = dict(
