@@ -41,6 +41,8 @@ config_anneal_duration = dcc.Dropdown(
         {"label": "80 ns", "value": 80},
         {"label": "160 ns", "value": 160},
         {"label": "320 ns", "value": 320},
+        {"label": "640 ns", "value": 640},
+        {"label": "1280 ns", "value": 1280},
     ],
     value=80,  # default value
     style={"max-width": "95%"},

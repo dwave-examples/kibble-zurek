@@ -29,6 +29,8 @@ ta_color_theme = {
     80: "#9467BD",  # Dark Purple
     160: "#8C564B",  # Brown
     320: "#E377C2",  # Dark Pink
+    640: "#17BECF",  # Teal
+    1280: "#BCBD22",  # Olive Green
 }
 coupling_color_theme = {
     -1.8: "#1F77B4",  # Dark Blue
