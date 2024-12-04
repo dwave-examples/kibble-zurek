@@ -52,9 +52,17 @@ config_kz_graph = RadioItems(
     id="kz_graph_display",
     options=[
         # {"label": "Both", "value": "both", "disabled": False},
-        {"label": "Kink density vs Anneal time", "value": "kink_density", "disabled": False},
+        {
+            "label": "Kink density vs Anneal time",
+            "value": "kink_density",
+            "disabled": False,
+        },
         # {"label": "Schedule", "value": "schedule", "disabled": False},
-        {"label": "Kink density vs Noise level", "value": "coupling", "disabled": False},
+        {
+            "label": "Kink density vs Noise level",
+            "value": "coupling",
+            "disabled": False,
+        },
     ],
     value="coupling",
     inputStyle={"margin-right": "10px", "margin-bottom": "5px"},

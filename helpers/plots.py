@@ -41,7 +41,16 @@ coupling_color_theme = {
     -0.8: "#9467BD",  # Dark Purple
     -0.6: "#8C564B",  # Brown
 }
-coupling_label = {-1.8: False,-1.6:False, -1.4:False,-1.2:False,-1:False, -0.8:False, -0.6:False}
+coupling_label = {
+    -1.8: False,
+    -1.6: False,
+    -1.4: False,
+    -1.2: False,
+    -1: False,
+    -0.8: False,
+    -0.6: False,
+}
+
 
 def plot_kink_densities_bg(
     display, time_range, J_base, schedule_name, coupling_data, zne_estimates
@@ -170,7 +179,15 @@ def plot_kink_densities_bg(
             xaxis=x_axis1,
             yaxis=y_axis1,
         )
-        _coupling_label = {-1.8: False,-1.6:False, -1.4:False,-1.2:False,-1:False, -0.8:False, -0.6:False}
+        _coupling_label = {
+            -1.8: False,
+            -1.6: False,
+            -1.4: False,
+            -1.2: False,
+            -1: False,
+            -0.8: False,
+            -0.6: False,
+        }
         fig_data = [predicted_plus, predicted_minus]
         for ta_str, data_points in coupling_data.items():
             for point in data_points:
@@ -403,7 +420,7 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
         color = coupling_color_theme[J]
     else:
         color = "black"
-    
+
     if not coupling_label[J]:
         legend = True
         coupling_label[J] = True
