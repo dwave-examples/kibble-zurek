@@ -363,73 +363,9 @@ def display_graphics_kink_density(
             coupling_data[ta_str].append(
                 {"kappa": kappa, "kink_density": kink_density, "coupling_strength": J}
             )
-
-            if kz_graph_display == "coupling":
-                # Check if more than two data points exist for this anneal_time
-                if len(coupling_data[ta_str]) > 2:
-                    # Perform a polynomial fit (e.g., linear)
-
-                    data_points = coupling_data[ta_str]
-                    x = np.array([point["kappa"] for point in data_points])
-                    y = np.array([point["kink_density"] for point in data_points])
-
-                    # Ensure there are enough unique x values for fitting
-                    if len(np.unique(x)) > 1:
-                        # Fit a 1st degree polynomial (linear fit)
-                        if qpu_name == "mock_dwave_solver":
-                            # Fancy non-linear function
-                            y_func_x = fitted_function(
-                                x, y, method="mixture_of_exponentials"
-                            )
-                        else:
-                            # Pure quadratic (see paper) # y = a + b x^2
-                            y_func_x = fitted_function(x, y, method="pure_quadratic")
-
-                        zne_estimates[ta_str] = y_func_x(0)
-                        # Generate fit curve points
-                        x_fit = np.linspace(0, max(x), 100)
-                        y_fit = y_func_x(x_fit)
-
-                        # Remove existing fitting curve traces to prevent duplication
-                        fig.data = [
-                            trace for trace in fig.data if trace.name != "Fitting Curve"
-                        ]
-                        # Remove existing ZNE Estimate traces to prevent duplication
-                        fig.data = [
-                            trace for trace in fig.data if trace.name != "ZNE Estimate"
-                        ]
-
-                        # Add the new fitting curve
-                        fig.add_trace(
-                            go.Scatter(
-                                x=x_fit,
-                                y=y_fit,
-                                mode="lines",
-                                name="Fitting Curve",
-                                line=dict(color="green", dash="dash"),
-                                showlegend=True,
-                                xaxis="x3",
-                                yaxis="y1",
-                            )
-                        )
-
-                        for ta_str, a in zne_estimates.items():
-                            # print(f'anneal itme: {ta_str}, a: {a}')
-                            fig.add_trace(
-                                # Add the ZNE point at kappa=0
-                                go.Scatter(
-                                    x=[0],
-                                    y=[a],
-                                    mode="markers",
-                                    name="ZNE Estimate",
-                                    marker=dict(
-                                        size=12, color="purple", symbol="diamond"
-                                    ),
-                                    showlegend=False,
-                                    xaxis="x3",
-                                    yaxis="y1",
-                                )
-                            )
+               
+            plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str)
+                        
 
             return fig, coupling_data, zne_estimates
 
@@ -713,6 +649,7 @@ def activate_tooltips(tooltips_show):
     if trigger_id == "tooltips_show":
         if tooltips_show == "off":
             return (
+                dict(display="none"),
                 dict(display="none"),
                 dict(display="none"),
                 dict(display="none"),
