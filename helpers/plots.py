@@ -573,17 +573,19 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_d
 
             # Remove existing fitting curve traces to prevent duplication
             fig.data = [
-                trace for trace in fig.data if trace.name != "Fitting Curve"
+                trace for trace in fig.data
+                if not (trace.name == "Fitting Curve" and trace.legendgroup == f"ta_{ta_str}")
             ]
             # Remove existing ZNE Estimate traces to prevent duplication
             fig.data = [
-                trace for trace in fig.data if trace.name != "ZNE Estimate"
+                trace for trace in fig.data
+                if not (trace.name == "ZNE Estimate" and trace.legendgroup == f"ta_{ta_str}")
             ]
 
             if kz_graph_display == "coupling":
                 x_axis = "x3"
                 y_axis = "y1"
-                _x = [0]
+                x_zne = 0
                 # Add the new fitting curve
                 fig.add_trace(
                     go.Scatter(
@@ -591,6 +593,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_d
                         y=y_fit,
                         mode="lines",
                         name="Fitting Curve",
+                        legendgroup=f"ta_{ta_str}",
                         line=dict(color="green", dash="dash"),
                         showlegend=True,
                         xaxis=x_axis,
@@ -600,19 +603,21 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_d
             else:
                 x_axis = "x1"
                 y_axis = "y1"
-                _x = [ta_str]
-            for ta_str, a in zne_estimates.items():
-                fig.add_trace(
-                    go.Scatter(
-                        x=_x,
-                        y=[a],
-                        mode="markers",
-                        name="ZNE Estimate",
-                        marker=dict(
-                            size=12, color="purple", symbol="diamond"
-                        ),
-                        showlegend=False,
-                        xaxis=x_axis,
-                        yaxis=y_axis,
-                    )
+                x_zne = float(ta_str)
+            # for ta_str, a in zne_estimates.items():
+            fig.add_trace(
+                go.Scatter(
+                    x=[x_zne],
+                    y=[zne_estimates[ta_str]],
+                    mode="markers",
+                    name="ZNE Estimate",
+                    legendgroup=f"ta_{ta_str}",
+                    marker=dict(
+                        size=12, color="purple", symbol="diamond"
+                    ),
+                    showlegend=False,
+                    xaxis=x_axis,
+                    yaxis=y_axis,
                 )
+                )
+    return zne_estimates
