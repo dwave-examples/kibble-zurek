@@ -277,7 +277,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Input("job_submit_state", "children"),
     Input("job_id", "children"),
     Input("anneal_duration", "value"),
-    State("spins", "value"),
+    Input("spins", "value"),
     State("embeddings_cached", "data"),
     State("sample_vs_theory", "figure"),
     State("coupling_data", "data"),  # access previously stored data
@@ -304,7 +304,7 @@ def display_graphics_kink_density(
     ta_min = 2
     ta_max = 350
 
-    if trigger_id == "btn_reset":
+    if trigger_id == "btn_reset" or trigger_id == "qpu_selection" or trigger_id == "spins":
         coupling_data = {}
         zne_estimates = {}
 
