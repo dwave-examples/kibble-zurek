@@ -219,8 +219,8 @@ def plot_kink_densities_bg(
     elif display == "coupling":
 
         fig_layout = go.Layout(
-            xaxis=x_axis3,
-            yaxis=y_axis1,
+            xaxis3=x_axis3,
+            yaxis1=y_axis1,
         )
 
         fig_data = []
@@ -388,6 +388,10 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
                     symbol="x",
                 ),
             )
+        )
+        fig.update_layout(
+            xaxis3=fig.layout.xaxis3,
+            yaxis1=fig.layout.yaxis1,
         )
         return fig
 
