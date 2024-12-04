@@ -314,7 +314,7 @@ def plot_kink_densities_bg(
                 )
     fig = go.Figure(data=fig_data, layout=fig_layout)
 
-    fig.update_layout(legend=dict(x=0.7, y=0.9), margin=dict(b=5, l=5, r=20, t=10))
+    fig.update_layout(legend=dict(x=0.1, y=0.1), margin=dict(b=5, l=5, r=20, t=10))
 
     if display != "schedule" and display != "coupling":
 
