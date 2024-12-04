@@ -16,10 +16,11 @@ from dash import no_update
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from helpers.qa import fitted_function
 
 from helpers.kz_calcs import theoretical_kink_density
 
-__all__ = ["plot_kink_densities_bg", "plot_kink_density", "plot_spin_orientation"]
+__all__ = ["plot_kink_densities_bg", "plot_kink_density", "plot_spin_orientation", "plot_zne_fitted_line"]
 
 ta_color_theme = {
     5: "#1F77B4",  # Dark Blue
@@ -544,3 +545,74 @@ def plot_spin_orientation(num_spins=512, sample=None):
     )
 
     return fig
+
+def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str):
+    
+    if len(coupling_data[ta_str]) > 2:
+
+        data_points = coupling_data[ta_str]
+        x = np.array([point["kappa"] for point in data_points])
+        y = np.array([point["kink_density"] for point in data_points])
+
+        # Ensure there are enough unique x values for fitting
+        if len(np.unique(x)) > 1:
+            # Fit a 1st degree polynomial (linear fit)
+            if qpu_name == "mock_dwave_solver":
+                # Fancy non-linear function
+                y_func_x = fitted_function(
+                    x, y, method="mixture_of_exponentials"
+                )
+            else:
+                # Pure quadratic (see paper) # y = a + b x^2
+                y_func_x = fitted_function(x, y, method="pure_quadratic")
+
+            zne_estimates[ta_str] = y_func_x(0)
+            # Generate fit curve points
+            x_fit = np.linspace(0, max(x), 100)
+            y_fit = y_func_x(x_fit)
+
+            # Remove existing fitting curve traces to prevent duplication
+            fig.data = [
+                trace for trace in fig.data if trace.name != "Fitting Curve"
+            ]
+            # Remove existing ZNE Estimate traces to prevent duplication
+            fig.data = [
+                trace for trace in fig.data if trace.name != "ZNE Estimate"
+            ]
+
+            if kz_graph_display == "coupling":
+                x_axis = "x3"
+                y_axis = "y1"
+                _x = [0]
+                # Add the new fitting curve
+                fig.add_trace(
+                    go.Scatter(
+                        x=x_fit,
+                        y=y_fit,
+                        mode="lines",
+                        name="Fitting Curve",
+                        line=dict(color="green", dash="dash"),
+                        showlegend=True,
+                        xaxis=x_axis,
+                        yaxis=y_axis,
+                    )
+                )
+            else:
+                x_axis = "x1"
+                y_axis = "y1"
+                _x = [ta_str]
+            for ta_str, a in zne_estimates.items():
+                fig.add_trace(
+                    go.Scatter(
+                        x=_x,
+                        y=[a],
+                        mode="markers",
+                        name="ZNE Estimate",
+                        marker=dict(
+                            size=12, color="purple", symbol="diamond"
+                        ),
+                        showlegend=False,
+                        xaxis=x_axis,
+                        yaxis=y_axis,
+                    )
+                )
