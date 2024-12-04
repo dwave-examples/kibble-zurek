@@ -363,9 +363,10 @@ def display_graphics_kink_density(
             coupling_data[ta_str].append(
                 {"kappa": kappa, "kink_density": kink_density, "coupling_strength": J}
             )
-               
-            plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str)
-                        
+
+            zne_estimates = plot_zne_fitted_line(
+                fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str
+            )
 
             return fig, coupling_data, zne_estimates
 

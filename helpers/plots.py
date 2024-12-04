@@ -20,7 +20,12 @@ from helpers.qa import fitted_function
 
 from helpers.kz_calcs import theoretical_kink_density
 
-__all__ = ["plot_kink_densities_bg", "plot_kink_density", "plot_spin_orientation", "plot_zne_fitted_line"]
+__all__ = [
+    "plot_kink_densities_bg",
+    "plot_kink_density",
+    "plot_spin_orientation",
+    "plot_zne_fitted_line",
+]
 
 ta_color_theme = {
     5: "#1F77B4",  # Dark Blue
@@ -546,8 +551,11 @@ def plot_spin_orientation(num_spins=512, sample=None):
 
     return fig
 
-def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str):
-    
+
+def plot_zne_fitted_line(
+    fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str
+):
+
     if len(coupling_data[ta_str]) > 2:
 
         data_points = coupling_data[ta_str]
@@ -559,9 +567,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_d
             # Fit a 1st degree polynomial (linear fit)
             if qpu_name == "mock_dwave_solver":
                 # Fancy non-linear function
-                y_func_x = fitted_function(
-                    x, y, method="mixture_of_exponentials"
-                )
+                y_func_x = fitted_function(x, y, method="mixture_of_exponentials")
             else:
                 # Pure quadratic (see paper) # y = a + b x^2
                 y_func_x = fitted_function(x, y, method="pure_quadratic")
@@ -573,13 +579,20 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_d
 
             # Remove existing fitting curve traces to prevent duplication
             fig.data = [
-                trace for trace in fig.data
-                if not (trace.name == "Fitting Curve" and trace.legendgroup == f"ta_{ta_str}")
+                trace
+                for trace in fig.data
+                if not (
+                    trace.name == "Fitting Curve"
+                    and trace.legendgroup == f"ta_{ta_str}"
+                )
             ]
             # Remove existing ZNE Estimate traces to prevent duplication
             fig.data = [
-                trace for trace in fig.data
-                if not (trace.name == "ZNE Estimate" and trace.legendgroup == f"ta_{ta_str}")
+                trace
+                for trace in fig.data
+                if not (
+                    trace.name == "ZNE Estimate" and trace.legendgroup == f"ta_{ta_str}"
+                )
             ]
 
             if kz_graph_display == "coupling":
@@ -612,12 +625,10 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, kz_graph_d
                     mode="markers",
                     name="ZNE Estimate",
                     legendgroup=f"ta_{ta_str}",
-                    marker=dict(
-                        size=12, color="purple", symbol="diamond"
-                    ),
+                    marker=dict(size=12, color="purple", symbol="diamond"),
                     showlegend=False,
                     xaxis=x_axis,
                     yaxis=y_axis,
                 )
-                )
+            )
     return zne_estimates
