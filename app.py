@@ -304,7 +304,11 @@ def display_graphics_kink_density(
     ta_min = 2
     ta_max = 350
 
-    if trigger_id == "btn_reset" or trigger_id == "qpu_selection" or trigger_id == "spins":
+    if (
+        trigger_id == "btn_reset"
+        or trigger_id == "qpu_selection"
+        or trigger_id == "spins"
+    ):
         coupling_data = {}
         zne_estimates = {}
 
