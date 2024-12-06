@@ -59,7 +59,7 @@ def control_card(solvers={}, init_job_status="READY"):
                             ),
                             html.P(
                                 """
-Simulate zero-temperature and zero-time extrapolations on a quantum computer, leveraging the Kibble-Zurek mechanism.
+Simulate zero-temperature and zero-time extrapolations on a quantum computer using the Kibble-Zurek mechanism. Fitting occurs once three or more data points are plotted, with -1.8 representing the highest energy scale corresponding to the lowest noise level.
 """,
                                 style={"color": "white", "fontSize": 14},
                             ),
