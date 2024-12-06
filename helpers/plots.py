@@ -571,12 +571,13 @@ def plot_zne_fitted_line(
             else:
                 # Pure quadratic (see paper) # y = a + b x^2
                 y_func_x = fitted_function(x, y, method="pure_quadratic")
-
-            zne_estimates[ta_str] = y_func_x(0)
-            # Generate fit curve points
-            x_fit = np.linspace(0, max(x), 100)
-            y_fit = y_func_x(x_fit)
-
+        
+            if y_func_x is not None:
+                zne_estimates[ta_str] = y_func_x(0)
+                x_fit = np.linspace(0, max(x), 100)
+                y_fit = y_func_x(x_fit)
+            
+        
             # Remove existing fitting curve traces to prevent duplication
             fig.data = [
                 trace
@@ -595,7 +596,7 @@ def plot_zne_fitted_line(
                 )
             ]
 
-            if kz_graph_display == "coupling":
+            if kz_graph_display == "coupling" and y_func_x is not None:
                 x_axis = "x3"
                 y_axis = "y1"
                 x_zne = 0
@@ -618,17 +619,18 @@ def plot_zne_fitted_line(
                 y_axis = "y1"
                 x_zne = float(ta_str)
             # for ta_str, a in zne_estimates.items():
-            fig.add_trace(
-                go.Scatter(
-                    x=[x_zne],
-                    y=[zne_estimates[ta_str]],
-                    mode="markers",
-                    name="ZNE Estimate",
-                    legendgroup=f"ta_{ta_str}",
-                    marker=dict(size=12, color="purple", symbol="diamond"),
-                    showlegend=False,
-                    xaxis=x_axis,
-                    yaxis=y_axis,
+            if y_func_x is not None:
+                fig.add_trace(
+                    go.Scatter(
+                        x=[x_zne],
+                        y=[zne_estimates[ta_str]],
+                        mode="markers",
+                        name="ZNE Estimate",
+                        legendgroup=f"ta_{ta_str}",
+                        marker=dict(size=12, color="purple", symbol="diamond"),
+                        showlegend=False,
+                        xaxis=x_axis,
+                        yaxis=y_axis,
+                    )
                 )
-            )
     return zne_estimates
