@@ -179,7 +179,25 @@ def json_to_dict(emb_json):
 
 
 def fitted_function(xdata, ydata, method=("polynomial", 1)):
-    """ """
+    """
+    Generate a fitting function based on the provided data points and method.
+
+    Args:
+        xdata: Array-like, independent variable data points.
+        ydata: Array-like, dependent variable data points.
+        method: Tuple or string specifying the fitting method. Options include:
+            - ("polynomial", deg): Fits a polynomial of degree `deg`.
+            - "pure_quadratic": Fits a pure quadratic model, y = a + b*x^2.
+            - "mixture_of_exponentials": Fits a mixture of exponential functions.
+            - "sigmoidal_crossover": Fits a sigmoidal crossover model.
+
+    Returns:
+        Callable function that takes a single argument `x` and returns the fitted value.
+        Returns `None` if the fitting process fails.
+
+    Raises:
+        ValueError: If the specified method is unknown.
+    """
     if type(method) is tuple and method[0] == "polynomial":
         coeffs = Polynomial.fit(xdata, ydata, deg=method[1]).convert().coef
 
