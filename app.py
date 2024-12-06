@@ -111,6 +111,17 @@ app.layout = dbc.Container(
         dcc.Store(id="coupling_data", data={}),
         # store zero noise extrapolation
         dcc.Store(id="zne_estimates", data={}),
+        dcc.Store(id="modal_trigger", data=False),
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Error")),
+                dbc.ModalBody(
+                    "Fitting function failed likely due to ill data, please collect more."
+                ),
+            ],
+            id="error-modal",
+            is_open=False,
+        ),
     ],
     fluid=True,
 )
@@ -269,6 +280,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Output("sample_vs_theory", "figure"),
     Output("coupling_data", "data"),  # store data using dcc
     Output("zne_estimates", "data"),  # update zne_estimates
+    Output("modal_trigger", "data"),
     Input("btn_reset", "n_clicks"),
     Input("qpu_selection", "value"),
     Input("kz_graph_display", "value"),
@@ -321,7 +333,7 @@ def display_graphics_kink_density(
             zne_estimates,
         )
 
-        return fig, coupling_data, zne_estimates
+        return fig, coupling_data, zne_estimates, False
 
     if trigger_id in [
         "kz_graph_display",
@@ -338,7 +350,7 @@ def display_graphics_kink_density(
             zne_estimates,
         )
 
-        return fig, coupling_data, zne_estimates
+        return fig, coupling_data, zne_estimates, False
 
     if trigger_id == "job_submit_state":
 
@@ -364,11 +376,11 @@ def display_graphics_kink_density(
                 {"kappa": kappa, "kink_density": kink_density, "coupling_strength": J}
             )
 
-            zne_estimates = plot_zne_fitted_line(
+            zne_estimates, modal_trigger = plot_zne_fitted_line(
                 fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str
             )
 
-            return fig, coupling_data, zne_estimates
+            return fig, coupling_data, zne_estimates, modal_trigger
 
         else:
             return dash.no_update
@@ -382,7 +394,7 @@ def display_graphics_kink_density(
         coupling_data,
         zne_estimates,
     )
-    return fig, coupling_data, zne_estimates
+    return fig, coupling_data, zne_estimates, False
 
 
 @app.callback(
@@ -674,6 +686,17 @@ def activate_tooltips(tooltips_show):
         dict(),
         dict(),
     )
+
+
+@app.callback(
+    Output("error-modal", "is_open"),
+    Input("modal_trigger", "data"),
+    State("error-modal", "is_open"),
+)
+def toggle_modal(trigger, is_open):
+    if trigger:
+        return True
+    return is_open
 
 
 if __name__ == "__main__":

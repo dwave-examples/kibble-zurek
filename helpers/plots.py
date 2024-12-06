@@ -555,7 +555,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
 def plot_zne_fitted_line(
     fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str
 ):
-
+    modal_trigger = False
     if len(coupling_data[ta_str]) > 2:
 
         data_points = coupling_data[ta_str]
@@ -576,7 +576,8 @@ def plot_zne_fitted_line(
                 zne_estimates[ta_str] = y_func_x(0)
                 x_fit = np.linspace(0, max(x), 100)
                 y_fit = y_func_x(x_fit)
-
+            else:
+                modal_trigger = True
             # Remove existing fitting curve traces to prevent duplication
             fig.data = [
                 trace
@@ -632,4 +633,4 @@ def plot_zne_fitted_line(
                         yaxis=y_axis,
                     )
                 )
-    return zne_estimates
+    return zne_estimates, modal_trigger
