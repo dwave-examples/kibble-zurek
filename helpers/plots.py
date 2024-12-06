@@ -62,20 +62,34 @@ def plot_kink_densities_bg(
     display, time_range, J_base, schedule_name, coupling_data, zne_estimates
 ):
     """
-    Plot background of theoretical kink-density and QPU energy scales.
+    Plot the background of theoretical kink density and QPU energy scales.
+
+    This function generates a Plotly figure that displays the theoretical
+    predictions for kink densities along with QPU energy scales based on
+    the provided anneal schedule. It supports different display modes
+    such as "both", "kink_density", "schedule", and "coupling".
 
     Args:
-
-        display: Displays plots of type "both", "kink_density", or "schedule".
-
-        time_range: Maximum and minimum quench times, as a list.
-
-        coupling_strength: Coupling strength between spins in ring.
-
-        schedule_name: Filename of anneal schedule.
+        display (str): The type of plot to display. Options are:
+            - "both": Display both kink density and schedule.
+            - "kink_density": Display only the kink density plot.
+            - "schedule": Display only the anneal schedule.
+            - "coupling": Display coupling-related plots.
+        time_range (list of float): A list containing the minimum and maximum
+            quench times [min_quench_time, max_quench_time] in nanoseconds.
+        J_base (float): The base coupling strength between spins in the ring.
+        schedule_name (str): The filename of the anneal schedule CSV file.
+            If not provided, a fallback schedule is used.
+        coupling_data (dict): A dictionary containing coupling-related data
+            structured as {ta_str: [data_points]}, where each data point
+            includes "coupling_strength" and "kink_density".
+        zne_estimates (dict): A dictionary to store Zero-Noise Extrapolation
+            (ZNE) estimates structured as {ta_str: estimate}.
 
     Returns:
-        Plotly figure of predicted kink densities and/or QPU energy scales.
+        plotly.graph_objs.Figure: A Plotly figure object containing the
+        predicted kink densities and/or QPU energy scales based on the
+        specified display mode.
     """
     if schedule_name:
         schedule = pd.read_csv(f"helpers/{schedule_name}")
@@ -377,20 +391,29 @@ def plot_kink_densities_bg(
 
 
 def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
-    """Add kink density from QPU samples to plot.
+    """
+    Add a kink density marker from QPU samples to an existing plot.
+
+    Depending on the display mode, this function updates the provided
+    Plotly figure with a new marker representing the calculated kink
+    density at a specific anneal time and coupling strength.
 
     Args:
-
-        display: Displays plots of type "both", "kink_density", or "schedule".
-
-        fig_dict: Existing background Plotly figure, as a dict.
-
-        kink_density: Calculated kink density derived from QPU sample set.
-
-        anneal_time: Anneal time used for the kink density.
+        display (str): The type of plot to display. Options are:
+            - "both": Display both kink density and schedule.
+            - "kink_density": Display only the kink density plot.
+            - "schedule": Display only the anneal schedule.
+            - "coupling": Display coupling-related plots.
+        fig_dict (dict): The existing background Plotly figure as a dictionary.
+        kink_density (float): The calculated kink density derived from QPU samples.
+        anneal_time (str or float): The anneal time corresponding to the kink density.
+            It can be a string identifier or a numerical value in nanoseconds.
+        J (float): The coupling strength associated with the kink density.
 
     Returns:
-        Updated Plotly figure with a marker at (anneal time, kink-density).
+        plotly.graph_objs.Figure or dash.no_update:
+            - If display is "schedule", returns `no_update` indicating no changes.
+            - Otherwise, returns the updated Plotly figure with the new kink density marker.
     """
     if display == "schedule":
         return no_update
@@ -454,15 +477,25 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J):
 
 
 def plot_spin_orientation(num_spins=512, sample=None):
-    """Plot the ring of spins.
+    """
+    Visualize the orientation of spins in a ring using 3D cones.
+
+    This function generates a 3D Plotly figure representing the orientation
+    of spins arranged in a ring. Each spin is depicted as a cone pointing
+    upwards or downwards based on the provided sample. If no sample is
+    provided, all spins are shown pointing upwards by default.
 
     Args:
-        num_spins: Number of spins in the ring.
-
-        sample: Single sample from a sample set.
+        num_spins (int, optional): The total number of spins in the ring.
+            Defaults to 512.
+        sample (array-like, optional): A single sample from a sample set
+            indicating spin orientations. Each element should be:
+            - `1` for spin up.
+            - `-1` or any other value for spin down.
+            If `None`, all spins are assumed to be up.
 
     Returns:
-        Plotly figure of orientation for all spins in the ring.
+        plotly.graph_objs.Figure: A 3D Plotly figure displaying the spin orientations.
     """
 
     cone_size = 0.5  # Based on how it looks
@@ -555,6 +588,34 @@ def plot_spin_orientation(num_spins=512, sample=None):
 def plot_zne_fitted_line(
     fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str
 ):
+    """
+    Fit a curve to the coupling data and plot the Zero-Noise Extrapolation (ZNE) estimate.
+
+    This function performs curve fitting on the provided coupling data for a
+    specific anneal time and adds the fitted curve along with the ZNE estimate
+    to the existing Plotly figure. The fitting method varies based on the QPU
+    used. It also handles the removal of any existing fitting curves to avoid
+    duplication.
+
+    Args:
+        fig (plotly.graph_objs.Figure): The existing Plotly figure to update.
+        coupling_data (dict): A dictionary containing coupling-related data
+            structured as {ta_str: [data_points]}, where each data point
+            includes "kappa" and "kink_density".
+        qpu_name (str): The name of the Quantum Processing Unit (QPU) used.
+            Determines the fitting method.
+        zne_estimates (dict): A dictionary to store Zero-Noise Extrapolation
+            (ZNE) estimates structured as {ta_str: estimate}.
+        kz_graph_display (str): The type of graph display. Typically aligns with
+            the `display` parameter in other functions, such as "coupling".
+        ta_str (str): The anneal time identifier as a string.
+
+    Returns:
+        tuple:
+            - zne_estimates (dict): Updated dictionary with new ZNE estimates.
+            - modal_trigger (bool): A flag indicating whether a modal was triggered
+              due to ill conditioned data for fitting.
+    """
     modal_trigger = False
     if len(coupling_data[ta_str]) > 2:
 
