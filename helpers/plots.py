@@ -571,13 +571,12 @@ def plot_zne_fitted_line(
             else:
                 # Pure quadratic (see paper) # y = a + b x^2
                 y_func_x = fitted_function(x, y, method="pure_quadratic")
-        
+
             if y_func_x is not None:
                 zne_estimates[ta_str] = y_func_x(0)
                 x_fit = np.linspace(0, max(x), 100)
                 y_fit = y_func_x(x_fit)
-            
-        
+
             # Remove existing fitting curve traces to prevent duplication
             fig.data = [
                 trace
