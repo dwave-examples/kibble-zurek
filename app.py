@@ -116,7 +116,7 @@ app.layout = dbc.Container(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Error")),
                 dbc.ModalBody(
-                    "Fitting function failed likely due to ill data, please collect more."
+                    "Fitting function failed likely due to ill conditioned data, please collect more."
                 ),
             ],
             id="error-modal",
