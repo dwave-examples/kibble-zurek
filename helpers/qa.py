@@ -216,8 +216,7 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
                 f=mixture_of_exponentials, xdata=xdata, ydata=ydata, p0=p0
             )
         except:
-            warnings.warn("Should modify to check exception is no solution")
-            p = p0
+            return None 
 
         def y_func_x(x):
             return mixture_of_exponentials(x, *p)
@@ -257,8 +256,7 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
                 f=sigmoidal_crossover, xdata=xdata, ydata=ydata, p0=p0
             )
         except:
-            warnings.warn("Should modify to check exception is no solution")
-            p = p0
+            return None
 
         def y_func_x(x):
             return sigmoidal_crossover(x, *p)
