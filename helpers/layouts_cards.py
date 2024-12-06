@@ -58,14 +58,28 @@ def control_card(solvers={}, init_job_status="READY"):
                                 style={"color": "rgb(243, 120, 32)"},
                             ),
                             html.P(
-                                """
-Simulate zero-temperature and zero-time extrapolations on a quantum computer using the Kibble-Zurek mechanism. Fitting occurs once three or more data points are plotted, with -1.8 representing the highest energy scale corresponding to the lowest noise level.
+                                [
+                                    """
+Simulate zero-temperature and zero-time extrapolations on a quantum computer using the Kibble-Zurek mechanism. Fitting occurs once three or more data points are plotted, with -1.8 representing the highest energy scale corresponding to the lowest noise level. Learn more in the
 """,
+                                    html.A(
+                                        "paper",
+                                        href="https://arxiv.org/abs/2311.01306",  # Replace with the actual URL
+                                        target="_blank",  # Opens the link in a new tab
+                                        style={
+                                            "color": "rgb(3, 184, 255)",
+                                            "textDecoration": "none",
+                                        },  # Optional styling
+                                    ),
+                                    ".",
+                                ],
                                 style={"color": "white", "fontSize": 14},
                             ),
                             html.H5("Spins", style=control_header_style),
                             html.Div([config_spins]),
-                            html.H5("Coupling Strength (J)", style=control_header_style),
+                            html.H5(
+                                "Coupling Strength (J)", style=control_header_style
+                            ),
                             html.Div([config_coupling_strength]),
                             html.H5("Quench Duration [ns]", style=control_header_style),
                             html.Div([config_anneal_duration]),
