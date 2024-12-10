@@ -64,64 +64,118 @@ if os.getenv("ZNE") == "YES":
         client = "dummy"
 
 
-# Dashboard-organization section
-app.layout = dbc.Container(
-    [
-        dbc.Row(
-            [  # Top: logo
-                dbc.Col(
-                    [
-                        html.Img(
-                            src="assets/dwave_logo.png",
-                            height="25px",
-                            style={"textAlign": "left", "margin": "10px 0px 15px 0px"},
-                        )
-                    ],
-                    width=3,
-                )
-            ]
-        ),
-        dbc.Row(
-            [
-                dbc.Col(  # Left: control panel
-                    [
-                        control_card(solvers=qpus, init_job_status=init_job_status),
-                        *dbc_modal("modal_solver"),
-                        *[
-                            dbc.Tooltip(
-                                message,
-                                target=target,
-                                id=f"tooltip_{target}",
-                                style=dict(),
-                            )
-                            for target, message in tool_tips.items()
+def demo1_layout():
+    return dbc.Container(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(  # Left: control panel
+                        [
+                            control_card(solvers=qpus, init_job_status=init_job_status, demo_type="Kibble-Zurek"),
+                            *dbc_modal("modal_solver"),
+                            *[
+                                dbc.Tooltip(
+                                    message,
+                                    target=target,
+                                    id=f"tooltip_{target}",
+                                    style=dict(),
+                                )
+                                for target, message in tool_tips.items()
+                            ],
                         ],
+                        width=4,
+                        style={"minWidth": "30rem"},
+                    ),
+                    dbc.Col(  # Right: display area
+                        graphs_card(),
+                        width=8,
+                        style={"minWidth": "60rem"},
+                    ),
+                ]
+            ),
+            # store coupling data points
+            dcc.Store(id="coupling_data", data={}),
+            # store zero noise extrapolation
+            dcc.Store(id="zne_estimates", data={}),
+            dcc.Store(id="modal_trigger", data=False),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("Error")),
+                    dbc.ModalBody(
+                        "Fitting function failed likely due to ill conditioned data, please collect more."
+                    ),
+                ],
+                id="error-modal",
+                is_open=False,
+            ),
+        ],
+        fluid=True,
+    )
+
+def demo2_layout():
+   return dbc.Container([
+            dbc.Row([                        
+                dbc.Col(                    # Left: control panel
+                    [
+                    control_card(
+                        solvers=qpus, 
+                        init_job_status=init_job_status,
+                        demo_type="Zero-Noise"
+                    ),
+                    *dbc_modal('modal_solver'),
+                    *[dbc.Tooltip(
+                    message, target=target, id=f'tooltip_{target}', style = dict())
+                    for target, message in tool_tips.items()]
                     ],
                     width=4,
-                    style={"minWidth": "30rem"},
+                    style={'minWidth': "30rem"},
                 ),
-                dbc.Col(  # Right: display area
+                dbc.Col(                    # Right: display area
                     graphs_card(),
                     width=8,
-                    style={"minWidth": "60rem"},
+                    style={'minWidth': "60rem"},
                 ),
-            ]
-        ),
-        # store coupling data points
-        dcc.Store(id="coupling_data", data={}),
-        # store zero noise extrapolation
-        dcc.Store(id="zne_estimates", data={}),
-        dcc.Store(id="modal_trigger", data=False),
-        dbc.Modal(
-            [
-                dbc.ModalHeader(dbc.ModalTitle("Error")),
-                dbc.ModalBody(
-                    "Fitting function failed likely due to ill conditioned data, please collect more."
-                ),
-            ],
-            id="error-modal",
-            is_open=False,
-        ),
+            ]),
+        ],
+            fluid=True,
+        )
+
+# Define the Navbar with two tabs
+navbar = dbc.Navbar(
+    dbc.Container(
+        [
+            # Navbar Brand/Logo
+            dbc.NavbarBrand(
+                [
+                    html.Img(
+                        src="assets/dwave_logo.png",
+                        height="30px",
+                        style={"margin-right": "10px"},
+                    ),
+                ],
+                href="/demo1",  # Default route
+            ),
+
+            # Navbar Tabs
+            dbc.Nav(
+                [
+                    dbc.NavItem(dbc.NavLink("Demo 1", href="/demo1", active="exact")),
+                    dbc.NavItem(dbc.NavLink("Demo 2", href="/demo2", active="exact")),
+                ],
+                pills=True,
+            ),
+        ]
+    ),
+    color="dark",
+    dark=True,
+    sticky="top",
+)
+
+app.layout = dbc.Container(
+    [
+        dcc.Location(id="url", refresh=False),  # Tracks the URL
+        navbar,  # Includes the Navbar at the top
+        html.Div(id="page-content", style={"paddingTop": "20px"}),  # Dynamic page content
     ],
     fluid=True,
 )
@@ -130,6 +184,21 @@ server = app.server
 app.config["suppress_callback_exceptions"] = True
 
 # Callbacks Section
+
+@app.callback(
+    Output("page-content", "children"),
+    Input("url", "pathname")
+)
+def display_page(pathname):
+    # If the user goes to the "/demo1" route
+    if pathname == "/demo1":
+        return demo1_layout()
+    # If the user goes to the "/demo2" route
+    elif pathname == "/demo2":
+        return demo2_layout()
+    # Default fallback if no path matches:
+    else:
+        return demo1_layout()  # or redirect to a "404" or default page
 
 
 @app.callback(

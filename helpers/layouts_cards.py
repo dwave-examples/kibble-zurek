@@ -27,7 +27,7 @@ __all__ = [
 control_header_style = {"color": "rgb(3, 184, 255)", "marginTop": "10px"}
 
 
-def control_card(solvers={}, init_job_status="READY"):
+def control_card(solvers={}, init_job_status="READY",  demo_type="Kibble-Zurek"):
     """Lay out the configuration and job-submission card.
 
     Args:
@@ -46,18 +46,17 @@ def control_card(solvers={}, init_job_status="READY"):
     else:
         job_status_color = "white"
 
-    return dbc.Card(
-        [
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            html.H4(
-                                "Coherent Annealing: Zero-Noise Extrapolation",
-                                className="card-title",
-                                style={"color": "rgb(243, 120, 32)"},
-                            ),
-                            html.P(
+    if demo_type == 'Kibble-Zurek':
+        demo_title =  'Coherent Annealing: KZ Simulation'
+        demo_description = html.P(
+                    """
+                    Use a quantum computer to simulate the formation of topological defects in a 1D ring 
+                    of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
+                    """, 
+                                        style={'color': 'white', 'fontSize': 14})
+    else:
+        demo_title = "Coherent Annealing: Zero-Noise Extrapolation"
+        demo_description = html.P(
                                 [
                                     """
 Simulate zero-temperature and zero-time extrapolations on a quantum computer using the Kibble-Zurek mechanism. Fitting occurs once three or more data points are plotted, with -1.8 representing the highest energy scale corresponding to the lowest noise level. Learn more in the
@@ -74,7 +73,20 @@ Simulate zero-temperature and zero-time extrapolations on a quantum computer usi
                                     ".",
                                 ],
                                 style={"color": "white", "fontSize": 14},
+                            )
+        
+    return dbc.Card(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            html.H4(
+                                demo_title,
+                                className="card-title",
+                                style={"color": "rgb(243, 120, 32)"},
                             ),
+                            demo_description,
                             html.H5("Spins", style=control_header_style),
                             html.Div([config_spins]),
                             html.H5(
