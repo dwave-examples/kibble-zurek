@@ -63,15 +63,15 @@ if os.getenv("ZNE") == "YES":
     if not client:
         client = "dummy"
 
+def demo_layout(demo_type):
 
-def demo1_layout():
     return dbc.Container(
         [
             dbc.Row(
                 [
                     dbc.Col(  # Left: control panel
                         [
-                            control_card(solvers=qpus, init_job_status=init_job_status, demo_type="Kibble-Zurek"),
+                            control_card(solvers=qpus, init_job_status=init_job_status, demo_type=demo_type),
                             *dbc_modal("modal_solver"),
                             *[
                                 dbc.Tooltip(
@@ -87,7 +87,7 @@ def demo1_layout():
                         style={"minWidth": "30rem"},
                     ),
                     dbc.Col(  # Right: display area
-                        graphs_card(demo_type="Kibble-Zurek"),
+                        graphs_card(demo_type=demo_type),
                         width=8,
                         style={"minWidth": "60rem"},
                     ),
@@ -111,34 +111,6 @@ def demo1_layout():
         ],
         fluid=True,
     )
-
-def demo2_layout():
-   return dbc.Container([
-            dbc.Row([                        
-                dbc.Col(                    # Left: control panel
-                    [
-                    control_card(
-                        solvers=qpus, 
-                        init_job_status=init_job_status,
-                        demo_type="Zero-Noise"
-                    ),
-                    *dbc_modal('modal_solver'),
-                    *[dbc.Tooltip(
-                    message, target=target, id=f'tooltip_{target}', style = dict())
-                    for target, message in tool_tips.items()]
-                    ],
-                    width=4,
-                    style={'minWidth': "30rem"},
-                ),
-                dbc.Col(                    # Right: display area
-                    graphs_card(demo_type="Zero-Noise"),
-                    width=8,
-                    style={'minWidth': "60rem"},
-                ),
-            ]),
-        ],
-            fluid=True,
-        )
 
 # Define the Navbar with two tabs
 navbar = dbc.Navbar(
@@ -192,13 +164,15 @@ app.config["suppress_callback_exceptions"] = True
 def display_page(pathname):
     # If the user goes to the "/demo1" route
     if pathname == "/demo1":
-        return demo1_layout()
+       
+        return demo_layout("Kibble-Zurek")
     # If the user goes to the "/demo2" route
     elif pathname == "/demo2":
-        return demo2_layout()
-    # Default fallback if no path matches:
+       
+        return demo_layout("Zero-Noise")
     else:
-        return demo1_layout()  # or redirect to a "404" or default page
+        return demo_layout("Kibble-Zurek")
+
 
 
 @app.callback(
@@ -351,28 +325,32 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Output("zne_estimates", "data"),  # update zne_estimates
     Output("modal_trigger", "data"),
     Input("qpu_selection", "value"),
-    Input("kz_graph_display", "value"),
+    #Input("zne_graph_display", "value"),
+    Input("graph_display", "value"),
     State("coupling_strength", "value"),  # previously input
     Input("quench_schedule_filename", "children"),
     Input("job_submit_state", "children"),
     Input("job_id", "children"),
+    #Input("anneal_duration_zne", "value"),
     Input("anneal_duration", "value"),
     Input("spins", "value"),
+    Input("url", "pathname"),
     State("embeddings_cached", "data"),
     State("sample_vs_theory", "figure"),
     State("coupling_data", "data"),  # access previously stored data
     State("zne_estimates", "data"),  # Access ZNE estimates
+    
 )
 def display_graphics_kink_density(
-    dummy,
     qpu_name,
-    kz_graph_display,
+    graph_display,
     J,
     schedule_filename,
     job_submit_state,
     job_id,
     ta,
     spins,
+    pathname,
     embeddings_cached,
     figure,
     coupling_data,
@@ -384,84 +362,110 @@ def display_graphics_kink_density(
     ta_min = 2
     ta_max = 350
 
-    if (
-        trigger_id == "qpu_selection" or trigger_id == "spins"
-    ):
-        coupling_data = {}
-        zne_estimates = {}
+    if pathname == "/demo2":
 
+        if (
+            trigger_id == "qpu_selection" or trigger_id == "spins"
+        ):
+            coupling_data = {}
+            zne_estimates = {}
+
+            fig = plot_kink_densities_bg(
+                graph_display,
+                [ta_min, ta_max],
+                J_baseline,
+                schedule_filename,
+                coupling_data,
+                zne_estimates,
+            )
+
+            return fig, coupling_data, zne_estimates, False
+
+        if trigger_id in [
+            "zne_graph_display",
+            "coupling_strength",
+            "quench_schedule_filename",
+        ]:
+
+            fig = plot_kink_densities_bg(
+                graph_display,
+                [ta_min, ta_max],
+                J_baseline,
+                schedule_filename,
+                coupling_data,
+                zne_estimates,
+            )
+
+            return fig, coupling_data, zne_estimates, False
+
+        if trigger_id == "job_submit_state":
+
+            if job_submit_state == "COMPLETED":
+
+                embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+
+                sampleset_unembedded = get_samples(
+                    client, job_id, spins, J, embeddings_cached[spins]
+                )
+                _, kink_density = kink_stats(sampleset_unembedded, J)
+
+                fig = plot_kink_density(graph_display, figure, kink_density, ta, J)
+
+                # Calculate kappa
+                kappa = calc_kappa(J, J_baseline)
+                # Initialize the list for this anneal_time if not present
+                ta_str = str(ta)
+                if ta_str not in coupling_data:
+                    coupling_data[ta_str] = []
+                # Append the new data point
+                coupling_data[ta_str].append(
+                    {"kappa": kappa, "kink_density": kink_density, "coupling_strength": J}
+                )
+
+                zne_estimates, modal_trigger = plot_zne_fitted_line(
+                    fig, coupling_data, qpu_name, zne_estimates, graph_display, ta_str
+                )
+
+                return fig, coupling_data, zne_estimates, modal_trigger
+
+            else:
+                return dash.no_update
+
+            # use global J value
         fig = plot_kink_densities_bg(
-            kz_graph_display,
+            graph_display,
             [ta_min, ta_max],
             J_baseline,
             schedule_filename,
             coupling_data,
             zne_estimates,
         )
-
         return fig, coupling_data, zne_estimates, False
+    else:
+        if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
+            
+        
+            fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates)
 
-    if trigger_id in [
-        "kz_graph_display",
-        "coupling_strength",
-        "quench_schedule_filename",
-    ]:
+            return fig, coupling_data, zne_estimates, False
+        
+        if trigger_id == 'job_submit_state':
 
-        fig = plot_kink_densities_bg(
-            kz_graph_display,
-            [ta_min, ta_max],
-            J_baseline,
-            schedule_filename,
-            coupling_data,
-            zne_estimates,
-        )
+            if job_submit_state == 'COMPLETED':
 
+                embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+
+                sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
+                _, kink_density = kink_stats(sampleset_unembedded, J)
+                
+                fig = plot_kink_density(graph_display, figure, kink_density, ta, J)
+                return fig, coupling_data, zne_estimates, False
+            
+            else:
+                return dash.no_update
+            
+        fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates)
         return fig, coupling_data, zne_estimates, False
-
-    if trigger_id == "job_submit_state":
-
-        if job_submit_state == "COMPLETED":
-
-            embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
-
-            sampleset_unembedded = get_samples(
-                client, job_id, spins, J, embeddings_cached[spins]
-            )
-            _, kink_density = kink_stats(sampleset_unembedded, J)
-
-            fig = plot_kink_density(kz_graph_display, figure, kink_density, ta, J)
-
-            # Calculate kappa
-            kappa = calc_kappa(J, J_baseline)
-            # Initialize the list for this anneal_time if not present
-            ta_str = str(ta)
-            if ta_str not in coupling_data:
-                coupling_data[ta_str] = []
-            # Append the new data point
-            coupling_data[ta_str].append(
-                {"kappa": kappa, "kink_density": kink_density, "coupling_strength": J}
-            )
-
-            zne_estimates, modal_trigger = plot_zne_fitted_line(
-                fig, coupling_data, qpu_name, zne_estimates, kz_graph_display, ta_str
-            )
-
-            return fig, coupling_data, zne_estimates, modal_trigger
-
-        else:
-            return dash.no_update
-
-        # use global J value
-    fig = plot_kink_densities_bg(
-        kz_graph_display,
-        [ta_min, ta_max],
-        J_baseline,
-        schedule_filename,
-        coupling_data,
-        zne_estimates,
-    )
-    return fig, coupling_data, zne_estimates, False
-
 
 @app.callback(
     Output("spin_orientation", "figure"),

@@ -586,7 +586,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
 
 
 def plot_zne_fitted_line(
-    fig, coupling_data, qpu_name, zne_estimates, kz_graph_display_zne, ta_str
+    fig, coupling_data, qpu_name, zne_estimates, zne_graph_display, ta_str
 ):
     """
     Fit a curve to the coupling data and plot the Zero-Noise Extrapolation (ZNE) estimate.
@@ -657,7 +657,7 @@ def plot_zne_fitted_line(
                 )
             ]
 
-            if kz_graph_display_zne == "coupling" and y_func_x is not None:
+            if zne_graph_display == "coupling" and y_func_x is not None:
                 x_axis = "x3"
                 y_axis = "y1"
                 x_zne = 0

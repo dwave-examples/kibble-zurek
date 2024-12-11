@@ -32,9 +32,9 @@ __all__ = [
 ring_lengths = [512, 1024, 2048]
 
 def get_config_anneal_duration(demo_type):
-    if demo_type == "Kibble-Zurek":
+    if demo_type == "Zero-Noise":
         return dcc.Dropdown(
-            id="anneal_duration_kz",
+            id="anneal_duration",
             options=[
                 {"label": "5 ns", "value": 5},
                 {"label": "10 ns", "value": 10},
@@ -51,7 +51,7 @@ def get_config_anneal_duration(demo_type):
         )
     else:
         return dbc.Input(
-            id="anneal_duration_zne",
+            id="anneal_duration",
             type='number',
             min=5,
             max=100,
@@ -63,7 +63,7 @@ def get_config_anneal_duration(demo_type):
 def get_config_kz_graph(demo_type):
     if demo_type == "Kibble-Zurek":
         return RadioItems(
-            id="kz_graph_display",
+            id="graph_display",
             options=[
                 {
                     'label': 'Both', 
@@ -88,7 +88,7 @@ def get_config_kz_graph(demo_type):
         )
     else:
         return RadioItems(
-            id="zne_graph_display",
+            id="graph_display",
             options=[
                 {
                     "label": "Kink density vs Anneal time",
