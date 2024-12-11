@@ -87,7 +87,7 @@ def demo1_layout():
                         style={"minWidth": "30rem"},
                     ),
                     dbc.Col(  # Right: display area
-                        graphs_card(),
+                        graphs_card(demo_type="Kibble-Zurek"),
                         width=8,
                         style={"minWidth": "60rem"},
                     ),
@@ -131,7 +131,7 @@ def demo2_layout():
                     style={'minWidth': "30rem"},
                 ),
                 dbc.Col(                    # Right: display area
-                    graphs_card(),
+                    graphs_card(demo_type="Zero-Noise"),
                     width=8,
                     style={'minWidth': "60rem"},
                 ),
@@ -350,7 +350,6 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Output("coupling_data", "data"),  # store data using dcc
     Output("zne_estimates", "data"),  # update zne_estimates
     Output("modal_trigger", "data"),
-    Input("btn_reset", "n_clicks"),
     Input("qpu_selection", "value"),
     Input("kz_graph_display", "value"),
     State("coupling_strength", "value"),  # previously input
@@ -386,9 +385,7 @@ def display_graphics_kink_density(
     ta_max = 350
 
     if (
-        trigger_id == "btn_reset"
-        or trigger_id == "qpu_selection"
-        or trigger_id == "spins"
+        trigger_id == "qpu_selection" or trigger_id == "spins"
     ):
         coupling_data = {}
         zne_estimates = {}

@@ -13,12 +13,14 @@
 #    limitations under the License.
 
 import dash_bootstrap_components as dbc
-from dash.dcc import Checklist, Dropdown, Link, RadioItems, Slider
+from dash.dcc import Checklist, Dropdown, Link, RadioItems, Slider, Input
 from dash import html, dcc
 
 __all__ = [
-    "config_anneal_duration",
-    "config_kz_graph",
+    "config_anneal_duration_zne",
+    "config_anneal_duration_kz",
+    "config_kz_graph_zne",
+    "config_kz_graph_kz",
     "config_spins",
     "config_coupling_strength",
     "config_qpu_selection",
@@ -31,7 +33,7 @@ __all__ = [
 
 ring_lengths = [512, 1024, 2048]
 
-config_anneal_duration = dcc.Dropdown(
+config_anneal_duration_zne = dcc.Dropdown(
     id="anneal_duration",
     options=[
         {"label": "5 ns", "value": 5},
@@ -48,7 +50,17 @@ config_anneal_duration = dcc.Dropdown(
     style={"max-width": "95%"},
 )
 
-config_kz_graph = RadioItems(
+config_anneal_duration_kz = Input(
+    id='anneal_duration',
+    type='number',
+    min=5,
+    max=100,
+    step=1,
+    value=7,
+    style={'max-width': '95%'}
+)
+
+config_kz_graph_zne = RadioItems(
     id="kz_graph_display",
     options=[
         # {"label": "Both", "value": "both", "disabled": False},
@@ -73,6 +85,31 @@ config_kz_graph = RadioItems(
         "marginLeft": 20,
     },
     inline=True,  # Currently requires above 'inline-block'
+)
+
+config_kz_graph_kz = RadioItems(
+    id='kz_graph_display',
+    options=[
+        {
+            'label': 'Both', 
+            'value': 'both', 
+            'disabled': False
+        },
+        {
+            'label': 'Kink density', 
+            'value': 'kink_density', 
+            'disabled': False
+        },
+        {
+            'label': 'Schedule', 
+            'value': 'schedule', 
+            'disabled': False
+        },
+    ],
+    value='both',
+    inputStyle={'margin-right': '10px', 'margin-bottom': '5px'},
+    labelStyle={'color': 'rgb(3, 184, 255)', 'font-size': 12, 'display': 'inline-block', 'marginLeft': 20},
+    inline=True,    # Currently requires above 'inline-block'
 )
 
 config_spins = RadioItems(

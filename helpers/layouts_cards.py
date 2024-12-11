@@ -54,6 +54,8 @@ def control_card(solvers={}, init_job_status="READY",  demo_type="Kibble-Zurek")
                     of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
                     """, 
                                         style={'color': 'white', 'fontSize': 14})
+        demo_anneal_duration = config_anneal_duration_kz
+        
     else:
         demo_title = "Coherent Annealing: Zero-Noise Extrapolation"
         demo_description = html.P(
@@ -74,6 +76,8 @@ Simulate zero-temperature and zero-time extrapolations on a quantum computer usi
                                 ],
                                 style={"color": "white", "fontSize": 14},
                             )
+        demo_anneal_duration = config_anneal_duration_zne
+        
         
     return dbc.Card(
         [
@@ -94,7 +98,7 @@ Simulate zero-temperature and zero-time extrapolations on a quantum computer usi
                             ),
                             html.Div([config_coupling_strength]),
                             html.H5("Quench Duration [ns]", style=control_header_style),
-                            html.Div([config_anneal_duration]),
+                            html.Div([demo_anneal_duration]),
                             html.H5("QPU", style=control_header_style),
                             html.Div(
                                 [
@@ -126,15 +130,6 @@ Simulate zero-temperature and zero-time extrapolations on a quantum computer usi
                                             style={
                                                 "marginTop": "10px"
                                             },  # Adds some vertical spacing
-                                        ),
-                                        width="auto",
-                                    ),
-                                    dbc.Col(
-                                        dbc.Button(
-                                            "Reset",
-                                            id="btn_reset",
-                                            color="danger",
-                                            style={"marginTop": "10px"},
                                         ),
                                         width="auto",
                                     ),
@@ -220,7 +215,11 @@ graphic_header_style = {
 }
 
 
-def graphs_card():
+def graphs_card(demo_type="Kibble-Zurek"):
+    if demo_type == "Kibble-Zurek":
+        demo_graph = config_kz_graph_kz
+    else:
+        demo_graph = config_kz_graph_zne
     return dbc.Card(
         [
             dbc.Row(
@@ -257,7 +256,7 @@ def graphs_card():
                                 "QPU Samples Vs. Kibble-Zurek Prediction",
                                 style=graphic_header_style,
                             ),
-                            html.Div([config_kz_graph]),
+                            html.Div([demo_graph]),
                         ]
                     ),
                 ]
