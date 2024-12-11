@@ -54,7 +54,7 @@ def control_card(solvers={}, init_job_status="READY",  demo_type="Kibble-Zurek")
                     of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
                     """, 
                                         style={'color': 'white', 'fontSize': 14})
-        demo_anneal_duration = config_anneal_duration_kz
+        demo_anneal_duration = get_config_anneal_duration(demo_type)
         
     else:
         demo_title = "Coherent Annealing: Zero-Noise Extrapolation"
@@ -76,7 +76,7 @@ Simulate zero-temperature and zero-time extrapolations on a quantum computer usi
                                 ],
                                 style={"color": "white", "fontSize": 14},
                             )
-        demo_anneal_duration = config_anneal_duration_zne
+        demo_anneal_duration = get_config_anneal_duration(demo_type)
         
         
     return dbc.Card(
@@ -216,10 +216,7 @@ graphic_header_style = {
 
 
 def graphs_card(demo_type="Kibble-Zurek"):
-    if demo_type == "Kibble-Zurek":
-        demo_graph = config_kz_graph_kz
-    else:
-        demo_graph = config_kz_graph_zne
+    demo_graph = get_config_kz_graph(demo_type)
     return dbc.Card(
         [
             dbc.Row(

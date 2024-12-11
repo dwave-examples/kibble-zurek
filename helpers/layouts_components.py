@@ -17,10 +17,8 @@ from dash.dcc import Checklist, Dropdown, Link, RadioItems, Slider, Input
 from dash import html, dcc
 
 __all__ = [
-    "config_anneal_duration_zne",
-    "config_anneal_duration_kz",
-    "config_kz_graph_zne",
-    "config_kz_graph_kz",
+    "get_config_anneal_duration",
+    "get_config_kz_graph",
     "config_spins",
     "config_coupling_strength",
     "config_qpu_selection",
@@ -33,84 +31,86 @@ __all__ = [
 
 ring_lengths = [512, 1024, 2048]
 
-config_anneal_duration_zne = dcc.Dropdown(
-    id="anneal_duration",
-    options=[
-        {"label": "5 ns", "value": 5},
-        {"label": "10 ns", "value": 10},
-        {"label": "20 ns", "value": 20},
-        {"label": "40 ns", "value": 40},
-        {"label": "80 ns", "value": 80},
-        {"label": "160 ns", "value": 160},
-        {"label": "320 ns", "value": 320},
-        {"label": "640 ns", "value": 640},
-        {"label": "1280 ns", "value": 1280},
-    ],
-    value=80,  # default value
-    style={"max-width": "95%"},
-)
+def get_config_anneal_duration(demo_type):
+    if demo_type == "Kibble-Zurek":
+        return dcc.Dropdown(
+            id="anneal_duration_kz",
+            options=[
+                {"label": "5 ns", "value": 5},
+                {"label": "10 ns", "value": 10},
+                {"label": "20 ns", "value": 20},
+                {"label": "40 ns", "value": 40},
+                {"label": "80 ns", "value": 80},
+                {"label": "160 ns", "value": 160},
+                {"label": "320 ns", "value": 320},
+                {"label": "640 ns", "value": 640},
+                {"label": "1280 ns", "value": 1280},
+            ],
+            value=80,  # default value
+            style={"max-width": "95%"},
+        )
+    else:
+        return dbc.Input(
+            id="anneal_duration_zne",
+            type='number',
+            min=5,
+            max=100,
+            step=1,
+            value=7,
+            style={'max-width': '95%'}
+        )
 
-config_anneal_duration_kz = Input(
-    id='anneal_duration',
-    type='number',
-    min=5,
-    max=100,
-    step=1,
-    value=7,
-    style={'max-width': '95%'}
-)
-
-config_kz_graph_zne = RadioItems(
-    id="kz_graph_display",
-    options=[
-        # {"label": "Both", "value": "both", "disabled": False},
-        {
-            "label": "Kink density vs Anneal time",
-            "value": "kink_density",
-            "disabled": False,
-        },
-        # {"label": "Schedule", "value": "schedule", "disabled": False},
-        {
-            "label": "Kink density vs Noise level",
-            "value": "coupling",
-            "disabled": False,
-        },
-    ],
-    value="coupling",
-    inputStyle={"margin-right": "10px", "margin-bottom": "5px"},
-    labelStyle={
-        "color": "rgb(3, 184, 255)",
-        "font-size": 12,
-        "display": "inline-block",
-        "marginLeft": 20,
-    },
-    inline=True,  # Currently requires above 'inline-block'
-)
-
-config_kz_graph_kz = RadioItems(
-    id='kz_graph_display',
-    options=[
-        {
-            'label': 'Both', 
-            'value': 'both', 
-            'disabled': False
-        },
-        {
-            'label': 'Kink density', 
-            'value': 'kink_density', 
-            'disabled': False
-        },
-        {
-            'label': 'Schedule', 
-            'value': 'schedule', 
-            'disabled': False
-        },
-    ],
-    value='both',
-    inputStyle={'margin-right': '10px', 'margin-bottom': '5px'},
-    labelStyle={'color': 'rgb(3, 184, 255)', 'font-size': 12, 'display': 'inline-block', 'marginLeft': 20},
-    inline=True,    # Currently requires above 'inline-block'
-)
+def get_config_kz_graph(demo_type):
+    if demo_type == "Kibble-Zurek":
+        return RadioItems(
+            id="kz_graph_display",
+            options=[
+                {
+                    'label': 'Both', 
+                    'value': 'both', 
+                    'disabled': False
+                },
+                {
+                    'label': 'Kink density', 
+                    'value': 'kink_density', 
+                    'disabled': False
+                },
+                {
+                    'label': 'Schedule', 
+                    'value': 'schedule', 
+                    'disabled': False
+                },
+            ],
+            value='both',
+            inputStyle={'margin-right': '10px', 'margin-bottom': '5px'},
+            labelStyle={'color': 'rgb(3, 184, 255)', 'font-size': 12, 'display': 'inline-block', 'marginLeft': 20},
+            inline=True,
+        )
+    else:
+        return RadioItems(
+            id="zne_graph_display",
+            options=[
+                {
+                    "label": "Kink density vs Anneal time",
+                    "value": "kink_density",
+                    "disabled": False,
+                },
+                {
+                    "label": "Kink density vs Noise level",
+                    "value": "coupling",
+                    "disabled": False,
+                },
+            ],
+            value="coupling",
+            inputStyle={"margin-right": "10px", "margin-bottom": "5px"},
+            labelStyle={
+                "color": "rgb(3, 184, 255)",
+                "font-size": 12,
+                "display": "inline-block",
+                "marginLeft": 20,
+            },
+            inline=True,
+        )
 
 config_spins = RadioItems(
     id="spins",
