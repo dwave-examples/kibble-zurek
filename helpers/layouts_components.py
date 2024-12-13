@@ -129,29 +129,29 @@ config_spins = RadioItems(
     inline=True,  # Currently requires above 'inline-block'
 )
 
-j_marks = {
-    round(0.1 * val, 1): (
-        {"label": f"{round(0.1*val, 1)}", "style": {"color": "blue"}}
-        if round(0.1 * val, 0) != 0.1 * val
-        else {"label": f"{round(0.1*val)}", "style": {"color": "blue"}}
-    )
-    for val in range(-18, 0, 2)
-}
-j_marks.update(
-    {
-        round(0.1 * val, 1): (
-            {"label": f"{round(0.1*val, 1)}", "style": {"color": "red"}}
-            if round(0.1 * val, 0) != 0.1 * val
-            else {"label": f"{round(0.1*val)}", "style": {"color": "red"}}
-        )
-        for val in range(2, 10, 2)
-    }
-)
+# j_marks = {
+#     round(0.1 * val, 1): (
+#         {"label": f"{round(0.1*val, 1)}", "style": {"color": "blue"}}
+#         if round(0.1 * val, 0) != 0.1 * val
+#         else {"label": f"{round(0.1*val)}", "style": {"color": "blue"}}
+#     )
+#     for val in range(-18, 0, 2)
+# }
+# j_marks.update(
+#     {
+#         round(0.1 * val, 1): (
+#             {"label": f"{round(0.1*val, 1)}", "style": {"color": "red"}}
+#             if round(0.1 * val, 0) != 0.1 * val
+#             else {"label": f"{round(0.1*val)}", "style": {"color": "red"}}
+#         )
+#         for val in range(2, 10, 2)
+#     }
+# )
 # Dash Slider has some issue with int values having a zero after the decimal point
-j_marks[-2] = {"label": "-2", "style": {"color": "blue"}}
-del j_marks[-1.0]
-j_marks[-1] = {"label": "-1", "style": {"color": "blue"}}
-j_marks[1] = {"label": "1", "style": {"color": "red"}}
+# j_marks[-2] = {"label": "-2", "style": {"color": "blue"}}
+# del j_marks[-1.0]
+# j_marks[-1] = {"label": "-1", "style": {"color": "blue"}}
+# j_marks[1] = {"label": "1", "style": {"color": "red"}}
 config_coupling_strength = dbc.Row(
     [
         dbc.Col(
@@ -160,10 +160,10 @@ config_coupling_strength = dbc.Row(
                     Slider(
                         id="coupling_strength",
                         value=-1.8,
-                        marks=j_marks,
-                        step=None,
+                        step=0.2,
                         min=-1.8,
                         max=-0.6,
+                        tooltip={"placement": "bottom", "always_visible": True}
                     )
                 ]
             ),
