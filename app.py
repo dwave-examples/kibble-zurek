@@ -450,8 +450,8 @@ def display_graphics_kink_density(
     else:
         if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
             
-            kz_data = {}
-            fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, url="Demo1")
+            kz_data = {"k":[]}
+            fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, kz_data=kz_data, url="Demo1")
 
             return fig, coupling_data, zne_estimates, False, kz_data
         
@@ -464,11 +464,10 @@ def display_graphics_kink_density(
                 sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
                 _, kink_density = kink_stats(sampleset_unembedded, J)
                 
-                if J not in kz_data:
-                    kz_data[J] = []
+                
                 # Append the new data point
-                kz_data[J].append(
-                    {"kink_density": kink_density, "ta_ns": ta}
+                kz_data["k"].append(
+                    (kink_density, ta)
                 )
                 fig = plot_kink_density(graph_display, figure, kink_density, ta, J, url="Demo1")
                 return fig, coupling_data, zne_estimates, False, kz_data
