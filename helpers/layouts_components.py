@@ -152,24 +152,32 @@ config_spins = RadioItems(
 # del j_marks[-1.0]
 # j_marks[-1] = {"label": "-1", "style": {"color": "blue"}}
 # j_marks[1] = {"label": "1", "style": {"color": "red"}}
-config_coupling_strength = dbc.Row(
-    [
-        dbc.Col(
-            html.Div(
-                [
-                    Slider(
-                        id="coupling_strength",
-                        value=-1.8,
-                        step=0.2,
-                        min=-1.8,
-                        max=-0.6,
-                        tooltip={"placement": "bottom", "always_visible": True}
-                    )
-                ]
+def get_config_coupling_strength(demo_type):
+    max_J = -2
+    min_J = 1
+    default = -1.4
+    if demo_type == "Zero-Noise":
+        max_J = -0.6
+        min_J = -1.8
+        default = -1.8
+    return dbc.Row(
+        [
+            dbc.Col(
+                html.Div(
+                    [
+                        Slider(
+                            id="coupling_strength",
+                            value=default,
+                            step=0.2,
+                            min=min_J,
+                            max=-max_J,
+                            tooltip={"placement": "bottom", "always_visible": True}
+                        )
+                    ]
+                ),
             ),
-        ),
-    ]
-)
+        ]
+    )
 
 
 def config_qpu_selection(solvers, default="Diffusion [Classical]"):
