@@ -98,6 +98,7 @@ def demo_layout(demo_type):
             # store zero noise extrapolation
             dcc.Store(id="zne_estimates", data={}),
             dcc.Store(id="modal_trigger", data=False),
+            dcc.Store(id="kz_data", data={}),
             dbc.Modal(
                 [
                     dbc.ModalHeader(dbc.ModalTitle("Error")),
@@ -324,6 +325,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Output("coupling_data", "data"),  # store data using dcc
     Output("zne_estimates", "data"),  # update zne_estimates
     Output("modal_trigger", "data"),
+    Output("kz_data", "data"),
     Input("qpu_selection", "value"),
     #Input("zne_graph_display", "value"),
     Input("graph_display", "value"),
@@ -339,7 +341,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     State("sample_vs_theory", "figure"),
     State("coupling_data", "data"),  # access previously stored data
     State("zne_estimates", "data"),  # Access ZNE estimates
-    
+    State("kz_data", "data") # get kibble zurek data point
 )
 def display_graphics_kink_density(
     qpu_name,
@@ -355,6 +357,7 @@ def display_graphics_kink_density(
     figure,
     coupling_data,
     zne_estimates,
+    kz_data,
 ):
     """Generate graphics for kink density based on theory and QPU samples."""
 
@@ -377,9 +380,10 @@ def display_graphics_kink_density(
                 schedule_filename,
                 coupling_data,
                 zne_estimates,
+                url="Demo2",
             )
 
-            return fig, coupling_data, zne_estimates, False
+            return fig, coupling_data, zne_estimates, False, kz_data
 
         if trigger_id in [
             "zne_graph_display",
@@ -394,9 +398,10 @@ def display_graphics_kink_density(
                 schedule_filename,
                 coupling_data,
                 zne_estimates,
+                url="Demo2",
             )
 
-            return fig, coupling_data, zne_estimates, False
+            return fig, coupling_data, zne_estimates, False, kz_data
 
         if trigger_id == "job_submit_state":
 
@@ -426,7 +431,7 @@ def display_graphics_kink_density(
                     fig, coupling_data, qpu_name, zne_estimates, graph_display, ta_str
                 )
 
-                return fig, coupling_data, zne_estimates, modal_trigger
+                return fig, coupling_data, zne_estimates, modal_trigger, kz_data
 
             else:
                 return dash.no_update
@@ -439,15 +444,16 @@ def display_graphics_kink_density(
             schedule_filename,
             coupling_data,
             zne_estimates,
+            url='Demo2'
         )
-        return fig, coupling_data, zne_estimates, False
+        return fig, coupling_data, zne_estimates, False, kz_data
     else:
         if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
             
-        
-            fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates)
+            kz_data = {}
+            fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, url="Demo1")
 
-            return fig, coupling_data, zne_estimates, False
+            return fig, coupling_data, zne_estimates, False, kz_data
         
         if trigger_id == 'job_submit_state':
 
@@ -458,14 +464,20 @@ def display_graphics_kink_density(
                 sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
                 _, kink_density = kink_stats(sampleset_unembedded, J)
                 
-                fig = plot_kink_density(graph_display, figure, kink_density, ta, J)
-                return fig, coupling_data, zne_estimates, False
+                if J not in kz_data:
+                    kz_data[J] = []
+                # Append the new data point
+                kz_data[J].append(
+                    {"kink_density": kink_density, "ta_ns": ta}
+                )
+                fig = plot_kink_density(graph_display, figure, kink_density, ta, J, url="Demo1")
+                return fig, coupling_data, zne_estimates, False, kz_data
             
             else:
                 return dash.no_update
             
-        fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates)
-        return fig, coupling_data, zne_estimates, False
+        fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, kz_data, url="Demo1")
+        return fig, coupling_data, zne_estimates, False, kz_data
 
 @app.callback(
     Output("spin_orientation", "figure"),
