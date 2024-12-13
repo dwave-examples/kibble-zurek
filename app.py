@@ -132,8 +132,8 @@ navbar = dbc.Navbar(
             # Navbar Tabs
             dbc.Nav(
                 [
-                    dbc.NavItem(dbc.NavLink("Demo 1", href="/demo1", active="exact")),
-                    dbc.NavItem(dbc.NavLink("Demo 2", href="/demo2", active="exact")),
+                    dbc.NavItem(dbc.NavLink("Kibble-Zurek Mechanism", href="/demo1", active="exact")),
+                    dbc.NavItem(dbc.NavLink("Kibble-Zurek Mechanism with Noise Mitigation", href="/demo2", active="exact")),
                 ],
                 pills=True,
             ),
