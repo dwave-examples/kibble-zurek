@@ -32,7 +32,7 @@ from helpers.layouts_cards import *
 from helpers.layouts_components import *
 from helpers.plots import *
 from helpers.qa import *
-from helpers.tooltips import tool_tips
+from helpers.tooltips import tool_tips_demo1, tool_tips_demo2
 
 import plotly.graph_objects as go
 
@@ -63,7 +63,13 @@ if os.getenv("ZNE") == "YES":
     if not client:
         client = "dummy"
 
+tool_tips = tool_tips_demo1
 def demo_layout(demo_type):
+
+    if demo_type == "Kibble-Zurek":
+        tool_tips = tool_tips_demo1
+    else:
+        tool_tips = tool_tips_demo2
 
     return dbc.Container(
         [
@@ -739,7 +745,7 @@ def activate_tooltips(tooltips_show):
 
     trigger = dash.callback_context.triggered
     trigger_id = trigger[0]["prop_id"].split(".")[0]
-
+        
     if trigger_id == "tooltips_show":
         if tooltips_show == "off":
             return (
@@ -752,11 +758,9 @@ def activate_tooltips(tooltips_show):
                 dict(display="none"),
                 dict(display="none"),
                 dict(display="none"),
-                dict(display="none"),
             )
 
     return (
-        dict(),
         dict(),
         dict(),
         dict(),
