@@ -252,6 +252,19 @@ def plot_kink_densities_bg(
                     )
         else:
             fig_data = [predicted_plus, predicted_minus]
+            if "k" in kz_data:
+                for pair in kz_data["k"]:
+                    fig_data.append(
+                        go.Scatter(
+                            x=[pair[1]],       
+                            y=[pair[0]],
+                            mode="markers",
+                            marker=dict(size=10, color="black", symbol="x"),
+                            xaxis="x1",
+                            yaxis="y1",
+                            showlegend=False
+                        )
+                    )
             
     elif display == "schedule":
 
