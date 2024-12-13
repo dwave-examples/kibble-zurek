@@ -299,20 +299,6 @@ def plot_kink_densities_bg(
                             marker=dict(size=10, color=color, symbol="x"),
                         )
                     )
-        # Plot ZNE estimates
-        for ta_str, a in zne_estimates.items():
-            fig_data.append(
-                go.Scatter(
-                    x=[0],
-                    y=[a],
-                    mode="markers",
-                    name="ZNE Estimate",
-                    marker=dict(size=12, color="purple", symbol="diamond"),
-                    showlegend=False,
-                    xaxis="x3",
-                    yaxis="y1",
-                )
-            )
 
     else:  # Display both plots together
 
