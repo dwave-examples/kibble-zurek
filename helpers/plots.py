@@ -346,7 +346,7 @@ def plot_kink_densities_bg(
             #         )
             #     )
         # Add previously computed kz_data points
-        if kz_data is not None and kz_data["k"] is not None:
+        if "k" in kz_data:
             for pair in kz_data["k"]:
                 fig_data.append(
                     go.Scatter(
@@ -424,6 +424,23 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, url=None)
 
     fig = go.Figure(fig_dict)
 
+    if url == "Demo1":
+        fig.add_trace(
+        go.Scatter(
+                x=[anneal_time], 
+                y=[kink_density], 
+                xaxis='x1',
+                yaxis='y1',
+                showlegend=False,
+                marker=dict(size=10, 
+                            color='black',
+                            symbol='x',
+                )
+            )
+        )
+
+        return fig
+    
     ta_value = float(anneal_time)
 
     if display == "coupling":
@@ -459,23 +476,6 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, url=None)
         coupling_label[J] = True
     else:
         legend = False
-
-    if url == "Demo1":
-        fig.add_trace(
-        go.Scatter(
-                x=[anneal_time], 
-                y=[kink_density], 
-                xaxis='x1',
-                yaxis='y1',
-                showlegend=False,
-                marker=dict(size=10, 
-                            color='black',
-                            symbol='x',
-                )
-            )
-        )
-
-        return fig
     
     fig.add_trace(
         go.Scatter(

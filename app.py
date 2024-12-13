@@ -448,7 +448,7 @@ def display_graphics_kink_density(
         )
         return fig, coupling_data, zne_estimates, False, kz_data
     else:
-        if trigger_id in ['kz_graph_display', 'coupling_strength', 'quench_schedule_filename'] :
+        if trigger_id == "qpu_selection" or trigger_id == "spins":
             
             kz_data = {"k":[]}
             fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, kz_data=kz_data, url="Demo1")
