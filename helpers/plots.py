@@ -359,7 +359,7 @@ def plot_kink_densities_bg(
             #         )
             #     )
         # Add previously computed kz_data points
-        if "k" in kz_data:
+        if kz_data is not None and "k" in kz_data:
             for pair in kz_data["k"]:
                 fig_data.append(
                     go.Scatter(
