@@ -96,7 +96,7 @@ Simulate zero-temperature and zero-time extrapolations on a quantum computer usi
                             html.H5(
                                 "Coupling Strength (J)", style=control_header_style
                             ),
-                            html.Div([config_coupling_strength]),
+                            html.Div([get_config_coupling_strength(demo_type)]),
                             html.H5("Quench Duration [ns]", style=control_header_style),
                             html.Div([demo_anneal_duration]),
                             html.H5("QPU", style=control_header_style),

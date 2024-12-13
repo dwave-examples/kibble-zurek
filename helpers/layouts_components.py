@@ -20,7 +20,7 @@ __all__ = [
     "get_config_anneal_duration",
     "get_config_kz_graph",
     "config_spins",
-    "config_coupling_strength",
+    "get_config_coupling_strength",
     "config_qpu_selection",
     "dbc_modal",
     "embeddings",
