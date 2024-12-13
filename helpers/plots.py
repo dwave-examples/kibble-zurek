@@ -612,7 +612,7 @@ def plot_zne_fitted_line(
         # Ensure there are enough unique x values for fitting
         if len(np.unique(x)) > 1:
             # Fit a 1st degree polynomial (linear fit)
-            if qpu_name == "mock_dwave_solver":
+            if qpu_name == "Diffusion [Classical]":
                 # Fancy non-linear function
                 y_func_x = fitted_function(x, y, method="mixture_of_exponentials")
             else:

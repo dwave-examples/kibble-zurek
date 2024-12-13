@@ -56,7 +56,7 @@ except Exception:
     client = None
     init_job_status = "NO SOLVER"
 if os.getenv("ZNE") == "YES":
-    qpus["mock_dwave_solver"] = MockKibbleZurekSampler(
+    qpus["Diffusion [Classical]"] = MockKibbleZurekSampler(
         topology_type="pegasus", topology_shape=[16]
     )  # Change sampler to mock
     init_job_status = "READY"
@@ -277,7 +277,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
             file for file in os.listdir("helpers") if ".json" in file and "emb_" in file
         ]:
 
-            if qpu_name == "mock_dwave_solver":
+            if qpu_name == "Diffusion [Classical]":
                 _qpu_name = "Advantage_system6.4"
             else:
                 _qpu_name = qpu_name
@@ -527,15 +527,15 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
         embedding = embeddings_cached[spins]
         annealing_time = calc_lambda(J, J_baseline) * (ta_ns / 1000)
 
-        if qpu_name == "mock_dwave_solver":
+        if qpu_name == "Diffusion [Classical]":
 
             bqm_embedded = embed_bqm(
                 bqm,
                 embedding,
-                qpus["mock_dwave_solver"].adjacency,
+                qpus["Diffusion [Classical]"].adjacency,
             )
 
-            sampleset = qpus["mock_dwave_solver"].sample(
+            sampleset = qpus["Diffusion [Classical]"].sample(
                 bqm_embedded, annealing_time=annealing_time
             )
             return json.dumps(sampleset.to_serializable())
@@ -607,10 +607,10 @@ def simulate(
 
     if trigger_id == "btn_simulate":
 
-        if spins in cached_embedding_lengths or qpu_name == "mock_dwave_solver":
+        if spins in cached_embedding_lengths or qpu_name == "Diffusion [Classical]":
 
             submit_time = datetime.datetime.now().strftime("%c")
-            if qpu_name == "mock_dwave_solver":  # Hack to fix switch from SA to QPU
+            if qpu_name == "Diffusion [Classical]":  # Hack to fix switch from SA to QPU
                 submit_time = "SA"
             job_submit_state = "SUBMITTED"
             embedding = dash.no_update
