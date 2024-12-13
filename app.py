@@ -335,7 +335,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Input("qpu_selection", "value"),
     #Input("zne_graph_display", "value"),
     Input("graph_display", "value"),
-    State("coupling_strength", "value"),  # previously input
+    Input("coupling_strength", "value"),  # previously input
     Input("quench_schedule_filename", "children"),
     Input("job_submit_state", "children"),
     Input("job_id", "children"),
@@ -454,10 +454,10 @@ def display_graphics_kink_density(
         )
         return fig, coupling_data, zne_estimates, False, kz_data
     else:
-        if trigger_id == "qpu_selection" or trigger_id == "spins":
+        if trigger_id == "qpu_selection" or trigger_id == "spins" or trigger_id == "coupling_strength":
             
             kz_data = {"k":[]}
-            fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, kz_data=kz_data, url="Demo1")
+            fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J, schedule_filename, coupling_data, zne_estimates, kz_data=kz_data, url="Demo1")
 
             return fig, coupling_data, zne_estimates, False, kz_data
         
@@ -481,7 +481,7 @@ def display_graphics_kink_density(
             else:
                 return dash.no_update
             
-        fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J_baseline, schedule_filename, coupling_data, zne_estimates, kz_data, url="Demo1")
+        fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J, schedule_filename, coupling_data, zne_estimates, kz_data, url="Demo1")
         return fig, coupling_data, zne_estimates, False, kz_data
 
 @app.callback(
