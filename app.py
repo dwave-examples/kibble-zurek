@@ -40,7 +40,6 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # global variable for a default J value
 J_baseline = -1.8
-
 # Initialize: available QPUs, initial progress-bar status
 try:
     client = Client.from_config(client="qpu")
@@ -378,7 +377,6 @@ def display_graphics_kink_density(
         ):
             coupling_data = {}
             zne_estimates = {}
-
             fig = plot_kink_densities_bg(
                 graph_display,
                 [ta_min, ta_max],
@@ -528,9 +526,13 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
     State("coupling_strength", "value"),
     State("anneal_duration", "value"),
     State("embeddings_cached", "data"),
+    # State("ta_multiplier", "value")
 )
 def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
+
     """Submit job and provide job ID."""
+    # ta_multiplier should be 1, unless (withNoiseMitigation and [J or schedule]) changes. In which case recalculate as ta_multiplier=calc_lambda(coupling_strength, schedule, J_baseline=-1.8) as a function of the correct schedule
+    ta_multiplier = calc_lambda(J, schedule=None, J_baseline=J_baseline)
 
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
@@ -542,7 +544,7 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
 
         embeddings_cached = json_to_dict(embeddings_cached)
         embedding = embeddings_cached[spins]
-        annealing_time = calc_lambda(J, J_baseline) * (ta_ns / 1000)
+        annealing_time = (ta_ns / 1000)
 
         if qpu_name == "Diffusion [Classical]":
 
@@ -566,7 +568,7 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
             computation = solver.sample_bqm(
                 bqm=bqm_embedded,
                 fast_anneal=True,
-                annealing_time=annealing_time,
+                annealing_time=annealing_time*ta_multiplier,
                 auto_scale=False,
                 answer_mode="raw",  # Easier than accounting for num_occurrences
                 num_reads=100,

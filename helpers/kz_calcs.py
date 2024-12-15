@@ -14,22 +14,22 @@
 
 import numpy as np
 
-__all__ = ["kink_stats", "theoretical_kink_density"]
+__all__ = ["kink_stats", "theoretical_kink_density_prefactor", "theoretical_kink_density", "calc_kappa", "calc_lambda"]
 
 
-def theoretical_kink_density(annealing_times_ns, J, schedule, schedule_name):
+def theoretical_kink_density_prefactor(J, schedule=None, schedule_name=None):
     """
     Calculate the kink density predicted for given the coupling strength and annealing times.
 
-    Args:
-        annealing_times_ns: Iterable of annealing times, in nanoseconds.
+    See: ""
 
+    Args:
         J: Coupling strength between the spins of the ring.
 
         schedule: Anneal schedule for the selected QPU.
 
-        schedule_name: Filename of anneal schedule. Used to compensate for schedule energy
-        overestimate.
+        schedule_name: Filename of anneal schedule. Used to compensate for 
+            schedule energy overestimate.
 
     Returns:
         Kink density per anneal time, as a NumPy array.
@@ -37,8 +37,13 @@ def theoretical_kink_density(annealing_times_ns, J, schedule, schedule_name):
 
     # See the Code section of the README.md file for an explanation of the
     # following code.
+    if schedule is None:
+        if schedule_name:
+            schedule = pd.read_csv(f"helpers/{schedule_name}")
+        else:
+            schedule = pd.read_csv("helpers/FALLBACK_SCHEDULE.csv")
 
-    COMPENSATION_SCHEDULE_ENERGY = 0.8 if "Advantage_system" in schedule_name else 1.0
+    COMPENSATION_SCHEDULE_ENERGY = 0.8 if (schedule_name is not None and "Advantage_system" in schedule_name) else 1.0
 
     A = COMPENSATION_SCHEDULE_ENERGY * schedule["A(s) (GHz)"]
     B = COMPENSATION_SCHEDULE_ENERGY * schedule["B(s) (GHz)"]
@@ -53,10 +58,56 @@ def theoretical_kink_density(annealing_times_ns, J, schedule, schedule_name):
     b_denominator = B_tag[sc_indx] / B[sc_indx] - A_tag[sc_indx] / A[sc_indx]
     b = b_numerator / b_denominator
 
-    return np.power([1e-9 * t for t in annealing_times_ns], -0.5) / (
-        2 * np.pi * np.sqrt(2 * b)
+    return b
+
+def theoretical_kink_density(annealing_times_ns, J=None, schedule=None, schedule_name=None, b=None):
+    """
+    Calculate the kink density as a function of anneal time
+
+    Args:
+        annealing_times_ns: Iterable of annealing times, in nanoseconds.
+
+        b: A timescale based on linearization of the schedule at criticality
+
+        J: Coupling strength between the spins of the ring.
+
+        schedule: Anneal schedule for the selected QPU.
+
+        schedule_name: Filename of anneal schedule. Used to compensate for 
+            schedule energy overestimate.
+
+    Returns:
+        Kink density per anneal time, as a NumPy array.
+    """
+    if b is None:
+        b = theoretical_kink_density_prefactor(J, schedule, schedule_name)
+    return np.power([1e-9 * t / b for t in annealing_times_ns], -0.5) / (
+        2 * np.pi * np.sqrt(2)
     )
 
+def calc_kappa(J, J_baseline=-1.8):
+    """Coupling ratio 
+
+    See "Quantum error mitigation in quantum annealing" usage."""
+    return abs(J_baseline / J)
+
+def calc_lambda(J, *, schedule=None, schedule_name=None, J_baseline=-1.8):
+    """Time rescaling factor (relative to J_baseline)
+
+    Rate through the transition is modified non-linearly by the
+    rescaling of J. If |J| is smaller than |J_baseline| we effectively move 
+    more slowly through the critical region, the ratio of timescales is > 1.
+    See "Quantum error mitigation in quantum annealing" usage.
+    """
+    if schedule is None:
+        # Fallback, assume ideal linear schedule
+        kappa = calc_kappa(J, J_baseline)
+        return kappa
+    else:
+        b_ref = theoretical_kink_density_prefactor(J_baseline, schedule, schedule_name)
+        b = theoretical_kink_density_prefactor(J, schedule, schedule_name)
+        
+        return b/b_ref
 
 def kink_stats(sampleset, J):
     """
