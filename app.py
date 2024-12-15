@@ -526,14 +526,10 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
     State("coupling_strength", "value"),
     State("anneal_duration", "value"),
     State("embeddings_cached", "data"),
-    # State("ta_multiplier", "value")
 )
 def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
 
     """Submit job and provide job ID."""
-    # ta_multiplier should be 1, unless (withNoiseMitigation and [J or schedule]) changes. In which case recalculate as ta_multiplier=calc_lambda(coupling_strength, schedule, J_baseline=-1.8) as a function of the correct schedule
-    ta_multiplier = calc_lambda(J, schedule=None, J_baseline=J_baseline)
-
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     if trigger_id == "job_submit_time":
@@ -564,7 +560,11 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
             bqm_embedded = embed_bqm(
                 bqm, embedding, DWaveSampler(solver=solver.name).adjacency
             )
-
+            # ta_multiplier should be 1, unless (withNoiseMitigation and [J or schedule]) changes, shouldn't change for MockSampler. In which case recalculate as ta_multiplier=calc_lambda(coupling_strength, schedule, J_baseline=-1.8) as a function of the correct schedule
+            # State("ta_multiplier", "value") ? Should recalculate when J or schedule changes IFF noise mitigation tab?
+            ta_multiplier = calc_lambda(J, schedule=None, J_baseline=J_baseline)
+            print(f'{ta_multiplier}: qpu_name')
+    
             computation = solver.sample_bqm(
                 bqm=bqm_embedded,
                 fast_anneal=True,

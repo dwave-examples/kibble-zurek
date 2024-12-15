@@ -28,7 +28,7 @@ def theoretical_kink_density_prefactor(J, schedule=None, schedule_name=None):
 
         schedule: Anneal schedule for the selected QPU.
 
-        schedule_name: Filename of anneal schedule. Used to compensate for 
+        schedule_name: Filename of anneal schedule. Used to compensate for
             schedule energy overestimate.
 
     Returns:
@@ -86,7 +86,7 @@ def theoretical_kink_density(annealing_times_ns, J=None, schedule=None, schedule
     )
 
 def calc_kappa(J, J_baseline=-1.8):
-    """Coupling ratio 
+    """Coupling ratio
 
     See "Quantum error mitigation in quantum annealing" usage."""
     return abs(J_baseline / J)
@@ -95,7 +95,7 @@ def calc_lambda(J, *, schedule=None, schedule_name=None, J_baseline=-1.8):
     """Time rescaling factor (relative to J_baseline)
 
     Rate through the transition is modified non-linearly by the
-    rescaling of J. If |J| is smaller than |J_baseline| we effectively move 
+    rescaling of J. If |J| is smaller than |J_baseline| we effectively move
     more slowly through the critical region, the ratio of timescales is > 1.
     See "Quantum error mitigation in quantum annealing" usage.
     """
@@ -106,7 +106,7 @@ def calc_lambda(J, *, schedule=None, schedule_name=None, J_baseline=-1.8):
     else:
         b_ref = theoretical_kink_density_prefactor(J_baseline, schedule, schedule_name)
         b = theoretical_kink_density_prefactor(J, schedule, schedule_name)
-        
+
         return b/b_ref
 
 def kink_stats(sampleset, J):
