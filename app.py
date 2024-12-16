@@ -34,7 +34,7 @@ from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips_demo1, tool_tips_demo2
 
-import plotly.graph_objects as go
+import yaml
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -54,13 +54,16 @@ except Exception:
     qpus = {}
     client = None
     init_job_status = "NO SOLVER"
-if os.getenv("ZNE") == "YES":
-    qpus["Diffusion [Classical]"] = MockKibbleZurekSampler(
-        topology_type="pegasus", topology_shape=[16]
-    )  # Change sampler to mock
-    init_job_status = "READY"
-    if not client:
-        client = "dummy"
+with open("config.yaml", "r") as file:
+    config = yaml.safe_load(file)
+    if config["ZNE"]:
+        qpus["Diffusion [Classical]"] = globals()[config["sampler"]["type"]](
+            topology_type=config["sampler"]["topology_type"],
+            topology_shape=config["sampler"]["topology_shape"],
+        )
+        init_job_status = config["init_job_status"]
+        if not client:
+            client = config["client"]
 
 tool_tips = tool_tips_demo1
 def demo_layout(demo_type):
@@ -526,8 +529,10 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
     State("coupling_strength", "value"),
     State("anneal_duration", "value"),
     State("embeddings_cached", "data"),
+    State("url", "pathname"),
+    State("quench_schedule_filename", "children"),
 )
-def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
+def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached, pathname, filename):
 
     """Submit job and provide job ID."""
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -562,9 +567,13 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached):
             )
             # ta_multiplier should be 1, unless (withNoiseMitigation and [J or schedule]) changes, shouldn't change for MockSampler. In which case recalculate as ta_multiplier=calc_lambda(coupling_strength, schedule, J_baseline=-1.8) as a function of the correct schedule
             # State("ta_multiplier", "value") ? Should recalculate when J or schedule changes IFF noise mitigation tab?
-            ta_multiplier = calc_lambda(J, schedule=None, J_baseline=J_baseline)
+            ta_multiplier = 1
+
+            if pathname == "/demo2":
+                ta_multiplier = calc_lambda(J, schedule_name=filename, J_baseline=J_baseline)
+
             print(f'{ta_multiplier}: qpu_name')
-    
+
             computation = solver.sample_bqm(
                 bqm=bqm_embedded,
                 fast_anneal=True,
