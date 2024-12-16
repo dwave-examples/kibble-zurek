@@ -28,7 +28,7 @@ class MockKibbleZurekSampler(MockDWaveSampler):
         # At large time (equilibrium) for long chains
         # <x_i x_{i+1}> lessthansimilarto t,
         # At J=-1 we want a kink density to bottom out. Therefore:
-        beta = np.atanh(1 - 2 * kink_density_limit_absJ1)
+        beta = np.arctanh(1 - 2 * kink_density_limit_absJ1)
         substitute_kwargs = {
             "beta_range": [beta, beta],  # Quench
             "randomize_order": True,
@@ -52,7 +52,7 @@ class MockKibbleZurekSampler(MockDWaveSampler):
 
         # Extract annealing_time from kwargs (if provided)
         annealing_time = kwargs.pop("annealing_time", 20)  # 20us default.
-        num_sweeps = int(annealing_time * 3000)  # 3000 sweeps per microsecond
+        num_sweeps = int(annealing_time * 1000)  # 1000 sweeps per microsecond
         # Extract flux biases from kwargs (if provided)
         # flux_biases = kwargs.pop('flux_biases', {})
         # flux_to_h_factor = fluxbias_to_h()
