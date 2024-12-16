@@ -18,10 +18,11 @@ __all__ = ["kink_stats", "theoretical_kink_density_prefactor", "theoretical_kink
 
 
 def theoretical_kink_density_prefactor(J, schedule=None, schedule_name=None):
-    """
-    Calculate the kink density predicted for given the coupling strength and annealing times.
+    """Time rescaling factor
 
-    See: ""
+    Calculate the rescaling of time necessary to replicate
+    the behaviour of a linearized schedule at coupling strength 1.
+    See: "Error Mitigation in Quantum Annealing"
 
     Args:
         J: Coupling strength between the spins of the ring.
@@ -81,7 +82,7 @@ def theoretical_kink_density(annealing_times_ns, J=None, schedule=None, schedule
     """
     if b is None:
         b = theoretical_kink_density_prefactor(J, schedule, schedule_name)
-    return np.power([1e-9 * t / b for t in annealing_times_ns], -0.5) / (
+    return np.power([1e-9 * t * b for t in annealing_times_ns], -0.5) / (
         2 * np.pi * np.sqrt(2)
     )
 
