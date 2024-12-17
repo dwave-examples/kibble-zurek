@@ -104,7 +104,7 @@ def calc_lambda(J, *, schedule_name=None, J_baseline=-1.8):
         b_ref = theoretical_kink_density_prefactor(J_baseline, schedule_name)
         b = theoretical_kink_density_prefactor(J, schedule_name)
 
-        return b/b_ref
+        return b_ref/b
 
 def kink_stats(sampleset, J):
     """
