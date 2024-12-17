@@ -40,6 +40,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # global variable for a default J value
 J_baseline = -1.8
+
 # Initialize: available QPUs, initial progress-bar status
 try:
     client = Client.from_config(client="qpu")
@@ -106,6 +107,7 @@ def demo_layout(demo_type):
             # store zero noise extrapolation
             dcc.Store(id="zne_estimates", data={}),
             dcc.Store(id="modal_trigger", data=False),
+            dcc.Store(id="initial_warning", data=False), 
             dcc.Store(id="kz_data", data={}),
             dbc.Modal(
                 [
@@ -115,6 +117,17 @@ def demo_layout(demo_type):
                     ),
                 ],
                 id="error-modal",
+                is_open=False,
+            ),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("Warning", style={"color": "orange", "fontWeight": "bold"})),
+                    dbc.ModalBody(
+                        "The Classical [diffusion] option executes a Markov Chain method locally for purposes of testing the demo interface. Kinks diffuse to annihilate, but are also created/destroyed by thermal fluctuations.  The number of updates performed is set proportional to the annealing time. In the limit of no thermal noise, kinks diffuse to eliminate producing a power law, this process produces a power-law but for reasons independent of the Kibble-Zurek mechanism. In the noise mitigation demo we fit the impact of thermal fluctuations with a mixture of exponentials, by contrast with the quadratic fit appropriate to quantum dynamics.",
+                        style={"color": "black", "fontSize": "16px"}, 
+                    ),
+                ],
+                id="warning-modal",
                 is_open=False,
             ),
         ],
@@ -181,7 +194,6 @@ def display_page(pathname):
         return demo_layout("Zero-Noise")
     else:
         return demo_layout("Kibble-Zurek")
-
 
 
 @app.callback(
@@ -523,6 +535,8 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
 
 @app.callback(
     Output("job_id", "children"),
+    Output("initial_warning", "data"),
+    Output("warning-modal", "is_open"),
     Input("job_submit_time", "children"),
     State("qpu_selection", "value"),
     State("spins", "value"),
@@ -531,8 +545,9 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
     State("embeddings_cached", "data"),
     State("url", "pathname"),
     State("quench_schedule_filename", "children"),
+    State("initial_warning", "data")
 )
-def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached, pathname, filename):
+def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached, pathname, filename, initial_warning):
 
     """Submit job and provide job ID."""
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
@@ -558,7 +573,9 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached, pa
             sampleset = qpus["Diffusion [Classical]"].sample(
                 bqm_embedded, annealing_time=annealing_time
             )
-            return json.dumps(sampleset.to_serializable())
+            if not initial_warning:
+                return json.dumps(sampleset.to_serializable()), True, True
+            return json.dumps(sampleset.to_serializable()), True, False
 
         else:
 
@@ -584,7 +601,7 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached, pa
                 label=f"Examples - Kibble-Zurek Simulation, submitted: {job_submit_time}",
             )
 
-        return computation.wait_id()
+        return computation.wait_id(), False, False
 
     return dash.no_update
 
@@ -793,7 +810,6 @@ def toggle_modal(trigger, is_open):
     if trigger:
         return True
     return is_open
-
 
 if __name__ == "__main__":
     app.run_server(debug=True)
