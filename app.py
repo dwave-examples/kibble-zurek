@@ -436,10 +436,11 @@ def display_graphics_kink_density(
                 )
                 _, kink_density = kink_stats(sampleset_unembedded, J)
 
-                 # Calculate kappa
-                kappa = calc_kappa(J, J_baseline)
+                # Calculate lambda (previously kappa)
+                # Added _ to avoid keyword restriction  
+                _lambda = calc_lambda(J=J, J_baseline=J_baseline)
 
-                fig = plot_kink_density(graph_display, figure, kink_density, ta, J)
+                fig = plot_kink_density(graph_display, figure, kink_density, ta, J, _lambda)
 
                 # Initialize the list for this anneal_time if not present
                 ta_str = str(ta)
@@ -447,7 +448,7 @@ def display_graphics_kink_density(
                     coupling_data[ta_str] = []
                 # Append the new data point
                 coupling_data[ta_str].append(
-                    {"kappa": kappa, "kink_density": kink_density, "coupling_strength": J}
+                    {"lambda": _lambda, "kink_density": kink_density, "coupling_strength": J}
                 )
 
                 zne_estimates, modal_trigger = plot_zne_fitted_line(

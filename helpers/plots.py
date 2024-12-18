@@ -289,12 +289,12 @@ def plot_kink_densities_bg(
             ta_value = float(ta_str)
             color = ta_color_theme[ta_value]
             for point in data_points:
-                kappa = point["kappa"]
+                _lambda = point["lambda"]
                 kink_density = point["kink_density"]
                 if not label:
                     fig_data.append(
                         go.Scatter(
-                            x=[kappa],
+                            x=[_lambda],
                             y=[kink_density],
                             xaxis="x3",
                             yaxis="y1",
@@ -308,7 +308,7 @@ def plot_kink_densities_bg(
                 else:
                     fig_data.append(
                         go.Scatter(
-                            x=[kappa],
+                            x=[_lambda],
                             y=[kink_density],
                             xaxis="x3",
                             yaxis="y1",
@@ -407,7 +407,7 @@ def plot_kink_densities_bg(
     return fig
 
 
-def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, url=None):
+def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, _lambda, url=None):
     """
     Add a kink density marker from QPU samples to an existing plot.
 
@@ -458,10 +458,10 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, url=None)
 
     if display == "coupling":
         color = ta_color_theme[ta_value]
-        kappa = -1.8 / J
+        #kappa = -1.8 / J
         fig.add_trace(
             go.Scatter(
-                x=[kappa],
+                x=[_lambda],
                 y=[kink_density],
                 xaxis="x3",
                 yaxis="y1",
@@ -654,7 +654,7 @@ def plot_zne_fitted_line(
     if len(coupling_data[ta_str]) > 2:
 
         data_points = coupling_data[ta_str]
-        x = np.array([point["kappa"] for point in data_points])
+        x = np.array([point["lambda"] for point in data_points])
         y = np.array([point["kink_density"] for point in data_points])
 
         # Ensure there are enough unique x values for fitting
@@ -723,7 +723,7 @@ def plot_zne_fitted_line(
                         yaxis=y_axis,
                     )
                 )
-                
+
             else:
                 x_axis = "x1"
                 y_axis = "y1"
