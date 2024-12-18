@@ -423,6 +423,11 @@ def display_graphics_kink_density(
                 url="Demo2",
             )
 
+            if graph_display == "coupling":
+                zne_estimates, modal_trigger = plot_zne_fitted_line(
+                    fig, coupling_data, qpu_name, zne_estimates, graph_display, str(ta)
+                )
+
             return fig, coupling_data, zne_estimates, False, kz_data
 
         if trigger_id == "job_submit_state":
