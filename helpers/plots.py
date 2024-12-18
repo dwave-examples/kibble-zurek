@@ -714,18 +714,18 @@ def plot_zne_fitted_line(
                 y_axis = "y1"
                 x_zne = float(ta_str)
             # for ta_str, a in zne_estimates.items():
-            if y_func_x is not None:
-                fig.add_trace(
-                    go.Scatter(
-                        x=[x_zne],
-                        y=[zne_estimates[ta_str]],
-                        mode="markers",
-                        name="ZNE Estimate",
-                        legendgroup=f"ta_{ta_str}",
-                        marker=dict(size=12, color="purple", symbol="diamond"),
-                        showlegend=False,
-                        xaxis=x_axis,
-                        yaxis=y_axis,
-                    )
-                )
+            # if y_func_x is not None:
+            #     fig.add_trace(
+            #         go.Scatter(
+            #             x=[x_zne],
+            #             y=[zne_estimates[ta_str]],
+            #             mode="markers",
+            #             name="ZNE Estimate",
+            #             legendgroup=f"ta_{ta_str}",
+            #             marker=dict(size=12, color="purple", symbol="diamond"),
+            #             showlegend=False,
+            #             xaxis=x_axis,
+            #             yaxis=y_axis,
+            #         )
+            #     )
     return zne_estimates, modal_trigger
