@@ -193,7 +193,7 @@ def plot_kink_densities_bg(
         type="linear",
     )
 
-    x_axis3 = dict(title="<b>Noise Level (-1.8/J)<b>", type="linear", range=[0, 3])
+    x_axis3 = dict(title="<b>Noise Level (-1.8/J)<b>", type="linear", range=[-1, 4])
 
     if display == "kink_density":
         fig_layout = go.Layout(
