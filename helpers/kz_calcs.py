@@ -59,7 +59,7 @@ def theoretical_kink_density_prefactor(J, schedule_name=None):
 
     return b
 
-def theoretical_kink_density(annealing_times_ns, J=None, schedule=None, schedule_name=None, b=None):
+def theoretical_kink_density(annealing_times_ns, J=None, schedule_name=None, b=None):
     """
     Calculate the kink density as a function of anneal time
 
@@ -88,7 +88,7 @@ def calc_kappa(J, J_baseline=-1.8):
     See "Quantum error mitigation in quantum annealing" usage."""
     return abs(J_baseline / J)
 
-def calc_lambda(J, *, schedule_name=None, J_baseline=-1.8):
+def calc_lambda(J, *, qpu_name=None, schedule_name=None, J_baseline=-1.8):
     """Time rescaling factor (relative to J_baseline)
 
     Rate through the transition is modified non-linearly by the
@@ -96,7 +96,7 @@ def calc_lambda(J, *, schedule_name=None, J_baseline=-1.8):
     more slowly through the critical region, the ratio of timescales is > 1.
     See "Quantum error mitigation in quantum annealing" usage.
     """
-    if schedule_name is None:
+    if qpu_name == "Diffusion [Classical]":
         # Fallback, assume ideal linear schedule
         kappa = calc_kappa(J, J_baseline)
         return kappa
