@@ -111,7 +111,7 @@ def plot_kink_densities_bg(
     A_joule = A_ghz / 1.5092e24
     B_joule = B_ghz / 1.5092e24
 
-    n = theoretical_kink_density(time_range, J_base, schedule, schedule_name)
+    n = theoretical_kink_density(time_range, J_base, schedule_name)
 
     predicted_plus = go.Scatter(
         x=np.asarray(time_range),

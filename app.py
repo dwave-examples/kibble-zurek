@@ -459,7 +459,7 @@ def display_graphics_kink_density(
 
                 # Calculate lambda (previously kappa)
                 # Added _ to avoid keyword restriction
-                _lambda = calc_lambda(J=J, qpu_name=qpu_name, J_baseline=J_baseline)
+                _lambda = calc_lambda(J=J, qpu_name=qpu_name, schedule_name=schedule_filename, J_baseline=J_baseline)
 
                 fig = plot_kink_density(
                     graph_display, figure, kink_density, ta, J, _lambda
