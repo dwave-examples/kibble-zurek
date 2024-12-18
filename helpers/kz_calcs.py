@@ -15,7 +15,13 @@
 import numpy as np
 import pandas as pd
 
-__all__ = ["kink_stats", "theoretical_kink_density_prefactor", "theoretical_kink_density", "calc_kappa", "calc_lambda"]
+__all__ = [
+    "kink_stats",
+    "theoretical_kink_density_prefactor",
+    "theoretical_kink_density",
+    "calc_kappa",
+    "calc_lambda",
+]
 
 
 def theoretical_kink_density_prefactor(J, schedule_name=None):
@@ -42,7 +48,11 @@ def theoretical_kink_density_prefactor(J, schedule_name=None):
     else:
         schedule = pd.read_csv(f"helpers/{schedule_name}")
 
-    COMPENSATION_SCHEDULE_ENERGY = 0.8 if (schedule_name is not None and "Advantage_system" in schedule_name) else 1.0
+    COMPENSATION_SCHEDULE_ENERGY = (
+        0.8
+        if (schedule_name is not None and "Advantage_system" in schedule_name)
+        else 1.0
+    )
 
     A = COMPENSATION_SCHEDULE_ENERGY * schedule["A(s) (GHz)"]
     B = COMPENSATION_SCHEDULE_ENERGY * schedule["B(s) (GHz)"]
@@ -59,6 +69,7 @@ def theoretical_kink_density_prefactor(J, schedule_name=None):
 
     return b
 
+
 def theoretical_kink_density(annealing_times_ns, J=None, schedule_name=None, b=None):
     """
     Calculate the kink density as a function of anneal time
@@ -70,7 +81,7 @@ def theoretical_kink_density(annealing_times_ns, J=None, schedule_name=None, b=N
 
         J: Coupling strength between the spins of the ring.
 
-        schedule_name: Filename of anneal schedule. Used to compensate for 
+        schedule_name: Filename of anneal schedule. Used to compensate for
             schedule energy overestimate.
 
     Returns:
@@ -82,11 +93,13 @@ def theoretical_kink_density(annealing_times_ns, J=None, schedule_name=None, b=N
         2 * np.pi * np.sqrt(2)
     )
 
+
 def calc_kappa(J, J_baseline=-1.8):
     """Coupling ratio
 
     See "Quantum error mitigation in quantum annealing" usage."""
     return abs(J_baseline / J)
+
 
 def calc_lambda(J, *, qpu_name=None, schedule_name=None, J_baseline=-1.8):
     """Time rescaling factor (relative to J_baseline)
@@ -104,7 +117,8 @@ def calc_lambda(J, *, qpu_name=None, schedule_name=None, J_baseline=-1.8):
         b_ref = theoretical_kink_density_prefactor(J_baseline, schedule_name)
         b = theoretical_kink_density_prefactor(J, schedule_name)
 
-        return b_ref/b
+        return b_ref / b
+
 
 def kink_stats(sampleset, J):
     """

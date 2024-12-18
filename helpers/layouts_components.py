@@ -31,6 +31,7 @@ __all__ = [
 
 ring_lengths = [512, 1024, 2048]
 
+
 def get_config_anneal_duration(demo_type):
     if demo_type == "Zero-Noise":
         return dcc.Dropdown(
@@ -52,38 +53,32 @@ def get_config_anneal_duration(demo_type):
     else:
         return dbc.Input(
             id="anneal_duration",
-            type='number',
+            type="number",
             min=5,
             max=100,
             step=1,
             value=7,
-            style={'max-width': '95%'}
+            style={"max-width": "95%"},
         )
+
 
 def get_config_kz_graph(demo_type):
     if demo_type == "Kibble-Zurek":
         return RadioItems(
             id="graph_display",
             options=[
-                {
-                    'label': 'Both', 
-                    'value': 'both', 
-                    'disabled': False
-                },
-                {
-                    'label': 'Kink density', 
-                    'value': 'kink_density', 
-                    'disabled': False
-                },
-                {
-                    'label': 'Schedule', 
-                    'value': 'schedule', 
-                    'disabled': False
-                },
+                {"label": "Both", "value": "both", "disabled": False},
+                {"label": "Kink density", "value": "kink_density", "disabled": False},
+                {"label": "Schedule", "value": "schedule", "disabled": False},
             ],
-            value='both',
-            inputStyle={'margin-right': '10px', 'margin-bottom': '5px'},
-            labelStyle={'color': 'rgb(3, 184, 255)', 'font-size': 12, 'display': 'inline-block', 'marginLeft': 20},
+            value="both",
+            inputStyle={"margin-right": "10px", "margin-bottom": "5px"},
+            labelStyle={
+                "color": "rgb(3, 184, 255)",
+                "font-size": 12,
+                "display": "inline-block",
+                "marginLeft": 20,
+            },
             inline=True,
         )
     else:
@@ -111,6 +106,7 @@ def get_config_kz_graph(demo_type):
             },
             inline=True,
         )
+
 
 config_spins = RadioItems(
     id="spins",
@@ -147,11 +143,13 @@ j_marks.update(
         for val in range(2, 10, 2)
     }
 )
-#Dash Slider has some issue with int values having a zero after the decimal point
+# Dash Slider has some issue with int values having a zero after the decimal point
 j_marks[-2] = {"label": "-2", "style": {"color": "white"}}
 del j_marks[-1.0]
 j_marks[-1] = {"label": "-1", "style": {"color": "white"}}
 j_marks[1] = {"label": "1", "style": {"color": "white"}}
+
+
 def get_config_coupling_strength(demo_type):
     if demo_type == "Zero-Noise":
         return dbc.Row(
@@ -166,26 +164,30 @@ def get_config_coupling_strength(demo_type):
                                 min=-1.8,
                                 max=-0.6,
                                 step=None,
-                                tooltip={"placement": "bottom", "always_visible": True}
+                                tooltip={"placement": "bottom", "always_visible": True},
                             )
                         ]
                     ),
                 ),
             ]
         )
-    return dbc.Row([
-                dbc.Col(
-                    html.Div([
+    return dbc.Row(
+        [
+            dbc.Col(
+                html.Div(
+                    [
                         Slider(
-                            id='coupling_strength',
+                            id="coupling_strength",
                             value=-1.4,
                             marks=j_marks,
                             step=None,
-                            tooltip={"placement": "bottom", "always_visible": True}
+                            tooltip={"placement": "bottom", "always_visible": True},
                         )
-                    ]),
-                ),    
-            ])
+                    ]
+                ),
+            ),
+        ]
+    )
 
 
 def config_qpu_selection(solvers, default="Diffusion [Classical]"):

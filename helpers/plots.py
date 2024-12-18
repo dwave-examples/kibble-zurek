@@ -59,7 +59,14 @@ coupling_label = {
 
 
 def plot_kink_densities_bg(
-    display, time_range, J_base, schedule_name, coupling_data, zne_estimates, kz_data=None, url=None
+    display,
+    time_range,
+    J_base,
+    schedule_name,
+    coupling_data,
+    zne_estimates,
+    kz_data=None,
+    url=None,
 ):
     """
     Plot the background of theoretical kink density and QPU energy scales.
@@ -200,7 +207,7 @@ def plot_kink_densities_bg(
             xaxis=x_axis1,
             yaxis=y_axis1,
         )
-        if url == 'Demo2':
+        if url == "Demo2":
             _coupling_label = {
                 -1.8: False,
                 -1.6: False,
@@ -256,16 +263,16 @@ def plot_kink_densities_bg(
                 for pair in kz_data["k"]:
                     fig_data.append(
                         go.Scatter(
-                            x=[pair[1]],       
+                            x=[pair[1]],
                             y=[pair[0]],
                             mode="markers",
                             marker=dict(size=10, color="black", symbol="x"),
                             xaxis="x1",
                             yaxis="y1",
-                            showlegend=False
+                            showlegend=False,
                         )
                     )
-            
+
     elif display == "schedule":
 
         fig_layout = go.Layout(
@@ -344,32 +351,32 @@ def plot_kink_densities_bg(
         #                 marker=dict(size=10, color=color, symbol="x"),
         #             )
         #         )
-            # Plot ZNE estimates
-            # for ta_str, a in zne_estimates.items():
-            #     fig_data.append(
-            #         go.Scatter(
-            #             x=[ta_str],
-            #             y=[a],
-            #             mode="markers",
-            #             name="ZNE Estimate",
-            #             marker=dict(size=12, color="purple", symbol="diamond"),
-            #             showlegend=False,
-            #             xaxis="x1",
-            #             yaxis="y1",
-            #         )
-            #     )
+        # Plot ZNE estimates
+        # for ta_str, a in zne_estimates.items():
+        #     fig_data.append(
+        #         go.Scatter(
+        #             x=[ta_str],
+        #             y=[a],
+        #             mode="markers",
+        #             name="ZNE Estimate",
+        #             marker=dict(size=12, color="purple", symbol="diamond"),
+        #             showlegend=False,
+        #             xaxis="x1",
+        #             yaxis="y1",
+        #         )
+        #     )
         # Add previously computed kz_data points
         if kz_data is not None and "k" in kz_data:
             for pair in kz_data["k"]:
                 fig_data.append(
                     go.Scatter(
-                        x=[pair[1]],       
+                        x=[pair[1]],
                         y=[pair[0]],
                         mode="markers",
                         marker=dict(size=10, color="black", symbol="x"),
                         xaxis="x1",
                         yaxis="y1",
-                        showlegend=False
+                        showlegend=False,
                     )
                 )
     fig = go.Figure(data=fig_data, layout=fig_layout)
@@ -407,7 +414,9 @@ def plot_kink_densities_bg(
     return fig
 
 
-def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, _lambda, url=None):
+def plot_kink_density(
+    display, fig_dict, kink_density, anneal_time, J, _lambda, url=None
+):
     """
     Add a kink density marker from QPU samples to an existing plot.
 
@@ -439,26 +448,27 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, _lambda, 
 
     if url == "Demo1":
         fig.add_trace(
-        go.Scatter(
-                x=[anneal_time], 
-                y=[kink_density], 
-                xaxis='x1',
-                yaxis='y1',
+            go.Scatter(
+                x=[anneal_time],
+                y=[kink_density],
+                xaxis="x1",
+                yaxis="y1",
                 showlegend=False,
-                marker=dict(size=10, 
-                            color='black',
-                            symbol='x',
-                )
+                marker=dict(
+                    size=10,
+                    color="black",
+                    symbol="x",
+                ),
             )
         )
 
         return fig
-    
+
     ta_value = float(anneal_time)
 
     if display == "coupling":
         color = ta_color_theme[ta_value]
-        #kappa = -1.8 / J
+        # kappa = -1.8 / J
         fig.add_trace(
             go.Scatter(
                 x=[_lambda],
@@ -489,7 +499,7 @@ def plot_kink_density(display, fig_dict, kink_density, anneal_time, J, _lambda, 
         coupling_label[J] = True
     else:
         legend = False
-    
+
     fig.add_trace(
         go.Scatter(
             x=[anneal_time],
@@ -651,7 +661,7 @@ def plot_zne_fitted_line(
               due to ill conditioned data for fitting.
     """
     modal_trigger = False
-    if len(coupling_data[ta_str]) > 2:
+    if len(coupling_data) > 0 and len(coupling_data[ta_str]) > 2:
 
         data_points = coupling_data[ta_str]
         x = np.array([point["lambda"] for point in data_points])

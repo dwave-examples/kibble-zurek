@@ -27,7 +27,7 @@ __all__ = [
 control_header_style = {"color": "rgb(3, 184, 255)", "marginTop": "10px"}
 
 
-def control_card(solvers={}, init_job_status="READY",  demo_type="Kibble-Zurek"):
+def control_card(solvers={}, init_job_status="READY", demo_type="Kibble-Zurek"):
     """Lay out the configuration and job-submission card.
 
     Args:
@@ -46,39 +46,39 @@ def control_card(solvers={}, init_job_status="READY",  demo_type="Kibble-Zurek")
     else:
         job_status_color = "white"
 
-    if demo_type == 'Kibble-Zurek':
-        demo_title =  'Coherent Annealing: KZ Simulation'
+    if demo_type == "Kibble-Zurek":
+        demo_title = "Coherent Annealing: KZ Simulation"
         demo_description = html.P(
-                    """
+            """
                     Use a quantum computer to simulate the formation of topological defects in a 1D ring 
                     of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.  
-                    """, 
-                                        style={'color': 'white', 'fontSize': 14})
+                    """,
+            style={"color": "white", "fontSize": 14},
+        )
         demo_anneal_duration = get_config_anneal_duration(demo_type)
-        
+
     else:
         demo_title = "Coherent Annealing: Zero-Noise Extrapolation"
         demo_description = html.P(
-                                [
-                                    """
+            [
+                """
 Simulate zero-temperature and zero-time extrapolations on a quantum computer using the Kibble-Zurek mechanism. Fitting occurs once three or more data points are plotted, with -1.8 representing the highest energy scale corresponding to the lowest noise level. Learn more in the
 """,
-                                    html.A(
-                                        "paper",
-                                        href="https://arxiv.org/abs/2311.01306",  # Replace with the actual URL
-                                        target="_blank",  # Opens the link in a new tab
-                                        style={
-                                            "color": "rgb(3, 184, 255)",
-                                            "textDecoration": "none",
-                                        },  # Optional styling
-                                    ),
-                                    ".",
-                                ],
-                                style={"color": "white", "fontSize": 14},
-                            )
+                html.A(
+                    "paper",
+                    href="https://arxiv.org/abs/2311.01306",  # Replace with the actual URL
+                    target="_blank",  # Opens the link in a new tab
+                    style={
+                        "color": "rgb(3, 184, 255)",
+                        "textDecoration": "none",
+                    },  # Optional styling
+                ),
+                ".",
+            ],
+            style={"color": "white", "fontSize": 14},
+        )
         demo_anneal_duration = get_config_anneal_duration(demo_type)
-        
-        
+
     return dbc.Card(
         [
             dbc.Row(

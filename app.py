@@ -58,13 +58,15 @@ with open("config.yaml", "r") as file:
     J_baseline = config["J_baseline"]
     if config["use_classical"]:
         qpus["Diffusion [Classical]"] = MockKibbleZurekSampler(
-        topology_type="pegasus", topology_shape=[16]
-    )  # Change sampler to mock
+            topology_type="pegasus", topology_shape=[16]
+        )  # Change sampler to mock
     init_job_status = "READY"
     if not client:
         client = "dummy"
 
 tool_tips = tool_tips_demo1
+
+
 def demo_layout(demo_type):
 
     if demo_type == "Kibble-Zurek":
@@ -78,7 +80,11 @@ def demo_layout(demo_type):
                 [
                     dbc.Col(  # Left: control panel
                         [
-                            control_card(solvers=qpus, init_job_status=init_job_status, demo_type=demo_type),
+                            control_card(
+                                solvers=qpus,
+                                init_job_status=init_job_status,
+                                demo_type=demo_type,
+                            ),
                             *dbc_modal("modal_solver"),
                             *[
                                 dbc.Tooltip(
@@ -105,7 +111,7 @@ def demo_layout(demo_type):
             # store zero noise extrapolation
             dcc.Store(id="zne_estimates", data={}),
             dcc.Store(id="modal_trigger", data=False),
-            dcc.Store(id="initial_warning", data=False), 
+            dcc.Store(id="initial_warning", data=False),
             dcc.Store(id="kz_data", data={}),
             dbc.Modal(
                 [
@@ -119,10 +125,14 @@ def demo_layout(demo_type):
             ),
             dbc.Modal(
                 [
-                    dbc.ModalHeader(dbc.ModalTitle("Warning", style={"color": "orange", "fontWeight": "bold"})),
+                    dbc.ModalHeader(
+                        dbc.ModalTitle(
+                            "Warning", style={"color": "orange", "fontWeight": "bold"}
+                        )
+                    ),
                     dbc.ModalBody(
                         "The Classical [diffusion] option executes a Markov Chain method locally for purposes of testing the demo interface. Kinks diffuse to annihilate, but are also created/destroyed by thermal fluctuations.  The number of updates performed is set proportional to the annealing time. In the limit of no thermal noise, kinks diffuse to eliminate producing a power law, this process produces a power-law but for reasons independent of the Kibble-Zurek mechanism. In the noise mitigation demo we fit the impact of thermal fluctuations with a mixture of exponentials, by contrast with the quadratic fit appropriate to quantum dynamics.",
-                        style={"color": "black", "fontSize": "16px"}, 
+                        style={"color": "black", "fontSize": "16px"},
                     ),
                 ],
                 id="warning-modal",
@@ -131,6 +141,7 @@ def demo_layout(demo_type):
         ],
         fluid=True,
     )
+
 
 # Define the Navbar with two tabs
 navbar = dbc.Navbar(
@@ -147,12 +158,21 @@ navbar = dbc.Navbar(
                 ],
                 href="/demo1",  # Default route
             ),
-
             # Navbar Tabs
             dbc.Nav(
                 [
-                    dbc.NavItem(dbc.NavLink("Kibble-Zurek Mechanism", href="/demo1", active="exact")),
-                    dbc.NavItem(dbc.NavLink("Kibble-Zurek Mechanism with Noise Mitigation", href="/demo2", active="exact")),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Kibble-Zurek Mechanism", href="/demo1", active="exact"
+                        )
+                    ),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Kibble-Zurek Mechanism with Noise Mitigation",
+                            href="/demo2",
+                            active="exact",
+                        )
+                    ),
                 ],
                 pills=True,
             ),
@@ -167,7 +187,9 @@ app.layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),  # Tracks the URL
         navbar,  # Includes the Navbar at the top
-        html.Div(id="page-content", style={"paddingTop": "20px"}),  # Dynamic page content
+        html.Div(
+            id="page-content", style={"paddingTop": "20px"}
+        ),  # Dynamic page content
     ],
     fluid=True,
 )
@@ -177,18 +199,16 @@ app.config["suppress_callback_exceptions"] = True
 
 # Callbacks Section
 
-@app.callback(
-    Output("page-content", "children"),
-    Input("url", "pathname")
-)
+
+@app.callback(Output("page-content", "children"), Input("url", "pathname"))
 def display_page(pathname):
     # If the user goes to the "/demo1" route
     if pathname == "/demo1":
-       
+
         return demo_layout("Kibble-Zurek")
     # If the user goes to the "/demo2" route
     elif pathname == "/demo2":
-       
+
         return demo_layout("Zero-Noise")
     else:
         return demo_layout("Kibble-Zurek")
@@ -345,13 +365,13 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     Output("modal_trigger", "data"),
     Output("kz_data", "data"),
     Input("qpu_selection", "value"),
-    #Input("zne_graph_display", "value"),
+    # Input("zne_graph_display", "value"),
     Input("graph_display", "value"),
     Input("coupling_strength", "value"),  # previously input
     Input("quench_schedule_filename", "children"),
     Input("job_submit_state", "children"),
     Input("job_id", "children"),
-    #Input("anneal_duration_zne", "value"),
+    # Input("anneal_duration_zne", "value"),
     Input("anneal_duration", "value"),
     Input("spins", "value"),
     Input("url", "pathname"),
@@ -359,7 +379,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached, spins):
     State("sample_vs_theory", "figure"),
     State("coupling_data", "data"),  # access previously stored data
     State("zne_estimates", "data"),  # Access ZNE estimates
-    State("kz_data", "data") # get kibble zurek data point
+    State("kz_data", "data"),  # get kibble zurek data point
 )
 def display_graphics_kink_density(
     qpu_name,
@@ -388,9 +408,7 @@ def display_graphics_kink_density(
         # update the maximum anneal time for zne demo
         ta_max = 1500
 
-        if (
-            trigger_id == "qpu_selection" or trigger_id == "spins"
-        ):
+        if trigger_id == "qpu_selection" or trigger_id == "spins":
             coupling_data = {}
             zne_estimates = {}
             fig = plot_kink_densities_bg(
@@ -440,10 +458,12 @@ def display_graphics_kink_density(
                 _, kink_density = kink_stats(sampleset_unembedded, J)
 
                 # Calculate lambda (previously kappa)
-                # Added _ to avoid keyword restriction  
+                # Added _ to avoid keyword restriction
                 _lambda = calc_lambda(J=J, qpu_name=qpu_name, J_baseline=J_baseline)
 
-                fig = plot_kink_density(graph_display, figure, kink_density, ta, J, _lambda)
+                fig = plot_kink_density(
+                    graph_display, figure, kink_density, ta, J, _lambda
+                )
 
                 # Initialize the list for this anneal_time if not present
                 ta_str = str(ta)
@@ -451,7 +471,11 @@ def display_graphics_kink_density(
                     coupling_data[ta_str] = []
                 # Append the new data point
                 coupling_data[ta_str].append(
-                    {"lambda": _lambda, "kink_density": kink_density, "coupling_strength": J}
+                    {
+                        "lambda": _lambda,
+                        "kink_density": kink_density,
+                        "coupling_strength": J,
+                    }
                 )
 
                 zne_estimates, modal_trigger = plot_zne_fitted_line(
@@ -466,7 +490,7 @@ def display_graphics_kink_density(
                         schedule_filename,
                         coupling_data,
                         zne_estimates,
-                        url='Demo2'
+                        url="Demo2",
                     )
 
                 return fig, coupling_data, zne_estimates, modal_trigger, kz_data
@@ -482,39 +506,63 @@ def display_graphics_kink_density(
             schedule_filename,
             coupling_data,
             zne_estimates,
-            url='Demo2'
+            url="Demo2",
         )
         return fig, coupling_data, zne_estimates, False, kz_data
     else:
-        if trigger_id == "qpu_selection" or trigger_id == "spins" or trigger_id == "coupling_strength":
-            
-            kz_data = {"k":[]}
-            fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J, schedule_filename, coupling_data, zne_estimates, kz_data=kz_data, url="Demo1")
+        if (
+            trigger_id == "qpu_selection"
+            or trigger_id == "spins"
+            or trigger_id == "coupling_strength"
+        ):
+
+            kz_data = {"k": []}
+            fig = plot_kink_densities_bg(
+                graph_display,
+                [ta_min, ta_max],
+                J,
+                schedule_filename,
+                coupling_data,
+                zne_estimates,
+                kz_data=kz_data,
+                url="Demo1",
+            )
 
             return fig, coupling_data, zne_estimates, False, kz_data
-        
-        if trigger_id == 'job_submit_state':
 
-            if job_submit_state == 'COMPLETED':
+        if trigger_id == "job_submit_state":
+
+            if job_submit_state == "COMPLETED":
 
                 embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
 
-                sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])              
-                _, kink_density = kink_stats(sampleset_unembedded, J)
-                
-                
-                # Append the new data point
-                kz_data["k"].append(
-                    (kink_density, ta)
+                sampleset_unembedded = get_samples(
+                    client, job_id, spins, J, embeddings_cached[spins]
                 )
-                fig = plot_kink_density(graph_display, figure, kink_density, ta, J, url="Demo1")
+                _, kink_density = kink_stats(sampleset_unembedded, J)
+
+                # Append the new data point
+                kz_data["k"].append((kink_density, ta))
+                fig = plot_kink_density(
+                    graph_display, figure, kink_density, ta, J, url="Demo1"
+                )
                 return fig, coupling_data, zne_estimates, False, kz_data
-            
+
             else:
                 return dash.no_update
-            
-        fig = plot_kink_densities_bg(graph_display, [ta_min, ta_max], J, schedule_filename, coupling_data, zne_estimates, kz_data, url="Demo1")
+
+        fig = plot_kink_densities_bg(
+            graph_display,
+            [ta_min, ta_max],
+            J,
+            schedule_filename,
+            coupling_data,
+            zne_estimates,
+            kz_data,
+            url="Demo1",
+        )
         return fig, coupling_data, zne_estimates, False, kz_data
+
 
 @app.callback(
     Output("spin_orientation", "figure"),
@@ -564,10 +612,19 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
     State("embeddings_cached", "data"),
     State("url", "pathname"),
     State("quench_schedule_filename", "children"),
-    State("initial_warning", "data")
+    State("initial_warning", "data"),
 )
-def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached, pathname, filename, initial_warning):
-
+def submit_job(
+    job_submit_time,
+    qpu_name,
+    spins,
+    J,
+    ta_ns,
+    embeddings_cached,
+    pathname,
+    filename,
+    initial_warning,
+):
     """Submit job and provide job ID."""
     trigger_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
@@ -579,7 +636,7 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached, pa
 
         embeddings_cached = json_to_dict(embeddings_cached)
         embedding = embeddings_cached[spins]
-        annealing_time = (ta_ns / 1000)
+        annealing_time = ta_ns / 1000
 
         if qpu_name == "Diffusion [Classical]":
 
@@ -606,14 +663,16 @@ def submit_job(job_submit_time, qpu_name, spins, J, ta_ns, embeddings_cached, pa
             ta_multiplier = 1
 
             if pathname == "/demo2":
-                ta_multiplier = calc_lambda(J, schedule_name=filename, J_baseline=J_baseline)
+                ta_multiplier = calc_lambda(
+                    J, schedule_name=filename, J_baseline=J_baseline
+                )
 
-            print(f'{ta_multiplier}: qpu_name')
+            print(f"{ta_multiplier}: qpu_name")
 
             computation = solver.sample_bqm(
                 bqm=bqm_embedded,
                 fast_anneal=True,
-                annealing_time=annealing_time*ta_multiplier,
+                annealing_time=annealing_time * ta_multiplier,
                 auto_scale=False,
                 answer_mode="raw",  # Easier than accounting for num_occurrences
                 num_reads=100,
@@ -792,7 +851,7 @@ def activate_tooltips(tooltips_show):
 
     trigger = dash.callback_context.triggered
     trigger_id = trigger[0]["prop_id"].split(".")[0]
-        
+
     if trigger_id == "tooltips_show":
         if tooltips_show == "off":
             return (
@@ -829,6 +888,7 @@ def toggle_modal(trigger, is_open):
     if trigger:
         return True
     return is_open
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)

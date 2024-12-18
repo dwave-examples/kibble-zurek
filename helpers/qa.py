@@ -32,7 +32,6 @@ __all__ = [
 ]
 
 
-
 def create_bqm(num_spins=512, coupling_strength=-1.4):
     """
     Create a binary quadratic model (BQM) representing a magnetic 1D ring.
@@ -218,7 +217,7 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
                 f=mixture_of_exponentials, xdata=xdata, ydata=ydata, p0=p0
             )
         except:
-            return None 
+            return None
 
         def y_func_x(x):
             return mixture_of_exponentials(x, *p)
