@@ -1,7 +1,3 @@
-ZNE: YES
-sampler:
-  type: MockKibbleZurekSampler
-  topology_type: pegasus
-  topology_shape: [16]
-init_job_status: READY
-client: dummy
+use_classical: YES
+J_baseline = -1.8
+

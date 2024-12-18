@@ -38,8 +38,6 @@ import yaml
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# global variable for a default J value
-J_baseline = -1.8
 
 # Initialize: available QPUs, initial progress-bar status
 try:
@@ -57,14 +55,14 @@ except Exception:
     init_job_status = "NO SOLVER"
 with open("config.yaml", "r") as file:
     config = yaml.safe_load(file)
-    if config["ZNE"]:
-        qpus["Diffusion [Classical]"] = globals()[config["sampler"]["type"]](
-            topology_type=config["sampler"]["topology_type"],
-            topology_shape=config["sampler"]["topology_shape"],
-        )
-        init_job_status = config["init_job_status"]
-        if not client:
-            client = config["client"]
+    J_baseline = config["J_baseline"]
+    if config["use_classical"]:
+        qpus["Diffusion [Classical]"] = MockKibbleZurekSampler(
+        topology_type="pegasus", topology_shape=[16]
+    )  # Change sampler to mock
+    init_job_status = "READY"
+    if not client:
+        client = "dummy"
 
 tool_tips = tool_tips_demo1
 def demo_layout(demo_type):
@@ -443,7 +441,7 @@ def display_graphics_kink_density(
 
                 # Calculate lambda (previously kappa)
                 # Added _ to avoid keyword restriction  
-                _lambda = calc_lambda(J=J, J_baseline=J_baseline)
+                _lambda = calc_lambda(J=J, qpu_name=qpu_name, J_baseline=J_baseline)
 
                 fig = plot_kink_density(graph_display, figure, kink_density, ta, J, _lambda)
 
