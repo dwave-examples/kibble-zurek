@@ -453,6 +453,15 @@ def display_graphics_kink_density(
                     fig, coupling_data, qpu_name, zne_estimates, graph_display, ta_str
                 )
 
+                fig = plot_kink_densities_bg(
+                    graph_display,
+                    [ta_min, ta_max],
+                    J_baseline,
+                    schedule_filename,
+                    coupling_data,
+                    zne_estimates,
+                    url='Demo2'
+                )
                 return fig, coupling_data, zne_estimates, modal_trigger, kz_data
 
             else:
