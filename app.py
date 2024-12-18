@@ -388,7 +388,7 @@ def display_graphics_kink_density(
     if pathname == "/demo2":
 
         # update the maximum anneal time for zne demo
-        ta_max = 1400
+        ta_max = 1500
 
         if (
             trigger_id == "qpu_selection" or trigger_id == "spins"
@@ -436,10 +436,11 @@ def display_graphics_kink_density(
                 )
                 _, kink_density = kink_stats(sampleset_unembedded, J)
 
+                 # Calculate kappa
+                kappa = calc_kappa(J, J_baseline)
+
                 fig = plot_kink_density(graph_display, figure, kink_density, ta, J)
 
-                # Calculate kappa
-                kappa = calc_kappa(J, J_baseline)
                 # Initialize the list for this anneal_time if not present
                 ta_str = str(ta)
                 if ta_str not in coupling_data:
@@ -453,15 +454,17 @@ def display_graphics_kink_density(
                     fig, coupling_data, qpu_name, zne_estimates, graph_display, ta_str
                 )
 
-                fig = plot_kink_densities_bg(
-                    graph_display,
-                    [ta_min, ta_max],
-                    J_baseline,
-                    schedule_filename,
-                    coupling_data,
-                    zne_estimates,
-                    url='Demo2'
-                )
+                if graph_display == "kink_density":
+                    fig = plot_kink_densities_bg(
+                        graph_display,
+                        [ta_min, ta_max],
+                        J_baseline,
+                        schedule_filename,
+                        coupling_data,
+                        zne_estimates,
+                        url='Demo2'
+                    )
+
                 return fig, coupling_data, zne_estimates, modal_trigger, kz_data
 
             else:

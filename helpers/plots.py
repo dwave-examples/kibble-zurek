@@ -635,7 +635,7 @@ def plot_zne_fitted_line(
         fig (plotly.graph_objs.Figure): The existing Plotly figure to update.
         coupling_data (dict): A dictionary containing coupling-related data
             structured as {ta_str: [data_points]}, where each data point
-            includes "kappa" and "kink_density".
+            includes "lambda" and "kink_density".
         qpu_name (str): The name of the Quantum Processing Unit (QPU) used.
             Determines the fitting method.
         zne_estimates (dict): A dictionary to store Zero-Noise Extrapolation
@@ -709,23 +709,24 @@ def plot_zne_fitted_line(
                         yaxis=y_axis,
                     )
                 )
+
+                fig.add_trace(
+                    go.Scatter(
+                        x=[x_zne],
+                        y=[zne_estimates[ta_str]],
+                        mode="markers",
+                        name="ZNE Estimate",
+                        legendgroup=f"ta_{ta_str}",
+                        marker=dict(size=12, color="purple", symbol="diamond"),
+                        showlegend=False,
+                        xaxis=x_axis,
+                        yaxis=y_axis,
+                    )
+                )
+                
             else:
                 x_axis = "x1"
                 y_axis = "y1"
                 x_zne = float(ta_str)
-            # for ta_str, a in zne_estimates.items():
-            # if y_func_x is not None:
-            #     fig.add_trace(
-            #         go.Scatter(
-            #             x=[x_zne],
-            #             y=[zne_estimates[ta_str]],
-            #             mode="markers",
-            #             name="ZNE Estimate",
-            #             legendgroup=f"ta_{ta_str}",
-            #             marker=dict(size=12, color="purple", symbol="diamond"),
-            #             showlegend=False,
-            #             xaxis=x_axis,
-            #             yaxis=y_axis,
-            #         )
-            #     )
+
     return zne_estimates, modal_trigger
