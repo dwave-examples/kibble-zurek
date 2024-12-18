@@ -388,8 +388,8 @@ def display_graphics_kink_density(
     if pathname == "/demo2":
 
         # update the maximum anneal time for zne demo
-        ta_max = 1280 
-        
+        ta_max = 1400
+
         if (
             trigger_id == "qpu_selection" or trigger_id == "spins"
         ):
