@@ -337,34 +337,7 @@ def plot_kink_densities_bg(
         )
 
         fig_data = [predicted_plus, predicted_minus, energy_transverse, energy_problem]
-        # for ta_str, data_points in coupling_data.items():
-        #     for point in data_points:
-        #         color = "black"
-        #         kink_density = point["kink_density"]
-        #         fig_data.append(
-        #             go.Scatter(
-        #                 x=[ta_str],
-        #                 y=[kink_density],
-        #                 xaxis="x1",
-        #                 yaxis="y1",
-        #                 showlegend=False,
-        #                 marker=dict(size=10, color=color, symbol="x"),
-        #             )
-        #         )
-        # Plot ZNE estimates
-        # for ta_str, a in zne_estimates.items():
-        #     fig_data.append(
-        #         go.Scatter(
-        #             x=[ta_str],
-        #             y=[a],
-        #             mode="markers",
-        #             name="ZNE Estimate",
-        #             marker=dict(size=12, color="purple", symbol="diamond"),
-        #             showlegend=False,
-        #             xaxis="x1",
-        #             yaxis="y1",
-        #         )
-        #     )
+        
         # Add previously computed kz_data points
         if kz_data is not None and "k" in kz_data:
             for pair in kz_data["k"]:
