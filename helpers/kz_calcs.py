@@ -20,7 +20,7 @@ __all__ = [
     "theoretical_kink_density_prefactor",
     "theoretical_kink_density",
     "calc_kappa",
-    "calc_lambda",
+    "calclambda_",
 ]
 
 
@@ -89,6 +89,7 @@ def theoretical_kink_density(annealing_times_ns, J=None, schedule_name=None, b=N
     """
     if b is None:
         b = theoretical_kink_density_prefactor(J, schedule_name)
+    
     return np.power([1e-9 * t * b for t in annealing_times_ns], -0.5) / (
         2 * np.pi * np.sqrt(2)
     )
@@ -101,7 +102,7 @@ def calc_kappa(J, J_baseline=-1.8):
     return abs(J_baseline / J)
 
 
-def calc_lambda(J, *, qpu_name=None, schedule_name=None, J_baseline=-1.8):
+def calclambda_(J, *, qpu_name=None, schedule_name=None, J_baseline=-1.8):
     """Time rescaling factor (relative to J_baseline)
 
     Rate through the transition is modified non-linearly by the

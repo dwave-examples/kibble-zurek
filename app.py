@@ -53,17 +53,18 @@ except Exception:
     qpus = {}
     client = None
     init_job_status = "NO SOLVER"
+# Load base coupling strength and user configuration for mock sampler
 with open("config.yaml", "r") as file:
     config = yaml.safe_load(file)
     J_baseline = config["J_baseline"]
     if config["use_classical"]:
         qpus["Diffusion [Classical]"] = MockKibbleZurekSampler(
             topology_type="pegasus", topology_shape=[16]
-        )  # Change sampler to mock
+        )
     init_job_status = "READY"
     if not client:
         client = "dummy"
-
+# Demo defaults to use 
 tool_tips = tool_tips_demo1
 
 
@@ -459,10 +460,10 @@ def display_graphics_kink_density(
 
                 # Calculate lambda (previously kappa)
                 # Added _ to avoid keyword restriction
-                _lambda = calc_lambda(J=J, qpu_name=qpu_name, schedule_name=schedule_filename, J_baseline=J_baseline)
+                lambda_ = calclambda_(J=J, qpu_name=qpu_name, schedule_name=schedule_filename, J_baseline=J_baseline)
 
                 fig = plot_kink_density(
-                    graph_display, figure, kink_density, ta, J, _lambda
+                    graph_display, figure, kink_density, ta, J, lambda_
                 )
 
                 # Initialize the list for this anneal_time if not present
@@ -472,7 +473,7 @@ def display_graphics_kink_density(
                 # Append the new data point
                 coupling_data[ta_str].append(
                     {
-                        "lambda": _lambda,
+                        "lambda": lambda_,
                         "kink_density": kink_density,
                         "coupling_strength": J,
                     }
@@ -658,12 +659,12 @@ def submit_job(
             bqm_embedded = embed_bqm(
                 bqm, embedding, DWaveSampler(solver=solver.name).adjacency
             )
-            # ta_multiplier should be 1, unless (withNoiseMitigation and [J or schedule]) changes, shouldn't change for MockSampler. In which case recalculate as ta_multiplier=calc_lambda(coupling_strength, schedule, J_baseline=-1.8) as a function of the correct schedule
+            # ta_multiplier should be 1, unless (withNoiseMitigation and [J or schedule]) changes, shouldn't change for MockSampler. In which case recalculate as ta_multiplier=calclambda_(coupling_strength, schedule, J_baseline=-1.8) as a function of the correct schedule
             # State("ta_multiplier", "value") ? Should recalculate when J or schedule changes IFF noise mitigation tab?
             ta_multiplier = 1
 
             if pathname == "/demo2":
-                ta_multiplier = calc_lambda(
+                ta_multiplier = calclambda_(
                     J, schedule_name=filename, J_baseline=J_baseline
                 )
 

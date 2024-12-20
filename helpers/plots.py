@@ -296,12 +296,12 @@ def plot_kink_densities_bg(
             ta_value = float(ta_str)
             color = ta_color_theme[ta_value]
             for point in data_points:
-                _lambda = point["lambda"]
+                lambda_ = point["lambda"]
                 kink_density = point["kink_density"]
                 if not label:
                     fig_data.append(
                         go.Scatter(
-                            x=[_lambda],
+                            x=[lambda_],
                             y=[kink_density],
                             xaxis="x3",
                             yaxis="y1",
@@ -315,7 +315,7 @@ def plot_kink_densities_bg(
                 else:
                     fig_data.append(
                         go.Scatter(
-                            x=[_lambda],
+                            x=[lambda_],
                             y=[kink_density],
                             xaxis="x3",
                             yaxis="y1",
@@ -388,7 +388,7 @@ def plot_kink_densities_bg(
 
 
 def plot_kink_density(
-    display, fig_dict, kink_density, anneal_time, J, _lambda, url=None
+    display, fig_dict, kink_density, anneal_time, J, lambda_=None, url=None
 ):
     """
     Add a kink density marker from QPU samples to an existing plot.
@@ -444,7 +444,7 @@ def plot_kink_density(
         # kappa = -1.8 / J
         fig.add_trace(
             go.Scatter(
-                x=[_lambda],
+                x=[lambda_],
                 y=[kink_density],
                 xaxis="x3",
                 yaxis="y1",
@@ -634,7 +634,7 @@ def plot_zne_fitted_line(
               due to ill conditioned data for fitting.
     """
     modal_trigger = False
-    if len(coupling_data) > 0 and len(coupling_data[ta_str]) > 2:
+    if ta_str in coupling_data.keys() and len(coupling_data[ta_str]) > 2:
 
         data_points = coupling_data[ta_str]
         x = np.array([point["lambda"] for point in data_points])
