@@ -668,8 +668,6 @@ def submit_job(
                     J, schedule_name=filename, J_baseline=J_baseline
                 )
 
-            print(f"{ta_multiplier}: qpu_name")
-
             computation = solver.sample_bqm(
                 bqm=bqm_embedded,
                 fast_anneal=True,
