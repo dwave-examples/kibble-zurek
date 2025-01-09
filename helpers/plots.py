@@ -1,4 +1,4 @@
-# Copyright 2024 D-Wave
+# Copyright 2025 D-Wave
 #
 #    Licensed under the A_ghzpache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from dash import no_update
+from src.demo_enums import ProblemType
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from helpers.qa import fitted_function
+from dash.exceptions import PreventUpdate
 
 from helpers.kz_calcs import theoretical_kink_density
 
@@ -66,7 +67,7 @@ def plot_kink_densities_bg(
     coupling_data,
     zne_estimates,
     kz_data=None,
-    url=None,
+    problem_type=None,
 ):
     """
     Plot the background of theoretical kink density and QPU energy scales.
@@ -98,10 +99,10 @@ def plot_kink_densities_bg(
         predicted kink densities and/or QPU energy scales based on the
         specified display mode.
     """
-    if schedule_name:
-        schedule = pd.read_csv(f"helpers/{schedule_name}")
-    else:
-        schedule = pd.read_csv("helpers/FALLBACK_SCHEDULE.csv")
+    if not schedule_name:
+        schedule_name = "FALLBACK_SCHEDULE.csv"
+
+    schedule = pd.read_csv(f"helpers/{schedule_name}")
 
     A_ghz = schedule["A(s) (GHz)"]
     B_ghz = schedule["B(s) (GHz)"]
@@ -207,7 +208,7 @@ def plot_kink_densities_bg(
             xaxis=x_axis1,
             yaxis=y_axis1,
         )
-        if url == "Demo2":
+        if problem_type is ProblemType.KZ_NM:
             _coupling_label = {
                 -1.8: False,
                 -1.6: False,
@@ -274,15 +275,14 @@ def plot_kink_densities_bg(
                     )
 
     elif display == "schedule":
-
         fig_layout = go.Layout(
             xaxis=x_axis2,
             yaxis=y_axis2,
         )
 
         fig_data = [energy_transverse, energy_problem]
-    elif display == "coupling":
 
+    elif display == "coupling":
         fig_layout = go.Layout(
             xaxis3=x_axis3,
             yaxis1=y_axis1,
@@ -325,7 +325,6 @@ def plot_kink_densities_bg(
                     )
 
     else:  # Display both plots together
-
         x_axis2.update({"overlaying": "x1"})
         y_axis2.update({"overlaying": "y1"})
 
@@ -339,7 +338,7 @@ def plot_kink_densities_bg(
         fig_data = [predicted_plus, predicted_minus, energy_transverse, energy_problem]
         
         # Add previously computed kz_data points
-        if kz_data is not None and "k" in kz_data:
+        if kz_data and "k" in kz_data:
             for pair in kz_data["k"]:
                 fig_data.append(
                     go.Scatter(
@@ -352,12 +351,12 @@ def plot_kink_densities_bg(
                         showlegend=False,
                     )
                 )
+
     fig = go.Figure(data=fig_data, layout=fig_layout)
 
     fig.update_layout(legend=dict(x=0.1, y=0.1), margin=dict(b=5, l=5, r=20, t=10))
 
     if display != "schedule" and display != "coupling":
-
         fig.add_annotation(
             xref="x",
             yref="y",
@@ -388,7 +387,7 @@ def plot_kink_densities_bg(
 
 
 def plot_kink_density(
-    display, fig_dict, kink_density, anneal_time, J, lambda_=None, url=None
+    display, fig_dict, kink_density, anneal_time, J, lambda_=None, problem_type=None
 ):
     """
     Add a kink density marker from QPU samples to an existing plot.
@@ -415,11 +414,11 @@ def plot_kink_density(
             - Otherwise, returns the updated Plotly figure with the new kink density marker.
     """
     if display == "schedule":
-        return no_update
+        raise PreventUpdate
 
     fig = go.Figure(fig_dict)
 
-    if url == "Demo1":
+    if problem_type is ProblemType.KZ:
         fig.add_trace(
             go.Scatter(
                 x=[anneal_time],
@@ -462,10 +461,7 @@ def plot_kink_density(
         )
         return fig
 
-    if display == "kink_density":
-        color = coupling_color_theme[J]
-    else:
-        color = "black"
+    color = coupling_color_theme[J] if display == "kink_density" else "black"
 
     if not coupling_label[J]:
         legend = True
@@ -521,12 +517,10 @@ def plot_spin_orientation(num_spins=512, sample=None):
     x, y = z * np.cos(5 * z), z * np.sin(5 * z)
 
     if sample is None:
-
         cones_red = cones_blue = np.ones(num_spins, dtype=bool)
         num_cones_red = num_cones_blue = num_spins
 
     else:
-
         cones_red = ~np.isnan(np.where(sample == 1, z, np.nan))
         cones_blue = ~cones_red
         num_cones_red = np.count_nonzero(cones_red)
@@ -634,8 +628,8 @@ def plot_zne_fitted_line(
               due to ill conditioned data for fitting.
     """
     modal_trigger = False
-    if ta_str in coupling_data.keys() and len(coupling_data[ta_str]) > 2:
 
+    if ta_str in coupling_data.keys() and len(coupling_data[ta_str]) > 2:
         data_points = coupling_data[ta_str]
         x = np.array([point["lambda"] for point in data_points])
         y = np.array([point["kink_density"] for point in data_points])
@@ -643,12 +637,12 @@ def plot_zne_fitted_line(
         # Ensure there are enough unique x values for fitting
         if len(np.unique(x)) > 1:
             # Fit a 1st degree polynomial (linear fit)
-            if qpu_name == "Diffusion [Classical]":
-                # Fancy non-linear function
-                y_func_x = fitted_function(x, y, method="mixture_of_exponentials")
-            else:
-                # Pure quadratic (see paper) # y = a + b x^2
-                y_func_x = fitted_function(x, y, method="pure_quadratic")
+            # Fancy non-linear function or pure quadratic (see paper) # y = a + b x^2
+            y_func_x = fitted_function(
+                x,
+                y,
+                method="mixture_of_exponentials" if len(np.unique(x)) > 1 else "pure_quadratic",
+            )
 
             if y_func_x is not None:
                 zne_estimates[ta_str] = y_func_x(0)
@@ -656,21 +650,14 @@ def plot_zne_fitted_line(
                 y_fit = y_func_x(x_fit)
             else:
                 modal_trigger = True
-            # Remove existing fitting curve traces to prevent duplication
+
+            # Remove existing fitting curve traces and ZNE Estimate traces to prevent duplication
             fig.data = [
                 trace
                 for trace in fig.data
-                if not (
-                    trace.name == "Fitting Curve"
+                if (
+                    trace.name not in ["Fitting Curve", "ZNE Estimate"]
                     and trace.legendgroup == f"ta_{ta_str}"
-                )
-            ]
-            # Remove existing ZNE Estimate traces to prevent duplication
-            fig.data = [
-                trace
-                for trace in fig.data
-                if not (
-                    trace.name == "ZNE Estimate" and trace.legendgroup == f"ta_{ta_str}"
                 )
             ]
 

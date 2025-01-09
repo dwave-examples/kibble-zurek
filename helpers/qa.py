@@ -38,7 +38,6 @@ def create_bqm(num_spins=512, coupling_strength=-1.4):
 
     Args:
         num_spins: Number of spins in the ring.
-
         coupling_strength: Coupling strength between spins in the ring.
 
     Returns:
@@ -58,7 +57,6 @@ def find_one_to_one_embedding(spins, sampler_edgelist):
 
     Args:
         spins: Number of spins.
-
         sampler_edgelist: Edges (couplers) of the QPU.
 
     Returns:
@@ -67,11 +65,9 @@ def find_one_to_one_embedding(spins, sampler_edgelist):
     bqm = create_bqm(spins)
 
     for _ in range(5):  # 4 out of 5 times will find an embedding
-
         embedding = minorminer.find_embedding(bqm.quadratic, sampler_edgelist)
 
         if max(len(val) for val in embedding.values()) == 1:
-
             return embedding
 
     return {}
@@ -82,9 +78,7 @@ def get_job_status(client, job_id, job_submit_time):
 
     Args:
         client: dwave-cloud-client Client instance.
-
         job_id: Identification string of the job.
-
         job_submit_time: Clock time of submission for identification.
 
     Returns:
@@ -94,23 +88,19 @@ def get_job_status(client, job_id, job_submit_time):
     if '"type": "SampleSet"' in job_id and job_submit_time == "SA":
         return "COMPLETED"
 
-    else:
-        p = Problems.from_config(client.config)
+    p = Problems.from_config(client.config)
 
-        try:
+    try:
+        status = p.get_problem_status(job_id)
+        label_time = dict(status)["label"].split("submitted: ")[1]
 
-            status = p.get_problem_status(job_id)
-            label_time = dict(status)["label"].split("submitted: ")[1]
+        if label_time == job_submit_time:
+            return status.status.value
 
-            if label_time == job_submit_time:
+        return None
 
-                return status.status.value
-
-            return None
-
-        except exceptions.ResourceNotFoundError:
-
-            return None
+    except exceptions.ResourceNotFoundError:
+        return None
 
 
 def get_samples(client, job_id, num_spins, J, embedding):
@@ -118,15 +108,10 @@ def get_samples(client, job_id, num_spins, J, embedding):
 
     Args:
         client: dwave-cloud-client Client instance.
-
         job_id: Identification string of the job.
-
         num_spins: Number of spins in the ring.
-
         coupling_strength: Coupling strength between spins in the ring.
-
         qpu_name: Name of the quantum computer the job was submitted to.
-
         embedding: Embedding used for the job.
 
     Returns:
@@ -161,18 +146,19 @@ def json_to_dict(emb_json):
     }
 
 
-def fitted_function(xdata, ydata, method=("polynomial", 1)):
+def fitted_function(xdata, ydata, method="polynomial", degree=1):
     """
     Generate a fitting function based on the provided data points and method.
 
     Args:
         xdata: Array-like, independent variable data points.
         ydata: Array-like, dependent variable data points.
-        method: Tuple or string specifying the fitting method. Options include:
-            - ("polynomial", deg): Fits a polynomial of degree `deg`.
+        method: A string specifying the fitting method. Options include:
+            - "polynomial": Fits a polynomial of degree `degree`.
             - "pure_quadratic": Fits a pure quadratic model, y = a + b*x^2.
             - "mixture_of_exponentials": Fits a mixture of exponential functions.
             - "sigmoidal_crossover": Fits a sigmoidal crossover model.
+        degree: The degree of the polynomial.
 
     Returns:
         Callable function that takes a single argument `x` and returns the fitted value.
@@ -181,8 +167,8 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
     Raises:
         ValueError: If the specified method is unknown.
     """
-    if type(method) is tuple and method[0] == "polynomial":
-        coeffs = Polynomial.fit(xdata, ydata, deg=method[1]).convert().coef
+    if method == "polynomial":
+        coeffs = Polynomial.fit(xdata, ydata, deg=degree).convert().coef
 
         def y_func_x(x):
             return np.polynomial.polynomial.polyval(x, coeffs)
@@ -203,8 +189,7 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
         # This type of function is quite difficult to fit.
         def mixture_of_exponentials(x, p_0, p_1, p_2):
             # Strictly positive form.
-            # To do: Change to force saturation. Large x should go sigmoidally
-            # towards 0.5
+            # TODO: Change to force saturation. Large x should go sigmoidally towards 0.5
             return np.exp(p_2) / 2 * (1 + np.exp(p_1 + np.exp(p_0) * x))
 
         # Take p_1 = 1; p_2 = min(x); take max(y) occurs at max(x)
@@ -212,6 +197,7 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
         maxx = np.max(xdata)
         miny = np.min(ydata)
         p0 = [np.log(np.log(2 * maxy / miny - 1) / (maxx - 1)), 0, np.log(miny)]
+
         try:
             p, _ = scipy.optimize.curve_fit(
                 f=mixture_of_exponentials, xdata=xdata, ydata=ydata, p0=p0
@@ -229,8 +215,7 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
         # This type of function is quite difficult to fit.
         def sigmoidal_crossover(x, p_0, p_1, p_2, p_3):
             # Strictly positive form.
-            # To do: Change to force saturation. Large x should go sigmoidally
-            # towards 0.5
+            # TODO: Change to force saturation. Large x should go sigmoidally towards 0.5
             return np.exp(p_3) * (
                 1 + np.exp(p_2) * np.tanh(np.exp(p_1) * (x - np.exp(p_0)))
             )
@@ -264,4 +249,5 @@ def fitted_function(xdata, ydata, method=("polynomial", 1)):
 
     else:
         raise ValueError("Unknown method")
+
     return y_func_x

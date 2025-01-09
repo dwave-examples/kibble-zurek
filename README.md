@@ -118,7 +118,9 @@ Your development environment should be configured to
 You can see information about supported IDEs and authorizing access to your 
 Leap account [here](https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html).  
 
-The default configuration uses `DWaveSampler` with specific models accessed through the Leap API. To run experiments using `MockDKibbleZurekSampler` locally, set the environment variable in your terminal before running the application.
+The default configuration uses `DWaveSampler` with specific models accessed through the Leap API.
+To run experiments using `MockDKibbleZurekSampler` locally, set the environment variable in your
+terminal before running the application.
 
 **Windows terminal**:
 ```
@@ -203,10 +205,16 @@ the kink density away from the predicted value.
 
 ## <a name="ZNE"></a> Zero-Noise Extrapolation
 
-Another feature showcased in this demo is the result achieved in Quantum Error Mitigation. In this paper, we demonstrate a practical implementation of zero-noise extrapolation as a method of quantum error mitigation specifically used for quantum annealing.
+Another feature showcased in this demo is the result achieved in Quantum Error Mitigation.
+In [this paper](https://arxiv.org/abs/2311.01306), we demonstrate a practical implementation
+of zero-noise extrapolation as a method of quantum error mitigation specifically used for quantum
+annealing.
 
 
-For various coupling strengths at the same annealing time, we used a fitting function—quadratic for the Advantage solver and a multi-polynomial for the MockDwaveSampler—to calculate the theoretical zero-noise point. As the experiment runs for a longer time, we expect this zero-noise point to follow the same trend as the other data points.
+For various coupling strengths at the same annealing time, we used a fitting function—quadratic
+for the Advantage solver and a multi-polynomial for the MockDwaveSampler to calculate the
+theoretical zero-noise point. As the experiment runs for a longer time, we expect this zero-noise
+point to follow the same trend as the other data points.
 
 <img src='assets/ZNE_fig2.png' alt='Experimental results' width='400'/>
 

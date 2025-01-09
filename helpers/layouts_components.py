@@ -1,4 +1,4 @@
-# Copyright 2024 D-Wave
+# Copyright 2025 D-Wave
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -12,15 +12,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from itertools import chain
 import dash_bootstrap_components as dbc
-from dash.dcc import Checklist, Dropdown, Link, RadioItems, Slider, Input
 from dash import html, dcc
+from src.demo_enums import ProblemType
 
 __all__ = [
-    "get_config_anneal_duration",
-    "get_config_kz_graph",
+    "get_anneal_duration_setting",
+    "get_kz_graph_radio_options",
     "config_spins",
-    "get_config_coupling_strength",
+    "get_coupling_strength_slider",
     "config_qpu_selection",
     "dbc_modal",
     "embeddings",
@@ -32,8 +33,8 @@ __all__ = [
 ring_lengths = [512, 1024, 2048]
 
 
-def get_config_anneal_duration(demo_type):
-    if demo_type == "Zero-Noise":
+def get_anneal_duration_setting(problem_type):
+    if problem_type is ProblemType.KZ_NM:
         return dcc.Dropdown(
             id="anneal_duration",
             options=[
@@ -50,39 +51,21 @@ def get_config_anneal_duration(demo_type):
             value=80,  # default value
             style={"max-width": "95%"},
         )
-    else:
-        return dbc.Input(
-            id="anneal_duration",
-            type="number",
-            min=5,
-            max=100,
-            step=1,
-            value=7,
-            style={"max-width": "95%"},
-        )
+
+    return dbc.Input(
+        id="anneal_duration",
+        type="number",
+        min=5,
+        max=100,
+        step=1,
+        value=7,
+        style={"max-width": "95%"},
+    )
 
 
-def get_config_kz_graph(demo_type):
-    if demo_type == "Kibble-Zurek":
-        return RadioItems(
-            id="graph_display",
-            options=[
-                {"label": "Both", "value": "both", "disabled": False},
-                {"label": "Kink density", "value": "kink_density", "disabled": False},
-                {"label": "Schedule", "value": "schedule", "disabled": False},
-            ],
-            value="both",
-            inputStyle={"margin-right": "10px", "margin-bottom": "5px"},
-            labelStyle={
-                "color": "rgb(3, 184, 255)",
-                "font-size": 12,
-                "display": "inline-block",
-                "marginLeft": 20,
-            },
-            inline=True,
-        )
-    else:
-        return RadioItems(
+def get_kz_graph_radio_options(problem_type):
+    if problem_type is ProblemType.KZ_NM:
+        return dcc.RadioItems(
             id="graph_display",
             options=[
                 {
@@ -107,8 +90,26 @@ def get_config_kz_graph(demo_type):
             inline=True,
         )
 
+    return dcc.RadioItems(
+        id="graph_display",
+        options=[
+            {"label": "Both", "value": "both", "disabled": False},
+            {"label": "Kink density", "value": "kink_density", "disabled": False},
+            {"label": "Schedule", "value": "schedule", "disabled": False},
+        ],
+        value="both",
+        inputStyle={"margin-right": "10px", "margin-bottom": "5px"},
+        labelStyle={
+            "color": "rgb(3, 184, 255)",
+            "font-size": 12,
+            "display": "inline-block",
+            "marginLeft": 20,
+        },
+        inline=True,
+    )
 
-config_spins = RadioItems(
+
+config_spins = dcc.RadioItems(
     id="spins",
     options=[
         {"label": f"{length}", "value": length, "disabled": False}
@@ -122,81 +123,52 @@ config_spins = RadioItems(
         "display": "inline-block",
         "marginLeft": 20,
     },
-    inline=True,  # Currently requires above 'inline-block'
+    inline=True,
 )
 
 j_marks = {
-    round(0.1 * val, 1): (
-        {"label": f"{round(0.1*val, 1)}", "style": {"color": "white"}}
-        if round(0.1 * val, 0) != 0.1 * val
-        else {"label": f"{round(0.1*val)}", "style": {"color": "white"}}
+    round(0.1 * val) if val % 10 == 0 else round(0.1 * val, 1): (
+        {"label": f"{round(0.1*val)}", "style": {"color": "white"}}
+        if val % 10 == 0
+        else {"label": f"{round(0.1*val, 1)}", "style": {"color": "white"}}
     )
-    for val in range(-18, 0, 2)
+    for val in chain(range(-20, 0, 2), range(2, 12, 2))
 }
-j_marks.update(
-    {
-        round(0.1 * val, 1): (
-            {"label": f"{round(0.1*val, 1)}", "style": {"color": "white"}}
-            if round(0.1 * val, 0) != 0.1 * val
-            else {"label": f"{round(0.1*val)}", "style": {"color": "white"}}
-        )
-        for val in range(2, 10, 2)
-    }
-)
-# Dash Slider has some issue with int values having a zero after the decimal point
-j_marks[-2] = {"label": "-2", "style": {"color": "white"}}
-del j_marks[-1.0]
-j_marks[-1] = {"label": "-1", "style": {"color": "white"}}
-j_marks[1] = {"label": "1", "style": {"color": "white"}}
 
-
-def get_config_coupling_strength(demo_type):
-    if demo_type == "Zero-Noise":
-        return dbc.Row(
+def get_coupling_strength_slider(problem_type):
+    if problem_type is ProblemType.KZ_NM:
+        return html.Div(
             [
-                dbc.Col(
-                    html.Div(
-                        [
-                            Slider(
-                                id="coupling_strength",
-                                value=-1.8,
-                                marks=j_marks,
-                                min=-1.8,
-                                max=-0.6,
-                                step=None,
-                                tooltip={"placement": "bottom", "always_visible": True},
-                            )
-                        ]
-                    ),
-                ),
+                dcc.Slider(
+                    id="coupling_strength",
+                    value=-1.8,
+                    marks=j_marks,
+                    min=-1.8,
+                    max=-0.6,
+                    step=None,
+                    tooltip={"placement": "bottom", "always_visible": True},
+                )
             ]
         )
-    return dbc.Row(
+
+    return html.Div(
         [
-            dbc.Col(
-                html.Div(
-                    [
-                        Slider(
-                            id="coupling_strength",
-                            value=-1.4,
-                            marks=j_marks,
-                            step=None,
-                            tooltip={"placement": "bottom", "always_visible": True},
-                        )
-                    ]
-                ),
-            ),
+            dcc.Slider(
+                id="coupling_strength",
+                value=-1.4,
+                marks=j_marks,
+                step=None,
+                tooltip={"placement": "bottom", "always_visible": True},
+            )
         ]
     )
 
 
-def config_qpu_selection(solvers, default="Diffusion [Classical]"):
-    default = "Diffusion [Classical]" if "Diffusion [Classical]" in solvers else None
-    return Dropdown(
+def config_qpu_selection(solvers):
+    return dcc.Dropdown(
         id="qpu_selection",
         options=[{"label": qpu_name, "value": qpu_name} for qpu_name in solvers],
         placeholder="Select a quantum computer",
-        # value=default
     )
 
 
@@ -222,10 +194,10 @@ modal_texts = {
                     html.Div(
                         [
                             """
-If you are running locally, set environment variables or a
-dwave-cloud-client configuration file as described in the
-""",
-                            Link(
+                            If you are running locally, set environment variables or a
+                            dwave-cloud-client configuration file as described in the
+                            """,
+                            dcc.Link(
                                 children=[html.Div(" Ocean")],
                                 href="https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html",
                                 style={"display": "inline-block"},
@@ -237,7 +209,7 @@ dwave-cloud-client configuration file as described in the
                     html.Div(
                         [
                             "If you are running in an online IDE, see the ",
-                            Link(
+                            dcc.Link(
                                 children=[html.Div("system documentation")],
                                 href="https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html",
                                 style={"display": "inline-block"},
@@ -271,7 +243,7 @@ def dbc_modal(name):
     ]
 
 
-embeddings = Checklist(
+embeddings = dcc.Checklist(
     options=[
         {
             "label": html.Div(
@@ -289,7 +261,7 @@ embeddings = Checklist(
     inline=True,
 )
 
-tooltips_activate = RadioItems(
+tooltips_activate = dcc.RadioItems(
     id="tooltips_show",
     options=[
         {
@@ -309,5 +281,5 @@ tooltips_activate = RadioItems(
         "display": "inline-block",
         "marginLeft": 20,
     },
-    inline=True,  # Currently requires above 'inline-block'
+    inline=True,
 )

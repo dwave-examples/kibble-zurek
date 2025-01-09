@@ -6,3 +6,40 @@ body {
 .row {
     flex-wrap: nowrap;
 }
+
+.nav-link {
+    cursor: pointer;
+}
+
+.nav-link.active {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-link.active:hover {
+    filter: none;
+    cursor: default;
+}
+
+h1 {
+    font-size: 1.5rem;
+    color: rgb(243, 120, 32);
+}
+
+h3 {
+    font-size: 1.25rem;
+    color: rgb(243, 120, 32);
+    margin: 15px 0 0 15px;
+}
+
+label {
+    color: rgb(3, 184, 255);
+    margin-top: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+p {
+    color: white;
+    font-size: 14px;
+}

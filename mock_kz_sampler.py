@@ -1,8 +1,21 @@
+# Copyright 2025 D-Wave
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
 import numpy as np
 
 from dimod import SampleSet
 from dwave.samplers import SimulatedAnnealingSampler
-from dwave.system.temperatures import fluxbias_to_h
 from dwave.system.testing import MockDWaveSampler
 
 
@@ -47,22 +60,16 @@ class MockKibbleZurekSampler(MockDWaveSampler):
         self.parameters.update({"num_sweeps": []})
 
     def sample(self, bqm, **kwargs):
-        # TO DO: corrupt bqm with noise proportional to annealing_time
+        # TODO: corrupt bqsm with noise proportional to annealing_time
         _bqm = bqm.change_vartype("SPIN", inplace=False)
 
         # Extract annealing_time from kwargs (if provided)
         annealing_time = kwargs.pop("annealing_time", 20)  # 20us default.
         num_sweeps = int(annealing_time * 1000)  # 1000 sweeps per microsecond
-        # Extract flux biases from kwargs (if provided)
-        # flux_biases = kwargs.pop('flux_biases', {})
-        # flux_to_h_factor = fluxbias_to_h()
-        # for v in _bqm.variables:
-        #     bias = _bqm.get_linear(v)
-        #     _bqm.set_linear(v, bias + flux_to_h_factor * flux_biases[v])
 
         ss = super().sample(bqm=_bqm, num_sweeps=num_sweeps, **kwargs)
 
-        ss.change_vartype(bqm.vartype)  # Not required (but safe) this case ...
+        ss.change_vartype(bqm.vartype)  # Not required but safe
 
         ss = SampleSet.from_samples_bqm(ss, bqm)
 
