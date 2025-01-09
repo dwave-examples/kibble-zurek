@@ -55,11 +55,21 @@ def test_job_submission(mocker,):
         context_value.set(AttributeDict(**
             {'triggered_inputs': [{'prop_id': 'job_submit_time.children'},]}))
 
-        return submit_job('11:45AM', 'Advantage_system88.4', 3, 2.3, 7, json_embeddings_file)
+        return submit_job(
+            '11:45AM',
+            'Advantage_system88.4',
+            3,
+            2.3,
+            7,
+            json_embeddings_file,
+            0,
+            "FALLBACK_SCHEDULE.csv",
+            False,
+        )
 
     ctx = copy_context()
     output = ctx.run(run_callback)
         
-    assert output == (1234)
+    assert output == (1234, False, False)
     
 

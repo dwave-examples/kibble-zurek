@@ -18,7 +18,7 @@ from io import StringIO
 from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
-from dash import no_update
+from dash.exceptions import PreventUpdate
 
 from app import cache_embeddings
 
@@ -42,25 +42,20 @@ class mock_qpu(object):
     def __init__(self):
         self.edges_per_qpu = {
             'Advantage_system4.1': edges_5,
-            'Advantage2_prototype2.55': edges_3_5, }
+            'Advantage2_prototype2.3': edges_3_5
+        }
     
     def __getitem__(self, indx):
         return mock_qpu_edges(self.edges_per_qpu[indx])
     
 parametrize_vals = [
-    ('Advantage_system4.1', 
-     embedding_filenames,
-     json_embeddings_file,), 
-    ('Advantage2_prototype2.55',
-     embedding_filenames,
-     json_embeddings_file,),
-    ('Advantage88_prototype7.3',
-     embedding_filenames,
-     json_embeddings_file,), ]
+    ('Advantage_system4.1', embedding_filenames, json_embeddings_file), 
+    ('Advantage2_prototype2.3', embedding_filenames, json_embeddings_file),
+    ('Advantage88_prototype7.3', embedding_filenames, json_embeddings_file)
+]
 
-@pytest.mark.parametrize(['qpu_name_val', 'embeddings', 'json_emb_file',],
-parametrize_vals)
-def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_emb_file,):
+@pytest.mark.parametrize(['qpu_name_val', 'embeddings', 'json_emb_file',], parametrize_vals)
+def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_emb_file):
     """Test the caching of embeddings: triggered by QPU selection."""
 
     mocker.patch('app.os.listdir', return_value=embeddings)
@@ -68,8 +63,9 @@ def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_e
     mocker.patch('app.qpus', new=mock_qpu())
 
     def run_callback():
-        context_value.set(AttributeDict(**
-            {'triggered_inputs': [{'prop_id': 'qpu_selection.value'},]}))
+        context_value.set(
+            AttributeDict(**{'triggered_inputs': [{'prop_id': 'qpu_selection.value'},]})
+        )
 
         return cache_embeddings(qpu_name_val, 'dummy', 'dummy')
 
@@ -79,19 +75,17 @@ def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_e
     if qpu_name_val == 'Advantage_system4.1':
         assert output[1] == [5]
     
-    if qpu_name_val == 'Advantage2_prototype2.55':
+    if qpu_name_val == 'Advantage2_prototype2.3':
         assert output[1] == [3, 5]
 
     if qpu_name_val == 'Advantage88_prototype7.3':
         assert output == ({}, [])
 
 parametrize_vals = [
-    ('{"22": {"1": [11], "0": [10], "2": [12]}}', 
-     json_embeddings_file,), 
-    ('needed',
-     json_embeddings_file,),
-    ('not found',
-     json_embeddings_file,), ]
+    ('{"22": {"1": [11], "0": [10], "2": [12]}}', json_embeddings_file), 
+    ('needed', json_embeddings_file),
+    ('not found', json_embeddings_file),
+]
 
 @pytest.mark.parametrize(['embeddings_found_val', 'embeddings_cached_val'],
 parametrize_vals)
@@ -99,15 +93,18 @@ def test_cache_embeddings_found_embedding(embeddings_found_val, embeddings_cache
     """Test the caching of embeddings: triggered by found embedding."""
 
     def run_callback():
-        context_value.set(AttributeDict(**
-            {'triggered_inputs': [{'prop_id': 'embeddings_found.data'},]}))
+        context_value.set(
+            AttributeDict(**{'triggered_inputs': [{'prop_id': 'embeddings_found.data'},]})
+        )
 
         return cache_embeddings('dummy', embeddings_found_val, embeddings_cached_val)
 
     ctx = copy_context()
-    output = ctx.run(run_callback)
 
     if not isinstance(embeddings_found_val, dict):
-        assert output == (no_update, no_update)
+        with pytest.raises(PreventUpdate):
+            ctx.run(run_callback)
     else:
+        output = ctx.run(run_callback)
+
         assert 22 in output[1]

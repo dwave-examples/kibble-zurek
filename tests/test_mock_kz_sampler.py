@@ -1,4 +1,4 @@
-# Copyright 2024 D-Wave Systems Inc.
+# Copyright 2025 D-Wave
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -16,17 +16,13 @@ import pytest
 import sys
 import os
 
-import dimod
 from dimod.testing import *
-from unittest.mock import patch
-from dimod import SampleSet
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 from dimod import BinaryQuadraticModel
 from dwave.samplers import SimulatedAnnealingSampler
-from dwave.system.testing import MockDWaveSampler
-from MockKibbleZurekSampler import MockKibbleZurekSampler
+from mock_kz_sampler import MockKibbleZurekSampler
 
 @pytest.fixture
 def default_sampler():
@@ -57,12 +53,11 @@ def sample_bqm():
     return BinaryQuadraticModel({'a': 1.0, 'b': -1.0}, {('a', 'b'): 0.5}, 0.0, 'BINARY')
 
 
-
 def test_initialization(default_sampler, custom_sampler):
-    # #assert default_sampler.topology_type == 'pegasus'
-    # #assert default_sampler.topology_shape == [16]
+    # assert default_sampler.topology_type == 'pegasus'
+    # assert default_sampler.topology_shape == [16]
     # assert isinstance(default_sampler.substitute_sampler, SimulatedAnnealingSampler)
-    # #assert default_sampler.substitute_kwargs['beta_range'] == [0, 3]
+    # assert default_sampler.substitute_kwargs['beta_range'] == [0, 3]
     # assert default_sampler.substitute_kwargs['beta_schedule_type'] == 'linear'
     # assert default_sampler.substitute_kwargs['num_sweeps'] == 100
     # assert default_sampler.substitute_kwargs['randomize_order'] is True
@@ -78,7 +73,6 @@ def test_initialization(default_sampler, custom_sampler):
     assert custom_sampler.substitute_kwargs['beta_range'] == [1, 2]
     assert custom_sampler.substitute_kwargs['num_sweeps'] == 200
 
-   
 
 # def test_sample_with_default_annealing_time(default_sampler, sample_bqm):
 #     sampleset = default_sampler.sample(sample_bqm)

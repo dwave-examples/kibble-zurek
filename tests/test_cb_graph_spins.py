@@ -15,7 +15,7 @@
 import pytest
 
 from contextvars import copy_context
-from dash import no_update
+from dash.exceptions import PreventUpdate
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 import plotly
@@ -68,9 +68,9 @@ def test_graph_spins_job_trigger(mocker, spins_val, job_submit_state_val, embedd
 
     ctx = copy_context()
 
-    output = ctx.run(run_callback)
-
     if job_submit_state_val == 'COMPLETED':
+        output = ctx.run(run_callback)
         assert type(output) == plotly.graph_objects.Figure
     else:
-        output = no_update
+        with pytest.raises(PreventUpdate):
+            ctx.run(run_callback)

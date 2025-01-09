@@ -12,6 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import os
 import pytest
 import pandas as pd
 
@@ -19,7 +20,9 @@ import dimod
 
 from helpers.kz_calcs import *
 
-schedule = pd.read_csv('helpers/FALLBACK_SCHEDULE.csv')
+project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+schedule = pd.read_csv(project_dir + '/helpers/FALLBACK_SCHEDULE.csv')
 
 @pytest.mark.parametrize('t_a_ns, J1, J2',
     [([7, 25], -1.0, -0.3), ([10, 30], 1.0, 0.3), ])
@@ -29,14 +32,14 @@ def test_kz_theory(t_a_ns, J1, J2):
     output1 = theoretical_kink_density(
         annealing_times_ns=t_a_ns, 
         J=J1, 
-        schedule=schedule, 
-        schedule_name='FALLBACK_SCHEDULE.csv')
+        schedule_name='FALLBACK_SCHEDULE.csv',
+    )
     
     output2 = theoretical_kink_density(
         annealing_times_ns=t_a_ns, 
         J=J2, 
-        schedule=schedule, 
-        schedule_name='FALLBACK_SCHEDULE.csv')
+        schedule_name='FALLBACK_SCHEDULE.csv',
+    )
 
     assert output1[0] > output1[1]
     assert output1[0] < output2[0]
