@@ -24,10 +24,8 @@ __all__ = [
     "get_coupling_strength_slider",
     "config_qpu_selection",
     "dbc_modal",
-    "embeddings",
     "job_bar_display",
     "ring_lengths",
-    "tooltips_activate",
 ]
 
 ring_lengths = [512, 1024, 2048]
@@ -241,45 +239,3 @@ def dbc_modal(name):
             ]
         )
     ]
-
-
-embeddings = dcc.Checklist(
-    options=[
-        {
-            "label": html.Div(
-                [f"{length}"],
-                style={"color": "white", "font-size": 10, "marginRight": 10},
-            ),
-            "value": length,
-            "disabled": True,
-        }
-        for length in ring_lengths
-    ],
-    value=[],
-    id=f"embedding_is_cached",
-    style={"color": "white"},
-    inline=True,
-)
-
-tooltips_activate = dcc.RadioItems(
-    id="tooltips_show",
-    options=[
-        {
-            "label": "On",
-            "value": "on",
-        },
-        {
-            "label": "Off",
-            "value": "off",
-        },
-    ],
-    value="on",
-    inputStyle={"margin-right": "10px", "margin-bottom": "10px"},
-    labelStyle={
-        "color": "white",
-        "font-size": 12,
-        "display": "inline-block",
-        "marginLeft": 20,
-    },
-    inline=True,
-)

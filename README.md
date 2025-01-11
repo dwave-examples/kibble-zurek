@@ -146,6 +146,9 @@ to the Kibble-Zurek predictions.
 *Hover over an input field to see a description of the input and its range of*
 *supported values.*
 
+<!-- TODO: Add a note about: You can download schedules from
+https://docs.dwavesys.com/docs/latest/doc_physical_properties.html -->
+
 ## <a name="Model-Overview"></a> Model Overview
 
 Quantum simulation is valuable for demonstrating and understanding the 

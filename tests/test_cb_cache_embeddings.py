@@ -42,7 +42,7 @@ class mock_qpu(object):
     def __init__(self):
         self.edges_per_qpu = {
             'Advantage_system4.1': edges_5,
-            'Advantage2_prototype2.3': edges_3_5
+            'Advantage2_prototype2.55': edges_3_5
         }
     
     def __getitem__(self, indx):
@@ -50,7 +50,7 @@ class mock_qpu(object):
     
 parametrize_vals = [
     ('Advantage_system4.1', embedding_filenames, json_embeddings_file), 
-    ('Advantage2_prototype2.3', embedding_filenames, json_embeddings_file),
+    ('Advantage2_prototype2.55', embedding_filenames, json_embeddings_file),
     ('Advantage88_prototype7.3', embedding_filenames, json_embeddings_file)
 ]
 
@@ -75,7 +75,7 @@ def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_e
     if qpu_name_val == 'Advantage_system4.1':
         assert output[1] == [5]
     
-    if qpu_name_val == 'Advantage2_prototype2.3':
+    if qpu_name_val == 'Advantage2_prototype2.55':
         assert output[1] == [3, 5]
 
     if qpu_name_val == 'Advantage88_prototype7.3':

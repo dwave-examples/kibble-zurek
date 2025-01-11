@@ -61,70 +61,45 @@ def control_card(solvers={}, init_job_status="READY"):
                 ],
                 style={"marginTop": "10px"},
             ),
-            html.Label("Cached Embeddings"),
-            embeddings,
-            html.Label("Simulation"),
+            html.P(["Cached Embeddings: ", html.Span(id="embedding_is_cached")], style={"marginTop": 10}),
             dbc.Row(
                 [
                     dbc.Col(
                         dbc.Button(
-                            "Run",
+                            "Run Simulation",
                             id="btn_simulate",
                             color="primary",
-                            className="me-2",  # Adds spacing between buttons
-                            style={
-                                "marginTop": "10px"
-                            },
                         ),
                         width="auto",
                     ),
-                ],
-                justify="start",  # Aligns buttons to the left
-                align="center",  # Vertically centers buttons
-            ),
-            dbc.Progress(
-                id="bar_job_status",
-                value=0,
-                color="link",
-                className="mb-3",
-                style={"width": "60%"},
-            ),
-            html.P(
-                [
-                    "Status: ",
-                    html.Span(
-                        id="job_submit_state",
-                        children=f"{init_job_status}",
-                        style={
-                            "color": job_status_color,
-                            "fontSize": 12,
-                            "marginTop": "10px",
-                        },
+                    dbc.Col(
+                        [
+                            dbc.Progress(
+                                id="bar_job_status",
+                                value=0,
+                                color="link",
+                                style={"width": "60%"},
+                            ),
+                            html.P(
+                                [
+                                    "Status: ",
+                                    html.Span(
+                                        id="job_submit_state",
+                                        children=f"{init_job_status}",
+                                        style={
+                                            "color": job_status_color,
+                                            "fontSize": 12,
+                                        },
+                                    ),
+                                ],
+                                style={"margin": "0"},
+                            ),
+                        ]
                     ),
                 ],
-                style={"marginTop": "5px"},
-            ),
-            tooltips_activate,
-            # Non-displayed section
-            dcc.Interval(
-                id="wd_job",
-                interval=None,
-                n_intervals=0,
-                disabled=True,
-                max_intervals=1,
-            ),
-            # Used for storing job status. Can probably be replaced with dcc.Store.
-            html.P(id="job_submit_time", style={"display": "none"}),
-            html.P(id="job_id", style={"display": "none"}),
-            dcc.Store(
-                id="embeddings_cached",
-                storage_type="memory",
-                data={},
-            ),
-            dcc.Store(
-                id="embeddings_found",
-                storage_type="memory",
-                data={},
+                justify="start",  # Aligns buttons to the left
+                align="end",
+                style={"marginTop": 40}
             ),
         ],
         body=True,

@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from typing import Union
+from typing import NamedTuple, Union
 import dash
 import dash_bootstrap_components as dbc
 from dash import ALL, ctx, dcc, html, Input, Output, State
@@ -130,6 +130,17 @@ app.layout = html.Div(
         dcc.Store(id="initial_warning", data=False),
         dcc.Store(id="kz_data", data={}),
         dcc.Store(id="selected-problem"),
+        dcc.Store(id="job_submit_time"),
+        dcc.Store(id="job_id"),
+        dcc.Store(id="embeddings_cached", data={}),
+        dcc.Store(id="embeddings_found", data={}),
+        dcc.Interval(
+            id="wd_job",
+            interval=500,
+            n_intervals=0,
+            disabled=True,
+            max_intervals=1,
+        ),
         navbar,  # Includes the Navbar at the top
         html.Div(
             [
@@ -313,7 +324,7 @@ def set_schedule(qpu_name):
 
 @app.callback(
     Output("embeddings_cached", "data"),
-    Output("embedding_is_cached", "value"),
+    Output("embedding_is_cached", "children"),
     inputs=[
         Input("qpu_selection", "value"),
         Input("embeddings_found", "data"),
@@ -331,9 +342,10 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
             file for file in os.listdir("helpers") if ".json" in file and "emb_" in file
         ]:
 
-            _qpu_name = "Advantage_system6.4" if qpu_name == "Diffusion [Classical]" else qpu_name
+            if qpu_name == "Diffusion [Classical]":
+                qpu_name = "Advantage_system6.4"
 
-            if _qpu_name in filename:
+            if qpu_name.split('.')[0] in filename:
                 with open(f"helpers/{filename}", "r") as fp:
                     embeddings_cached = json.load(fp)
 
@@ -341,9 +353,8 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
 
                 # Validate that loaded embeddings' edges are still available on the selected QPU
                 for length in list(embeddings_cached.keys()):
-
                     source_graph = dimod.to_networkx_graph(create_bqm(num_spins=length)).edges
-                    target_graph = qpus[_qpu_name].edges
+                    target_graph = qpus[qpu_name].edges
                     emb = embeddings_cached[length]
 
                     if not is_valid_embedding(emb, source_graph, target_graph):
@@ -358,7 +369,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
         new_embedding = list(embeddings_found.keys())[0]
         embeddings_cached[new_embedding] = embeddings_found[new_embedding]
 
-    return embeddings_cached, list(embeddings_cached.keys())
+    return embeddings_cached, ", ".join(str(embedding) for embedding in embeddings_cached.keys())
 
 
 @app.callback(
@@ -373,7 +384,7 @@ def cache_embeddings(qpu_name, embeddings_found, embeddings_cached):
         Input("coupling_strength", "value"),  # previously input
         Input("quench_schedule_filename", "children"),
         Input("job_submit_state", "children"),
-        Input("job_id", "children"),
+        Input("job_id", "data"),
         Input("anneal_duration", "value"),
         Input("spins", "value"),
         Input("selected-problem", "data"),
@@ -447,7 +458,7 @@ def display_graphics_kink_density(
             if job_submit_state != "COMPLETED":
                 raise PreventUpdate
 
-            embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+            embeddings_cached = json_to_dict(embeddings_cached)
 
             sampleset_unembedded = get_samples(
                 client, job_id, spins, J, embeddings_cached[spins]
@@ -522,7 +533,7 @@ def display_graphics_kink_density(
         if job_submit_state != "COMPLETED":
             raise PreventUpdate
 
-        embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+        embeddings_cached = json_to_dict(embeddings_cached)
 
         sampleset_unembedded = get_samples(
             client, job_id, spins, J, embeddings_cached[spins]
@@ -554,7 +565,7 @@ def display_graphics_kink_density(
     inputs=[
         Input("spins", "value"),
         Input("job_submit_state", "children"),
-        State("job_id", "children"),
+        State("job_id", "data"),
         State("coupling_strength", "value"),
         State("embeddings_cached", "data"),
     ]
@@ -566,7 +577,7 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
         if job_submit_state != "COMPLETED":
             raise PreventUpdate
 
-        embeddings_cached = embeddings_cached = json_to_dict(embeddings_cached)
+        embeddings_cached = json_to_dict(embeddings_cached)
         sampleset_unembedded = get_samples(
             client, job_id, spins, J, embeddings_cached[spins]
         )
@@ -582,11 +593,12 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
 
 
 @app.callback(
-    Output("job_id", "children"),
+    Output("job_id", "data"),
     Output("initial_warning", "data"),
     Output("warning-modal", "is_open"),
+    Output("wd_job", "n_intervals"),
     inputs=[
-        Input("job_submit_time", "children"),
+        Input("job_submit_time", "data"),
         State("qpu_selection", "value"),
         State("spins", "value"),
         State("coupling_strength", "value"),
@@ -630,7 +642,7 @@ def submit_job(
             bqm_embedded, annealing_time=annealing_time
         )
 
-        return json.dumps(sampleset.to_serializable()), True, not initial_warning
+        return json.dumps(sampleset.to_serializable()), True, not initial_warning, 0
 
     bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
 
@@ -654,24 +666,78 @@ def submit_job(
         label=f"Examples - Kibble-Zurek Simulation, submitted: {job_submit_time}",
     )
 
-    return computation.wait_id(), False, False
+    return computation.wait_id(), False, False, 0
 
 
 @app.callback(
     Output("btn_simulate", "disabled"),
     Output("wd_job", "disabled"),
-    Output("wd_job", "interval"),
-    Output("wd_job", "n_intervals"),
+    Output("wd_job", "n_intervals", allow_duplicate=True),
     Output("job_submit_state", "children"),
-    Output("job_submit_time", "children"),
+    Output("job_submit_time", "data"),
     Output("embeddings_found", "data"),
     inputs=[
         Input("btn_simulate", "n_clicks"),
-        Input("wd_job", "n_intervals"),
-        State("job_id", "children"),
         State("job_submit_state", "children"),
-        State("job_submit_time", "children"),
-        State("embedding_is_cached", "value"),
+        State("embedding_is_cached", "children"),
+        State("spins", "value"),
+        State("qpu_selection", "value"),
+    ],
+    prevent_initial_call=True,
+)
+def run_button_click(
+    run_btn_click,
+    job_submit_state,
+    cached_embeddings,
+    spins,
+    qpu_name,
+):
+    """Manage simulation: embedding, job submission."""
+    if str(spins) in cached_embeddings.split(", ") or qpu_name == "Diffusion [Classical]":
+        submit_time = datetime.datetime.now().strftime("%c")
+        if qpu_name == "Diffusion [Classical]":  # Hack to fix switch from SA to QPU
+            submit_time = "SA"
+        job_submit_state = "SUBMITTED"
+        embedding = dash.no_update
+
+    else:
+        submit_time = dash.no_update
+        job_submit_state = "EMBEDDING"
+        embedding = "needed"
+
+    return (
+        True,
+        False,
+        0,
+        job_submit_state,
+        submit_time,
+        embedding,
+    )
+
+class SimulateReturn(NamedTuple):
+    """Return type for the ``simulate`` callback function."""
+
+    btn_simulate_disabled: bool = dash.no_update
+    wd_job_disabled: bool = dash.no_update
+    wd_job_interval: int = dash.no_update
+    wd_job_n_intervals: int = dash.no_update
+    job_submit_state: str = dash.no_update
+    job_submit_time: datetime = dash.no_update
+    embeddings_found: dict|str = dash.no_update
+
+@app.callback(
+    Output("btn_simulate", "disabled", allow_duplicate=True),
+    Output("wd_job", "disabled", allow_duplicate=True),
+    Output("wd_job", "interval"),
+    Output("wd_job", "n_intervals", allow_duplicate=True),
+    Output("job_submit_state", "children", allow_duplicate=True),
+    Output("job_submit_time", "data", allow_duplicate=True),
+    Output("embeddings_found", "data", allow_duplicate=True),
+    inputs=[
+        Input("wd_job", "n_intervals"),
+        State("job_id", "data"),
+        State("job_submit_state", "children"),
+        State("job_submit_time", "data"),
         State("spins", "value"),
         State("qpu_selection", "value"),
         State("embeddings_found", "data"),
@@ -679,96 +745,64 @@ def submit_job(
     prevent_initial_call=True,
 )
 def simulate(
-    dummy1,
-    dummy2,
+    interval,
     job_id,
     job_submit_state,
     job_submit_time,
-    cached_embedding_lengths,
     spins,
     qpu_name,
     embeddings_found,
-):
+) -> SimulateReturn:
     """Manage simulation: embedding, job submission."""
 
-    if ctx.triggered_id == "btn_simulate":
-
-        if spins in cached_embedding_lengths or qpu_name == "Diffusion [Classical]":
-            submit_time = datetime.datetime.now().strftime("%c")
-            if qpu_name == "Diffusion [Classical]":  # Hack to fix switch from SA to QPU
-                submit_time = "SA"
-            job_submit_state = "SUBMITTED"
-            embedding = dash.no_update
-
-        else:
-            submit_time = dash.no_update
-            job_submit_state = "EMBEDDING"
-            embedding = "needed"
-
-        disable_btn = True
-        disable_watchdog = False
-
-        return (
-            disable_btn,
-            disable_watchdog,
-            0.5 * 1000,
-            0,
-            job_submit_state,
-            submit_time,
-            embedding,
-        )
-
     if job_submit_state == "EMBEDDING":
-        submit_time = dash.no_update
-        embedding = dash.no_update
+        if embeddings_found != "needed":
+            # Found embedding last WD, so is cached, so now can submit job
+            return SimulateReturn(
+                wd_job_interval=200,
+                job_submit_state="SUBMITTED",
+                job_submit_time=datetime.datetime.now().strftime("%c"),
+            )
 
-        if embeddings_found == "needed":
-            try:
-                embedding = find_one_to_one_embedding(spins, qpus[qpu_name].edges)
-                if embedding:
-                    job_submit_state = (
-                        "EMBEDDING"  # Stay another WD to allow caching the embedding
-                    )
-                    embedding = {spins: embedding}
-                else:
-                    job_submit_state = "FAILED"
-                    embedding = "not found"
-            except Exception:
+        try:
+            embedding = find_one_to_one_embedding(spins, qpus[qpu_name].edges)
+            if embedding:
+                job_submit_state = "EMBEDDING"  # Stay another WD to allow caching the embedding
+                embedding = {spins: embedding}
+
+            else:
                 job_submit_state = "FAILED"
                 embedding = "not found"
+        except Exception:
+            job_submit_state = "FAILED"
+            embedding = "not found"
 
-        else:  # Found embedding last WD, so is cached, so now can submit job
-            submit_time = datetime.datetime.now().strftime("%c")
-            job_submit_state = "SUBMITTED"
-
-        return True, False, 0.2 * 1000, 0, job_submit_state, submit_time, embedding
+        return SimulateReturn(
+            wd_job_interval=200,
+            wd_job_n_intervals=0,
+            job_submit_state=job_submit_state,
+            embeddings_found=embedding
+        )
 
     if job_submit_state in ["SUBMITTED", "PENDING", "IN_PROGRESS"]:
         job_submit_state = get_job_status(client, job_id, job_submit_time)
+        wd_time = 1000
+
         if not job_submit_state:
             job_submit_state = "SUBMITTED"
-            wd_time = 0.2 * 1000
-        else:
-            wd_time = 1 * 1000
+            wd_time = 200
 
-        return True, False, wd_time, 0, job_submit_state, dash.no_update, dash.no_update
-
-    if job_submit_state in ["COMPLETED", "CANCELLED", "FAILED"]:
-        disable_btn = False
-        disable_watchdog = True
-
-        return (
-            disable_btn,
-            disable_watchdog,
-            0.1 * 1000,
-            0,
-            dash.no_update,
-            dash.no_update,
-            dash.no_update,
+        return SimulateReturn(
+            wd_job_interval=wd_time,
+            wd_job_n_intervals=0,
+            job_submit_state=job_submit_state,
         )
 
-    # Exception state: should only ever happen in testing
-    return False, True, 0, 0, "ERROR", dash.no_update, dash.no_update
+    return SimulateReturn(
+        btn_simulate_disabled=False,
+        wd_job_disabled=True,
+        job_submit_state=dash.no_update if job_submit_state in ["COMPLETED", "CANCELLED", "FAILED"] else "ERROR",
+    )
 
 
 @app.callback(
@@ -791,9 +825,7 @@ def set_progress_bar(job_submit_state):
     State("error-modal", "is_open"),
 )
 def toggle_modal(trigger, is_open):
-    if trigger:
-        return True
-    return is_open
+    return True if trigger else is_open
 
 
 if __name__ == "__main__":
