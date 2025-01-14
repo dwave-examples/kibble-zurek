@@ -70,6 +70,6 @@ def test_job_submission(mocker,):
     ctx = copy_context()
     output = ctx.run(run_callback)
         
-    assert output == (1234, False, False)
+    assert output == (1234, False, False, 0)
     
 

@@ -73,13 +73,13 @@ def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_e
     output = ctx.run(run_callback)
 
     if qpu_name_val == 'Advantage_system4.1':
-        assert output[1] == [5]
+        assert output[1] == "5"
     
     if qpu_name_val == 'Advantage2_prototype2.55':
-        assert output[1] == [3, 5]
+        assert output[1] == "3, 5"
 
     if qpu_name_val == 'Advantage88_prototype7.3':
-        assert output == ({}, [])
+        assert output == ({}, "")
 
 parametrize_vals = [
     ('{"22": {"1": [11], "0": [10], "2": [12]}}', json_embeddings_file), 

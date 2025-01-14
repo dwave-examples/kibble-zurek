@@ -767,22 +767,26 @@ def simulate(
         try:
             embedding = find_one_to_one_embedding(spins, qpus[qpu_name].edges)
             if embedding:
-                job_submit_state = "EMBEDDING"  # Stay another WD to allow caching the embedding
-                embedding = {spins: embedding}
+                return SimulateReturn(
+                    wd_job_interval=200,
+                    wd_job_n_intervals=0,
+                    job_submit_state="EMBEDDING",  # Stay another WD to allow caching the embedding
+                    embeddings_found={spins: embedding}
+                )
 
-            else:
-                job_submit_state = "FAILED"
-                embedding = "not found"
+            return SimulateReturn(
+                btn_simulate_disabled=False,
+                wd_job_disabled=True,
+                job_submit_state="FAILED",
+                embeddings_found="not found"
+            )
         except Exception:
-            job_submit_state = "FAILED"
-            embedding = "not found"
-
-        return SimulateReturn(
-            wd_job_interval=200,
-            wd_job_n_intervals=0,
-            job_submit_state=job_submit_state,
-            embeddings_found=embedding
-        )
+            return SimulateReturn(
+                btn_simulate_disabled=False,
+                wd_job_disabled=True,
+                job_submit_state="FAILED",
+                embeddings_found="not found"
+            )
 
     if job_submit_state in ["SUBMITTED", "PENDING", "IN_PROGRESS"]:
         job_submit_state = get_job_status(client, job_id, job_submit_time)
