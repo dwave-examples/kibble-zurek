@@ -13,14 +13,14 @@
 #    limitations under the License.
 
 import json
-import numpy as np
-from numpy.polynomial.polynomial import Polynomial
-import scipy
 
 import dimod
-from dwave.cloud.api import exceptions, Problems
-from dwave.embedding import unembed_sampleset
 import minorminer
+import numpy as np
+import scipy
+from dwave.cloud.api import Problems, exceptions
+from dwave.embedding import unembed_sampleset
+from numpy.polynomial.polynomial import Polynomial
 
 __all__ = [
     "create_bqm",
@@ -216,9 +216,7 @@ def fitted_function(xdata, ydata, method="polynomial", degree=1):
         def sigmoidal_crossover(x, p_0, p_1, p_2, p_3):
             # Strictly positive form.
             # TODO: Change to force saturation. Large x should go sigmoidally towards 0.5
-            return np.exp(p_3) * (
-                1 + np.exp(p_2) * np.tanh(np.exp(p_1) * (x - np.exp(p_0)))
-            )
+            return np.exp(p_3) * (1 + np.exp(p_2) * np.tanh(np.exp(p_1) * (x - np.exp(p_0))))
 
         # Small lp1 << lp0, and lp0= (maxx-minxx)/2; We can linearize:
         # lp3*(1 + lp2( lp1 x - lp0)) = lp0*lp2*lp3 + lp1*lp2*lp3 x # WIP
@@ -238,9 +236,7 @@ def fitted_function(xdata, ydata, method="polynomial", degree=1):
             np.log(np.sqrt(lp2lp3)),
         )
         try:
-            p, _ = scipy.optimize.curve_fit(
-                f=sigmoidal_crossover, xdata=xdata, ydata=ydata, p0=p0
-            )
+            p, _ = scipy.optimize.curve_fit(f=sigmoidal_crossover, xdata=xdata, ydata=ydata, p0=p0)
         except:
             return None
 

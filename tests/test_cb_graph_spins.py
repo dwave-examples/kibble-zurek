@@ -12,63 +12,86 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import pytest
-
 from contextvars import copy_context
-from dash.exceptions import PreventUpdate
-from dash._callback_context import context_value
-from dash._utils import AttributeDict
-import plotly
 
 import dimod
+import plotly
+import pytest
+from dash._callback_context import context_value
+from dash._utils import AttributeDict
+from dash.exceptions import PreventUpdate
 
 from app import display_graphics_spin_ring
 
-json_embeddings_file = { \
-    "512": {"1": [11], "0": [10], "2": [12]}, \
-    "5": {"1": [11], "0": [10], "2": [12], "3": [13], "4": [14]} }
+json_embeddings_file = {
+    "512": {"1": [11], "0": [10], "2": [12]},
+    "5": {"1": [11], "0": [10], "2": [12], "3": [13], "4": [14]},
+}
 
-samples = dimod.as_samples([
-    [-1, -1, -1, +1, +1], 
-    [-1, -1, +1, +1, +1],
-    [-1, -1, -1, +1, +1],])
-sampleset = dimod.SampleSet.from_samples(samples, 'SPIN', 0)
+samples = dimod.as_samples(
+    [
+        [-1, -1, -1, +1, +1],
+        [-1, -1, +1, +1, +1],
+        [-1, -1, -1, +1, +1],
+    ]
+)
+sampleset = dimod.SampleSet.from_samples(samples, "SPIN", 0)
 
 parametrize_vals = [
-(512, 'SUBMITTED', json_embeddings_file), (5, 'COMPLETED', json_embeddings_file)]
+    (512, "SUBMITTED", json_embeddings_file),
+    (5, "COMPLETED", json_embeddings_file),
+]
 
-@pytest.mark.parametrize('spins_val, job_submit_state_val, embeddings_cached_val', parametrize_vals)
+
+@pytest.mark.parametrize("spins_val, job_submit_state_val, embeddings_cached_val", parametrize_vals)
 def test_graph_spins_spin_trigger(spins_val, job_submit_state_val, embeddings_cached_val):
     """Test graph of spin ring: spins trigger."""
 
     def run_callback():
-        context_value.set(AttributeDict(**
-            {'triggered_inputs': [{'prop_id': 'spins.value'},]}))
+        context_value.set(
+            AttributeDict(
+                **{
+                    "triggered_inputs": [
+                        {"prop_id": "spins.value"},
+                    ]
+                }
+            )
+        )
 
         return display_graphics_spin_ring(
-            spins_val, job_submit_state_val, '1234', 2.5, embeddings_cached_val)
+            spins_val, job_submit_state_val, "1234", 2.5, embeddings_cached_val
+        )
 
     ctx = copy_context()
 
     output = ctx.run(run_callback)
     assert type(output) == plotly.graph_objects.Figure
 
-@pytest.mark.parametrize('spins_val, job_submit_state_val, embeddings_cached_val', parametrize_vals)
+
+@pytest.mark.parametrize("spins_val, job_submit_state_val, embeddings_cached_val", parametrize_vals)
 def test_graph_spins_job_trigger(mocker, spins_val, job_submit_state_val, embeddings_cached_val):
     """Test graph of spin ring: job-state trigger."""
 
-    mocker.patch('app.get_samples', return_value=sampleset)
+    mocker.patch("app.get_samples", return_value=sampleset)
 
     def run_callback():
-        context_value.set(AttributeDict(**
-            {'triggered_inputs': [{'prop_id': 'job_submit_state.children'},]}))
+        context_value.set(
+            AttributeDict(
+                **{
+                    "triggered_inputs": [
+                        {"prop_id": "job_submit_state.children"},
+                    ]
+                }
+            )
+        )
 
         return display_graphics_spin_ring(
-            spins_val, job_submit_state_val, '1234', 2.5, embeddings_cached_val)
+            spins_val, job_submit_state_val, "1234", 2.5, embeddings_cached_val
+        )
 
     ctx = copy_context()
 
-    if job_submit_state_val == 'COMPLETED':
+    if job_submit_state_val == "COMPLETED":
         output = ctx.run(run_callback)
         assert type(output) == plotly.graph_objects.Figure
     else:

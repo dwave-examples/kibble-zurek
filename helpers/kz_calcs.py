@@ -80,7 +80,7 @@ def theoretical_kink_density(annealing_times_ns, J=None, schedule_name=None, b=N
     """
     if b is None:
         b = theoretical_kink_density_prefactor(J, schedule_name)
-    
+
     return np.power([1e-9 * t * b for t in annealing_times_ns], -0.5) / (2 * np.pi * np.sqrt(2))
 
 

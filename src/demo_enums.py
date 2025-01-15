@@ -25,4 +25,3 @@ class ProblemType(Enum):
             ProblemType.KZ: "Kibble-Zurek Mechanism",
             ProblemType.KZ_NM: "Kibble-Zurek Mechanism with Noise Mitigation",
         }[self]
-

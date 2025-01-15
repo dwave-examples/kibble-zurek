@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 import numpy as np
-
 from dimod import SampleSet
 from dwave.samplers import SimulatedAnnealingSampler
 from dwave.system.testing import MockDWaveSampler

@@ -13,8 +13,10 @@
 #    limitations under the License.
 
 from itertools import chain
+
 import dash_bootstrap_components as dbc
-from dash import html, dcc
+from dash import dcc, html
+
 from src.demo_enums import ProblemType
 
 __all__ = [
@@ -89,10 +91,7 @@ def get_kz_graph_radio_options(problem_type):
 
 config_spins = dcc.RadioItems(
     id="spins",
-    options=[
-        {"label": f"{length}", "value": length}
-        for length in ring_lengths
-    ],
+    options=[{"label": f"{length}", "value": length} for length in ring_lengths],
     value=512,
     inputStyle={"marginRight": "10px"},
     inline=True,
@@ -106,6 +105,7 @@ j_marks = {
     )
     for val in chain(range(-20, 0, 2), range(2, 12, 2))
 }
+
 
 def get_coupling_strength_slider(problem_type):
     if problem_type is ProblemType.KZ_NM:

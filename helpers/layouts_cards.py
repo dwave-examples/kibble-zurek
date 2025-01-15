@@ -12,19 +12,19 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from dash import dcc, html
 import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
+from dash import dcc, html
 
 from demo_configs import DESCRIPTION, MAIN_HEADER
-from src.demo_enums import ProblemType
-import plotly.graph_objects as go
-
 from helpers.layouts_components import *
+from src.demo_enums import ProblemType
 
 __all__ = [
     "control_card",
     "graphs_card",
 ]
+
 
 def control_card(solvers={}, init_job_status="READY"):
     """Lay out the configuration and job-submission card.
@@ -61,7 +61,10 @@ def control_card(solvers={}, init_job_status="READY"):
                 ],
                 style={"marginTop": "10px"},
             ),
-            html.P(["Cached Embeddings: ", html.Span(id="embedding_is_cached")], style={"marginTop": 10}),
+            html.P(
+                ["Cached Embeddings: ", html.Span(id="embedding_is_cached")],
+                style={"marginTop": 10},
+            ),
             dbc.Row(
                 [
                     dbc.Col(
@@ -99,7 +102,7 @@ def control_card(solvers={}, init_job_status="READY"):
                 ],
                 justify="start",  # Aligns buttons to the left
                 align="end",
-                style={"marginTop": 40}
+                style={"marginTop": 40},
             ),
         ],
         body=True,
@@ -123,7 +126,7 @@ def graphs_card(problem_type=ProblemType.KZ):
                 id="sample_vs_theory",
                 figure=go.Figure(),
                 style={"height": "40vh", "minHeight": "20rem"},
-            )
+            ),
         ],
         color="white",
         style={"height": "100%", "minHeight": "50rem"},

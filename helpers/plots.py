@@ -12,14 +12,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from src.demo_enums import ProblemType
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from helpers.qa import fitted_function
 from dash.exceptions import PreventUpdate
 
 from helpers.kz_calcs import theoretical_kink_density
+from helpers.qa import fitted_function
+from src.demo_enums import ProblemType
 
 __all__ = [
     "plot_kink_densities_bg",
@@ -336,7 +336,7 @@ def plot_kink_densities_bg(
         )
 
         fig_data = [predicted_plus, predicted_minus, energy_transverse, energy_problem]
-        
+
         # Add previously computed kz_data points
         if kz_data and "k" in kz_data:
             for pair in kz_data["k"]:
@@ -596,9 +596,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
     return fig
 
 
-def plot_zne_fitted_line(
-    fig, coupling_data, qpu_name, zne_estimates, zne_graph_display, ta_str
-):
+def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_display, ta_str):
     """
     Fit a curve to the coupling data and plot the Zero-Noise Extrapolation (ZNE) estimate.
 

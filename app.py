@@ -12,30 +12,37 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from typing import NamedTuple, Union
-import dash
-import dash_bootstrap_components as dbc
-from dash import ALL, ctx, dcc, html, Input, Output, State
-from dash.exceptions import PreventUpdate
 import datetime
 import json
-from demo_configs import DESCRIPTION, DESCRIPTION_NM, J_BASELINE, MAIN_HEADER, MAIN_HEADER_NM, THUMBNAIL, USE_CLASSICAL
-import numpy as np
 import os
+from typing import NamedTuple, Union
 
+import dash
+import dash_bootstrap_components as dbc
 import dimod
+import numpy as np
+from dash import ALL, Input, Output, State, ctx, dcc, html
+from dash.exceptions import PreventUpdate
 from dwave.cloud import Client
 from dwave.embedding import embed_bqm, is_valid_embedding
 from dwave.system import DWaveSampler
-from mock_kz_sampler import MockKibbleZurekSampler
 
+from demo_configs import (
+    DESCRIPTION,
+    DESCRIPTION_NM,
+    J_BASELINE,
+    MAIN_HEADER,
+    MAIN_HEADER_NM,
+    THUMBNAIL,
+    USE_CLASSICAL,
+)
 from helpers.kz_calcs import *
 from helpers.layouts_cards import *
 from helpers.layouts_components import *
 from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips_demo1, tool_tips_demo2
-
+from mock_kz_sampler import MockKibbleZurekSampler
 from src.demo_enums import ProblemType
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -45,8 +52,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 try:
     client = Client.from_config(client="qpu")
     qpus = {
-        qpu.name: qpu
-        for qpu in client.get_solvers(fast_anneal_time_range__covers=[0.005, 0.1])
+        qpu.name: qpu for qpu in client.get_solvers(fast_anneal_time_range__covers=[0.005, 0.1])
     }
     if len(qpus) < 1:
         raise Exception
@@ -89,9 +95,10 @@ navbar = dbc.Navbar(
                         dbc.NavLink(
                             problem_type.label,
                             id={"type": "problem-type", "index": index},
-                            active="exact"
+                            active="exact",
                         )
-                    ) for index, problem_type in enumerate(ProblemType)
+                    )
+                    for index, problem_type in enumerate(ProblemType)
                 ],
                 pills=True,
             ),
@@ -120,6 +127,7 @@ def tooltips(problem_type: Union[ProblemType, int]) -> list[dbc.Tooltip]:
         )
         for target, message in tool_tips.items()
     ]
+
 
 app.layout = html.Div(
     [
@@ -154,7 +162,7 @@ app.layout = html.Div(
                                             init_job_status=init_job_status,
                                         ),
                                         *dbc_modal("modal_solver"),
-                                        html.Div(tooltips(ProblemType.KZ), id="tooltips")
+                                        html.Div(tooltips(ProblemType.KZ), id="tooltips"),
                                     ],
                                     width=4,
                                     style={"minWidth": "30rem"},
@@ -195,7 +203,7 @@ app.layout = html.Div(
                     fluid=True,
                 )
             ],
-            style={"paddingTop": "20px"}
+            style={"paddingTop": "20px"},
         ),
     ],
 )
@@ -309,9 +317,7 @@ def set_schedule(qpu_name):
     schedule_filename_style = {"color": "#FFA143", "fontSize": 12}
 
     if ctx.triggered_id:
-        for filename in [
-            file for file in os.listdir("helpers") if "schedule.csv" in file.lower()
-        ]:
+        for filename in [file for file in os.listdir("helpers") if "schedule.csv" in file.lower()]:
 
             if qpu_name.split(".")[0] in filename:  # Accepts & reddens older versions
                 schedule_filename = filename
@@ -335,14 +341,12 @@ def load_cached_embeddings(qpu_name):
 
     embeddings_cached = {}  # Wipe out previous QPU's embeddings
 
-    for filename in [
-        file for file in os.listdir("helpers") if ".json" in file and "emb_" in file
-    ]:
+    for filename in [file for file in os.listdir("helpers") if ".json" in file and "emb_" in file]:
 
         if qpu_name == "Diffusion [Classical]":
             qpu_name = "Advantage_system6.4"
 
-        if qpu_name.split('.')[0] in filename:
+        if qpu_name.split(".")[0] in filename:
             with open(f"helpers/{filename}", "r") as fp:
                 embeddings_cached = json.load(fp)
 
@@ -381,7 +385,7 @@ def load_cached_embeddings(qpu_name):
         State("coupling_data", "data"),  # access previously stored data
         State("zne_estimates", "data"),  # Access ZNE estimates
         State("kz_data", "data"),  # get kibble zurek data point
-    ]
+    ],
 )
 def display_graphics_kink_density(
     qpu_name,
@@ -414,18 +418,16 @@ def display_graphics_kink_density(
         if ctx.triggered_id == "job_submit_state":
             embeddings_cached = json_to_dict(embeddings_cached)
 
-            sampleset_unembedded = get_samples(
-                client, job_id, spins, J, embeddings_cached[spins]
-            )
+            sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])
             _, kink_density = kink_stats(sampleset_unembedded, J)
 
             # Calculate lambda (previously kappa)
             # Added _ to avoid keyword restriction
-            lambda_ = calclambda_(J=J, qpu_name=qpu_name, schedule_name=schedule_filename, J_baseline=J_BASELINE)
-
-            fig = plot_kink_density(
-                graph_display, figure, kink_density, ta, J, lambda_
+            lambda_ = calclambda_(
+                J=J, qpu_name=qpu_name, schedule_name=schedule_filename, J_baseline=J_BASELINE
             )
+
+            fig = plot_kink_density(graph_display, figure, kink_density, ta, J, lambda_)
 
             # Initialize the list for this anneal_time if not present
             ta_str = str(ta)
@@ -471,7 +473,11 @@ def display_graphics_kink_density(
             problem_type=problem_type,
         )
 
-        if ctx.triggered_id in ["zne_graph_display", "coupling_strength", "quench_schedule_filename"] and graph_display == "coupling":
+        if (
+            ctx.triggered_id
+            in ["zne_graph_display", "coupling_strength", "quench_schedule_filename"]
+            and graph_display == "coupling"
+        ):
             zne_estimates, modal_trigger = plot_zne_fitted_line(
                 fig, coupling_data, qpu_name, zne_estimates, graph_display, str(ta)
             )
@@ -481,9 +487,7 @@ def display_graphics_kink_density(
     if ctx.triggered_id == "job_submit_state":
         embeddings_cached = json_to_dict(embeddings_cached)
 
-        sampleset_unembedded = get_samples(
-            client, job_id, spins, J, embeddings_cached[spins]
-        )
+        sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])
         _, kink_density = kink_stats(sampleset_unembedded, J)
 
         # Append the new data point
@@ -517,7 +521,7 @@ def display_graphics_kink_density(
         State("job_id", "data"),
         State("coupling_strength", "value"),
         State("embeddings_cached", "data"),
-    ]
+    ],
 )
 def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_cached):
     """Generate graphics for spin-ring display."""
@@ -528,9 +532,7 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
             raise PreventUpdate
 
         embeddings_cached = json_to_dict(embeddings_cached)
-        sampleset_unembedded = get_samples(
-            client, job_id, spins, J, embeddings_cached[spins]
-        )
+        sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])
         kinks_per_sample, kink_density = kink_stats(sampleset_unembedded, J)
         best_indx = np.abs(kinks_per_sample - kink_density).argmin()
         best_sample = sampleset_unembedded.record.sample[best_indx]
@@ -546,6 +548,7 @@ class SubmitJobReturn(NamedTuple):
     initial_warning: bool = False
     warning_modal_open: bool = False
     wd_job_n_intervals: int = 0
+
 
 @app.callback(
     Output("job_id", "data"),
@@ -596,7 +599,7 @@ def submit_job(
         return SubmitJobReturn(
             job_id=json.dumps(sampleset.to_serializable()),
             initial_warning=True,
-            warning_modal_open=not initial_warning
+            warning_modal_open=not initial_warning,
         )
 
     bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
@@ -632,6 +635,7 @@ class RunButtonClickReturn(NamedTuple):
     wd_job_n_intervals: int = 0
     job_submit_state: str = dash.no_update
     job_submit_time: datetime = dash.no_update
+
 
 @app.callback(
     Output("btn_simulate", "disabled"),
@@ -681,6 +685,7 @@ class SimulateReturn(NamedTuple):
     embeddings_cached: dict = dash.no_update
     embedding_is_cached: str = dash.no_update
 
+
 @app.callback(
     Output("btn_simulate", "disabled", allow_duplicate=True),
     Output("wd_job", "disabled", allow_duplicate=True),
@@ -725,7 +730,7 @@ def simulate(
                     job_submit_state="SUBMITTED",
                     job_submit_time=datetime.datetime.now().strftime("%c"),
                     embeddings_cached=embeddings_cached,
-                    embedding_is_cached=", ".join(str(em) for em in embeddings_cached.keys())
+                    embedding_is_cached=", ".join(str(em) for em in embeddings_cached.keys()),
                 )
 
             return SimulateReturn(
@@ -757,7 +762,9 @@ def simulate(
     return SimulateReturn(
         btn_simulate_disabled=False,
         wd_job_disabled=True,
-        job_submit_state=dash.no_update if job_submit_state in ["COMPLETED", "CANCELLED", "FAILED"] else "ERROR",
+        job_submit_state=(
+            dash.no_update if job_submit_state in ["COMPLETED", "CANCELLED", "FAILED"] else "ERROR"
+        ),
     )
 
 
