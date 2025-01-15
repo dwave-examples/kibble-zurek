@@ -34,15 +34,15 @@ parametrize_vals = [
     ('Advantage_system6.4',
      all_schedules,
      1,
-     {'color': 'red', 'fontSize': 12}), 
+     {'color': '#FFA143', 'fontSize': 12}), 
     ('Advantage2_prototype2.3',
      all_schedules,
      2,
-     {'color': 'red', 'fontSize': 12}),
+     {'color': '#FFA143', 'fontSize': 12}),
      ('Advantage25_system7.9',
      all_schedules,
      3,
-     {'color': 'red', 'fontSize': 12}),
+     {'color': '#FFA143', 'fontSize': 12}),
      ]
 
 @pytest.mark.parametrize(['qpu_selection_val', 'schedule_name', 'indx', 'style'], parametrize_vals)

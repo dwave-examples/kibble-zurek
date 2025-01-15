@@ -34,10 +34,10 @@ h3 {
 
 label {
     color: rgb(3, 184, 255);
-    margin-top: 10px;
+    margin-top: 16px;
     margin-bottom: 5px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 16px;
 }
 
 p {
@@ -47,4 +47,29 @@ p {
 
 .progress {
     background: rgba(255, 255, 255, 0.25);
+}
+
+#coupling_strength {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
+
+#spins label,
+#graph_display label {
+    font-size: 13px;
+    margin: 0;
+}
+
+#spins label {
+    color: white;
+}
+
+#spins label:not(:first-child),
+#graph_display label:not(:first-child) {
+    margin-left: 20px;
+}
+
+#graph_display {
+    margin-top: 10px;
+    margin-left: 20px;
 }

@@ -18,9 +18,8 @@ from io import StringIO
 from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
-from dash.exceptions import PreventUpdate
 
-from app import cache_embeddings
+from app import load_cached_embeddings
 
 embedding_filenames = [
     'emb_Advantage_system4.1.json',
@@ -67,7 +66,7 @@ def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_e
             AttributeDict(**{'triggered_inputs': [{'prop_id': 'qpu_selection.value'},]})
         )
 
-        return cache_embeddings(qpu_name_val, 'dummy', 'dummy')
+        return load_cached_embeddings(qpu_name_val)
 
     ctx = copy_context()
     output = ctx.run(run_callback)
@@ -86,25 +85,3 @@ parametrize_vals = [
     ('needed', json_embeddings_file),
     ('not found', json_embeddings_file),
 ]
-
-@pytest.mark.parametrize(['embeddings_found_val', 'embeddings_cached_val'],
-parametrize_vals)
-def test_cache_embeddings_found_embedding(embeddings_found_val, embeddings_cached_val):
-    """Test the caching of embeddings: triggered by found embedding."""
-
-    def run_callback():
-        context_value.set(
-            AttributeDict(**{'triggered_inputs': [{'prop_id': 'embeddings_found.data'},]})
-        )
-
-        return cache_embeddings('dummy', embeddings_found_val, embeddings_cached_val)
-
-    ctx = copy_context()
-
-    if not isinstance(embeddings_found_val, dict):
-        with pytest.raises(PreventUpdate):
-            ctx.run(run_callback)
-    else:
-        output = ctx.run(run_callback)
-
-        assert 22 in output[1]

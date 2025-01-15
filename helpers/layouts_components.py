@@ -47,7 +47,7 @@ def get_anneal_duration_setting(problem_type):
                 {"label": "1280 ns", "value": 1280},
             ],
             value=80,  # default value
-            style={"max-width": "95%"},
+            style={"maxWidth": "95%"},
         )
 
     return dbc.Input(
@@ -57,7 +57,7 @@ def get_anneal_duration_setting(problem_type):
         max=100,
         step=1,
         value=7,
-        style={"max-width": "95%"},
+        style={"maxWidth": "95%"},
     )
 
 
@@ -66,43 +66,23 @@ def get_kz_graph_radio_options(problem_type):
         return dcc.RadioItems(
             id="graph_display",
             options=[
-                {
-                    "label": "Kink density vs Anneal time",
-                    "value": "kink_density",
-                    "disabled": False,
-                },
-                {
-                    "label": "Kink density vs Noise level",
-                    "value": "coupling",
-                    "disabled": False,
-                },
+                {"label": "Kink density vs Anneal time", "value": "kink_density"},
+                {"label": "Kink density vs Noise level", "value": "coupling"},
             ],
             value="coupling",
-            inputStyle={"margin-right": "10px", "margin-bottom": "5px"},
-            labelStyle={
-                "color": "rgb(3, 184, 255)",
-                "font-size": 12,
-                "display": "inline-block",
-                "marginLeft": 20,
-            },
+            inputStyle={"marginRight": "10px"},
             inline=True,
         )
 
     return dcc.RadioItems(
         id="graph_display",
         options=[
-            {"label": "Both", "value": "both", "disabled": False},
-            {"label": "Kink density", "value": "kink_density", "disabled": False},
-            {"label": "Schedule", "value": "schedule", "disabled": False},
+            {"label": "Both", "value": "both"},
+            {"label": "Kink density", "value": "kink_density"},
+            {"label": "Schedule", "value": "schedule"},
         ],
         value="both",
-        inputStyle={"margin-right": "10px", "margin-bottom": "5px"},
-        labelStyle={
-            "color": "rgb(3, 184, 255)",
-            "font-size": 12,
-            "display": "inline-block",
-            "marginLeft": 20,
-        },
+        inputStyle={"marginRight": "10px"},
         inline=True,
     )
 
@@ -110,17 +90,11 @@ def get_kz_graph_radio_options(problem_type):
 config_spins = dcc.RadioItems(
     id="spins",
     options=[
-        {"label": f"{length}", "value": length, "disabled": False}
+        {"label": f"{length}", "value": length}
         for length in ring_lengths
     ],
     value=512,
-    inputStyle={"margin-right": "10px", "margin-bottom": "10px"},
-    labelStyle={
-        "color": "white",
-        "font-size": 12,
-        "display": "inline-block",
-        "marginLeft": 20,
-    },
+    inputStyle={"marginRight": "10px"},
     inline=True,
 )
 
