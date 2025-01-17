@@ -213,7 +213,6 @@ In [this paper](https://arxiv.org/abs/2311.01306), we demonstrate a practical im
 of zero-noise extrapolation as a method of quantum error mitigation specifically used for quantum
 annealing.
 
-
 For various coupling strengths at the same annealing time, we used a fitting function—quadratic
 for the Advantage solver and a multi-polynomial for the MockDwaveSampler to calculate the
 theoretical zero-noise point. As the experiment runs for a longer time, we expect this zero-noise
