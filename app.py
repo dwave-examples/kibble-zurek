@@ -634,7 +634,7 @@ class RunButtonClickReturn(NamedTuple):
     wd_job_disabled: bool = False
     wd_job_n_intervals: int = 0
     job_submit_state: str = dash.no_update
-    job_submit_time: datetime = dash.no_update
+    job_submit_time: str = dash.no_update
 
 
 @app.callback(
@@ -681,7 +681,7 @@ class SimulateReturn(NamedTuple):
     wd_job_interval: int = dash.no_update
     wd_job_n_intervals: int = dash.no_update
     job_submit_state: str = dash.no_update
-    job_submit_time: datetime = dash.no_update
+    job_submit_time: str = dash.no_update
     embeddings_cached: dict = dash.no_update
     embedding_is_cached: str = dash.no_update
 
