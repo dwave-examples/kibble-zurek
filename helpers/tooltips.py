@@ -13,7 +13,7 @@
 #    limitations under the License.
 
 tool_tips_demo2 = {
-    "anneal_duration": f"""Duration of the quantum anneal. Range of 5 to 320 nanoseconds.""",
+    "anneal-duration-dropdown": f"""Duration of the quantum anneal. Range of 5 to 1280 nanoseconds.""",
     "spins": f"""Number of spins in the 1D ring.""",
     "coupling_strength": f"""Coupling strength between spins in the ferromagnetic ring. 
 Range of -1.8 to -0.6.
@@ -25,7 +25,7 @@ If none exists, one from a different quantum computer is used (expect inaccuraci
 }
 
 tool_tips_demo1 = {
-    "anneal_duration": f"""Duration of the quantum anneal. Range of 5 to 100 nanoseconds.""",
+    "anneal-duration-dropdown": f"""Duration of the quantum anneal. Range of 5 to 100 nanoseconds.""",
     "spins": f"""Number of spins in the 1D ring.""",
     "coupling_strength": f"""Coupling strength between spins in the ring. 
 Range of -2 (ferromagnetic) to +1 (anti-ferromagnetic).

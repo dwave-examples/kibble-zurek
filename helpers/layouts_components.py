@@ -50,6 +50,7 @@ def get_anneal_duration_setting(problem_type):
             ],
             value=80,  # default value
             style={"maxWidth": "95%"},
+            clearable=False,
         )
 
     return dbc.Input(
