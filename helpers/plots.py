@@ -118,7 +118,7 @@ def plot_kink_densities_bg(
         x=np.asarray(time_range),
         y=np.asarray(1.1 * n),
         mode="lines",
-        name="<b>Predicted (&plusmn;10%)",
+        name="<b>Predicted (&plusmn;10%)</b>",
         xaxis="x1",
         yaxis="y1",
         line_color="black",
@@ -169,7 +169,7 @@ def plot_kink_densities_bg(
     )
 
     x_axis1 = dict(
-        title="<b>Quench Duration [ns]<b>",
+        title="<b>Quench Duration [ns]</b>",
         type="log",
         range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],
     )
@@ -178,7 +178,7 @@ def plot_kink_densities_bg(
     y_max = (1.1 * n).max()
 
     y_axis1 = dict(
-        title="<b>Kink Density<b>",
+        title="<b>Kink Density</b>",
         type="log",
         range=[np.log10(y_min), np.log10(y_max)],
     )
@@ -201,7 +201,7 @@ def plot_kink_densities_bg(
         type="linear",
     )
 
-    x_axis3 = dict(title="<b>Noise Level (-1.8/J)<b>", type="linear", range=[-1, 4])
+    x_axis3 = dict(title="<b>Noise Level (-1.8/J)</b>", type="linear", range=[-1, 4])
 
     if display == "kink_density":
         fig_layout = go.Layout(
@@ -224,11 +224,8 @@ def plot_kink_densities_bg(
                     _J = point["coupling_strength"]
                     color = coupling_color_theme[_J]
 
-                    if not _coupling_label[_J]:
-                        legend = True
-                        _coupling_label[_J] = True
-                    else:
-                        legend = False
+                    legend = not _coupling_label[_J]
+                    _coupling_label[_J] = True
 
                     kink_density = point["kink_density"]
 
@@ -440,7 +437,6 @@ def plot_kink_density(
 
     if display == "coupling":
         color = ta_color_theme[ta_value]
-        # kappa = -1.8 / J
         fig.add_trace(
             go.Scatter(
                 x=[lambda_],
@@ -463,11 +459,8 @@ def plot_kink_density(
 
     color = coupling_color_theme[J] if display == "kink_density" else "black"
 
-    if not coupling_label[J]:
-        legend = True
-        coupling_label[J] = True
-    else:
-        legend = False
+    legend = not coupling_label[J]
+    coupling_label[J] = True
 
     fig.add_trace(
         go.Scatter(
@@ -642,7 +635,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_
                 method="mixture_of_exponentials" if qpu_name == "Diffusion [Classical]" else "pure_quadratic",
             )
 
-            if y_func_x is not None:
+            if y_func_x:
                 zne_estimates[ta_str] = y_func_x(0)
                 x_fit = np.linspace(0, max(x), 100)
                 y_fit = y_func_x(x_fit)
@@ -659,7 +652,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_
                 )
             ]
 
-            if zne_graph_display == "coupling" and y_func_x is not None:
+            if zne_graph_display == "coupling" and y_func_x:
                 x_axis = "x3"
                 y_axis = "y1"
                 x_zne = 0

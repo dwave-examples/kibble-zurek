@@ -88,20 +88,20 @@ def test_graph_kink_density(mocker, trigger_val, kz_graph_display_val, job_submi
         )
 
         return display_graphics_kink_density(
-            None,
-            kz_graph_display_val,
-            2.5,
-            "FALLBACK_SCHEDULE.csv",
-            job_submit_state_val,
-            "1234",
-            7,
-            5,
-            0,
-            json_embeddings_file,
-            sample_vs_theory,
-            {},
-            {},
-            {"k": []},
+            qpu_name=None,
+            graph_display=kz_graph_display_val,
+            J=2.5,
+            schedule_filename="FALLBACK_SCHEDULE.csv",
+            job_submit_state=job_submit_state_val,
+            job_id="1234",
+            ta=7,
+            spins=5,
+            problem_type=0,
+            embeddings_cached=json_embeddings_file,
+            figure=sample_vs_theory,
+            coupling_data={},
+            zne_estimates={},
+            kz_data={"k": []},
         )
 
     ctx = copy_context()

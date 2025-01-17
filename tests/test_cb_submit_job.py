@@ -75,15 +75,15 @@ def test_job_submission(
         )
 
         return submit_job(
-            "11:45AM",
-            "Advantage_system88.4",
-            3,
-            2.3,
-            7,
-            json_embeddings_file,
-            0,
-            "FALLBACK_SCHEDULE.csv",
-            False,
+            job_submit_time="11:45AM",
+            qpu_name="Advantage_system88.4",
+            spins=3,
+            J=2.3,
+            ta_ns=7,
+            embeddings_cached=json_embeddings_file,
+            problem_type=0,
+            filename="FALLBACK_SCHEDULE.csv",
+            initial_warning=False,
         )
 
     ctx = copy_context()

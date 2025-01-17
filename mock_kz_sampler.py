@@ -59,7 +59,7 @@ class MockKibbleZurekSampler(MockDWaveSampler):
         self.parameters.update({"num_sweeps": []})
 
     def sample(self, bqm, **kwargs):
-        # TODO: corrupt bqsm with noise proportional to annealing_time
+        # TODO: corrupt bqm with noise proportional to annealing_time
         _bqm = bqm.change_vartype("SPIN", inplace=False)
 
         # Extract annealing_time from kwargs (if provided)
