@@ -639,7 +639,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_
             y_func_x = fitted_function(
                 x,
                 y,
-                method="mixture_of_exponentials" if len(np.unique(x)) > 1 else "pure_quadratic",
+                method="mixture_of_exponentials" if qpu_name == "Diffusion [Classical]" else "pure_quadratic",
             )
 
             if y_func_x is not None:
@@ -653,8 +653,8 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_
             fig.data = [
                 trace
                 for trace in fig.data
-                if (
-                    trace.name not in ["Fitting Curve", "ZNE Estimate"]
+                if not (
+                    trace.name in ["Fitting Curve", "ZNE Estimate"]
                     and trace.legendgroup == f"ta_{ta_str}"
                 )
             ]
