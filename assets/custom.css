@@ -73,3 +73,10 @@ p {
     margin-top: 10px;
     margin-left: 20px;
 }
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 20px;
+    padding-right: 20px;
+}

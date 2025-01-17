@@ -98,40 +98,27 @@ average length increases as a function of the square root of the anneal time.
 
 ## <a name="Installation"></a> Installation
 
-You can run this example without installation in cloud-based IDEs that support 
-the [Development Containers specification](https://containers.dev/supporting)
-(aka "devcontainers").
+You can run this example without installation in cloud-based IDEs that support the
+[Development Containers specification](https://containers.dev/supporting) (aka "devcontainers")
+such as GitHub Codespaces.
 
-For development environments that do not support ``devcontainers``, install 
-requirements:
+For development environments that do not support `devcontainers`, install requirements:
 
-    pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
-If you are cloning the repo to your local system, working in a 
-[virtual environment](https://docs.python.org/3/library/venv.html) is 
-recommended.
+If you are cloning the repo to your local system, working in a
+[virtual environment](https://docs.python.org/3/library/venv.html) is recommended.
 
 ## <a name="Usage"></a> Usage
 
-Your development environment should be configured to 
-[access Leap’s Solvers](https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html).
-You can see information about supported IDEs and authorizing access to your 
-Leap account [here](https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html).  
+Your development environment should be configured to access the
+[Leap&trade; quantum cloud service](https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html).
+You can see information about supported IDEs and authorizing access to your Leap account
+[here](https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html).
 
-The default configuration uses `DWaveSampler` with specific models accessed through the Leap API.
-To run experiments using `MockDKibbleZurekSampler` locally, set the environment variable in your
-terminal before running the application.
-
-**Windows terminal**:
-```
-set ZNE=YES
-```
-**Unix terminal**:
-```
-export ZNE=YES
-```
-
-To run the demo:
+Run the following terminal command to start the Dash application:
 
 ```bash
 python app.py
@@ -139,9 +126,10 @@ python app.py
 
 Access the user interface with your browser at http://127.0.0.1:8050/.
 
-The demo program opens an interface where you can configure 
-problems, submit these problems to a quantum computer, and compare the results
-to the Kibble-Zurek predictions.
+The demo program opens an interface where you can configure problems and submit these problems to
+a solver.
+
+Configuration options can be found in the [demo_configs.py](demo_configs.py) file.
 
 *Hover over an input field to see a description of the input and its range of*
 *supported values.*
@@ -208,15 +196,12 @@ the kink density away from the predicted value.
 
 ## <a name="ZNE"></a> Zero-Noise Extrapolation
 
-Another feature showcased in this demo is the result achieved in Quantum Error Mitigation.
-In [this paper](https://arxiv.org/abs/2311.01306), we demonstrate a practical implementation
-of zero-noise extrapolation as a method of quantum error mitigation specifically used for quantum
-annealing.
+Zero-Noise Extrapolation (ZNE) is a quantum error mitigation method used for quantum annealing
+as described in this [paper](https://arxiv.org/abs/2311.01306).
 
-For various coupling strengths at the same annealing time, we used a fitting function—quadratic
-for the Advantage solver and a multi-polynomial for the MockDwaveSampler to calculate the
-theoretical zero-noise point. As the experiment runs for a longer time, we expect this zero-noise
-point to follow the same trend as the other data points.
+A fitting function—quadratic for the Advantage solver and a multi-polynomial for the
+MockDwaveSampler can be used to calculate the theoretical zero-noise point for various coupling
+strengths at the same annealing time.
 
 <img src='assets/ZNE_fig2.png' alt='Experimental results' width='400'/>
 

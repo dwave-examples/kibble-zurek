@@ -76,34 +76,32 @@ if not client:
 
 # Define the Navbar with two tabs
 navbar = dbc.Navbar(
-    dbc.Container(
-        [
-            # Navbar Brand/Logo
-            dbc.NavbarBrand(
-                [
-                    html.Img(
-                        src=THUMBNAIL,
-                        height="30px",
-                        style={"marginRight": "10px"},
-                    ),
-                ],
-            ),
-            # Navbar Tabs
-            dbc.Nav(
-                [
-                    dbc.NavItem(
-                        dbc.NavLink(
-                            problem_type.label,
-                            id={"type": "problem-type", "index": index},
-                            active="exact",
-                        )
+    [
+        # Navbar Brand/Logo
+        dbc.NavbarBrand(
+            [
+                html.Img(
+                    src=THUMBNAIL,
+                    height="30px",
+                    style={"marginRight": "10px"},
+                ),
+            ],
+        ),
+        # Navbar Tabs
+        dbc.Nav(
+            [
+                dbc.NavItem(
+                    dbc.NavLink(
+                        problem_type.label,
+                        id={"type": "problem-type", "index": index},
+                        active="exact",
                     )
-                    for index, problem_type in enumerate(ProblemType)
-                ],
-                pills=True,
-            ),
-        ]
-    ),
+                )
+                for index, problem_type in enumerate(ProblemType)
+            ],
+            pills=True,
+        ),
+    ],
     color="dark",
     dark=True,
     sticky="top",
