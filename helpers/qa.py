@@ -15,12 +15,12 @@
 import json
 
 import dimod
-import minorminer
 import numpy as np
 import scipy
 from dwave.cloud.api import Problems, exceptions
 from dwave.embedding import unembed_sampleset
 from numpy.polynomial.polynomial import Polynomial
+from minorminer.subgraph import find_subgraph
 
 __all__ = [
     "create_bqm",
@@ -51,26 +51,22 @@ def create_bqm(num_spins=512, coupling_strength=-1.4):
     return bqm
 
 
-def find_one_to_one_embedding(spins, sampler_edgelist):
+def find_one_to_one_embedding(spins, sampler_edgelist, timeout=60):
     """
     Find an embedding with chains of length one for the ring of spins.
 
     Args:
         spins: Number of spins.
         sampler_edgelist: Edges (couplers) of the QPU.
+        timeout: Maximum time allowed for search.
 
     Returns:
         Embedding, as a dict of format {spin: [qubit]}.
     """
-    bqm = create_bqm(spins)
+    ring_edges = {(i, (i+1) % spins) for i in range(spins)}
+    emb_1to1 = find_subgraph(ring_edges, sampler_edgelist, timeout=timeout)
 
-    for _ in range(5):  # 4 out of 5 times will find an embedding
-        embedding = minorminer.find_embedding(bqm.quadratic, sampler_edgelist)
-
-        if max(len(val) for val in embedding.values()) == 1:
-            return embedding
-
-    return {}
+    return {k: (v,) for k, v in emb_1to1.items()}
 
 
 def get_job_status(client, job_id, job_submit_time):

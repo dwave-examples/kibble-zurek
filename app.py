@@ -134,7 +134,7 @@ app.layout = html.Div(
         dcc.Store(id="zne_estimates", data={}),
         dcc.Store(id="modal_trigger", data=False),
         dcc.Store(id="initial_warning", data=False),
-        dcc.Store(id="kz_data", data={}),
+        dcc.Store(id="kz_data", data={"k": []}),
         dcc.Store(id="selected-problem"),
         dcc.Store(id="job_submit_time"),
         dcc.Store(id="job_id"),
