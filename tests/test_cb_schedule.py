@@ -22,7 +22,7 @@ from app import set_schedule
 
 all_schedules = ['09-1263A-B_Advantage_system4.1_fast_annealing_schedule.csv',
                  '09-1273A-E_Advantage_system6.3_fast_annealing_schedule.csv',
-                 '09-1302A-F_Advantage2_prototype2.6_fast_annealing_schedule.csv',
+                 '09-1302A-G_Advantage2_prototype2.6_fast_annealing_schedule.csv',
                  'FALLBACK_SCHEDULE.csv',
                  ]
 
