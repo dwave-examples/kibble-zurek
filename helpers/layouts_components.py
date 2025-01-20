@@ -17,6 +17,7 @@ from itertools import chain
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 
+from demo_configs import DEFAULT_QPU
 from src.demo_enums import ProblemType
 
 __all__ = [
@@ -142,6 +143,8 @@ def config_qpu_selection(solvers):
         id="qpu_selection",
         options=[{"label": qpu_name, "value": qpu_name} for qpu_name in solvers],
         placeholder="Select a quantum computer",
+        value=DEFAULT_QPU if DEFAULT_QPU in solvers else list(solvers.keys())[0],
+        clearable=False,
     )
 
 

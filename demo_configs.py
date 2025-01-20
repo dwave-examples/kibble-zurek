@@ -32,3 +32,5 @@ lowest noise level.
 
 USE_CLASSICAL = True
 J_BASELINE = -1.8
+
+DEFAULT_QPU = "Advantage2_prototype2.6"  # If not available, the first returned will be default

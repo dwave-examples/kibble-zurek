@@ -314,7 +314,7 @@ def set_schedule(qpu_name):
     schedule_filename = "FALLBACK_SCHEDULE.csv"
     schedule_filename_style = {"color": "#FFA143", "fontSize": 12}
 
-    if ctx.triggered_id:
+    if qpu_name:
         for filename in [file for file in os.listdir("helpers") if "schedule.csv" in file.lower()]:
 
             if qpu_name.split(".")[0] in filename:  # Accepts & reddens older versions
@@ -329,35 +329,33 @@ def set_schedule(qpu_name):
 @app.callback(
     Output("embeddings_cached", "data"),
     Output("embedding_is_cached", "children"),
-    inputs=[
-        Input("qpu_selection", "value"),
-    ],
-    prevent_initial_call=True,
+    Input("qpu_selection", "value"),
 )
 def load_cached_embeddings(qpu_name):
     """Cache embeddings for the selected QPU."""
 
     embeddings_cached = {}  # Wipe out previous QPU's embeddings
 
-    for filename in [file for file in os.listdir("helpers") if ".json" in file and "emb_" in file]:
+    if qpu_name:
+        for filename in [file for file in os.listdir("helpers") if ".json" in file and "emb_" in file]:
 
-        if qpu_name == "Diffusion [Classical]":
-            qpu_name = "Advantage_system6.4"
+            if qpu_name == "Diffusion [Classical]":
+                qpu_name = "Advantage_system6.4"
 
-        if qpu_name.split(".")[0] in filename:
-            with open(f"helpers/{filename}", "r") as fp:
-                embeddings_cached = json.load(fp)
+            if qpu_name.split(".")[0] in filename:
+                with open(f"helpers/{filename}", "r") as fp:
+                    embeddings_cached = json.load(fp)
 
-            embeddings_cached = json_to_dict(embeddings_cached)
+                embeddings_cached = json_to_dict(embeddings_cached)
 
-            # Validate that loaded embeddings' edges are still available on the selected QPU
-            for length in list(embeddings_cached.keys()):
-                source_graph = dimod.to_networkx_graph(create_bqm(num_spins=length)).edges
-                target_graph = qpus[qpu_name].edges
-                emb = embeddings_cached[length]
+                # Validate that loaded embeddings' edges are still available on the selected QPU
+                for length in list(embeddings_cached.keys()):
+                    source_graph = dimod.to_networkx_graph(create_bqm(num_spins=length)).edges
+                    target_graph = qpus[qpu_name].edges
+                    emb = embeddings_cached[length]
 
-                if not is_valid_embedding(emb, source_graph, target_graph):
-                    del embeddings_cached[length]
+                    if not is_valid_embedding(emb, source_graph, target_graph):
+                        del embeddings_cached[length]
 
     return embeddings_cached, ", ".join(str(embedding) for embedding in embeddings_cached.keys())
 
