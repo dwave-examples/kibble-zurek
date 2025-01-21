@@ -469,15 +469,6 @@ def display_graphics_kink_density(
             problem_type=problem_type,
         )
 
-        if (
-            ctx.triggered_id
-            in ["zne_graph_display", "coupling_strength", "quench_schedule_filename"]
-            and graph_display == "coupling"
-        ):
-            zne_estimates, modal_trigger = plot_zne_fitted_line(
-                fig, coupling_data, qpu_name, zne_estimates, graph_display, str(ta)
-            )
-
         return fig, coupling_data, zne_estimates, False, kz_data
 
     if ctx.triggered_id == "job_submit_state":

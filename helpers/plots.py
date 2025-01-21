@@ -201,7 +201,7 @@ def plot_kink_densities_bg(
         type="linear",
     )
 
-    x_axis3 = dict(title="<b>Noise Level (-1.8/J)</b>", type="linear", range=[-1, 4])
+    x_axis3 = dict(title="<b>Noise Level (-1.8/J)</b>", type="linear", range=[0, 4])
 
     if display == "kink_density":
         fig_layout = go.Layout(
@@ -619,75 +619,74 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_
               due to ill conditioned data for fitting.
     """
     modal_trigger = False
+    data_points = coupling_data[ta_str]
+    x = np.array([point["lambda"] for point in data_points])
+    y = np.array([point["kink_density"] for point in data_points])
 
-    if ta_str in coupling_data.keys() and len(coupling_data[ta_str]) > 2:
-        data_points = coupling_data[ta_str]
-        x = np.array([point["lambda"] for point in data_points])
-        y = np.array([point["kink_density"] for point in data_points])
+    if len(np.unique(x)) < 2:
+        return zne_estimates, modal_trigger
 
-        # Ensure there are enough unique x values for fitting
-        if len(np.unique(x)) > 1:
-            # Fit a 1st degree polynomial (linear fit)
-            # Fancy non-linear function or pure quadratic (see paper) # y = a + b x^2
-            y_func_x = fitted_function(
-                x,
-                y,
-                method="mixture_of_exponentials" if qpu_name == "Diffusion [Classical]" else "pure_quadratic",
+    # Fit a 1st degree polynomial (linear fit)
+    # Fancy non-linear function or pure quadratic (see paper) # y = a + b x^2
+    y_func_x = fitted_function(
+        x,
+        y,
+        method="mixture_of_exponentials" if qpu_name == "Diffusion [Classical]" else "pure_quadratic",
+    )
+
+    if y_func_x:
+        zne_estimates[ta_str] = y_func_x(0)
+        x_fit = np.linspace(0, max(x), 100)
+        y_fit = y_func_x(x_fit)
+    else:
+        modal_trigger = True
+
+    # Remove existing fitting curve traces and ZNE Estimate traces to prevent duplication
+    fig.data = [
+        trace
+        for trace in fig.data
+        if not (
+            trace.name in ["Fitting Curve", "ZNE Estimate"]
+            and trace.legendgroup == f"ta_{ta_str}"
+        )
+    ]
+
+    if zne_graph_display == "coupling" and y_func_x:
+        x_axis = "x3"
+        y_axis = "y1"
+        x_zne = 0
+        # Add the new fitting curve
+        fig.add_trace(
+            go.Scatter(
+                x=x_fit,
+                y=y_fit,
+                mode="lines",
+                name="Fitting Curve",
+                legendgroup=f"ta_{ta_str}",
+                line=dict(color="green", dash="dash"),
+                showlegend=True,
+                xaxis=x_axis,
+                yaxis=y_axis,
             )
+        )
 
-            if y_func_x:
-                zne_estimates[ta_str] = y_func_x(0)
-                x_fit = np.linspace(0, max(x), 100)
-                y_fit = y_func_x(x_fit)
-            else:
-                modal_trigger = True
+        fig.add_trace(
+            go.Scatter(
+                x=[x_zne],
+                y=[zne_estimates[ta_str]],
+                mode="markers",
+                name="ZNE Estimate",
+                legendgroup=f"ta_{ta_str}",
+                marker=dict(size=12, color="purple", symbol="diamond"),
+                showlegend=False,
+                xaxis=x_axis,
+                yaxis=y_axis,
+            )
+        )
 
-            # Remove existing fitting curve traces and ZNE Estimate traces to prevent duplication
-            fig.data = [
-                trace
-                for trace in fig.data
-                if not (
-                    trace.name in ["Fitting Curve", "ZNE Estimate"]
-                    and trace.legendgroup == f"ta_{ta_str}"
-                )
-            ]
-
-            if zne_graph_display == "coupling" and y_func_x:
-                x_axis = "x3"
-                y_axis = "y1"
-                x_zne = 0
-                # Add the new fitting curve
-                fig.add_trace(
-                    go.Scatter(
-                        x=x_fit,
-                        y=y_fit,
-                        mode="lines",
-                        name="Fitting Curve",
-                        legendgroup=f"ta_{ta_str}",
-                        line=dict(color="green", dash="dash"),
-                        showlegend=True,
-                        xaxis=x_axis,
-                        yaxis=y_axis,
-                    )
-                )
-
-                fig.add_trace(
-                    go.Scatter(
-                        x=[x_zne],
-                        y=[zne_estimates[ta_str]],
-                        mode="markers",
-                        name="ZNE Estimate",
-                        legendgroup=f"ta_{ta_str}",
-                        marker=dict(size=12, color="purple", symbol="diamond"),
-                        showlegend=False,
-                        xaxis=x_axis,
-                        yaxis=y_axis,
-                    )
-                )
-
-            else:
-                x_axis = "x1"
-                y_axis = "y1"
-                x_zne = float(ta_str)
+    else:
+        x_axis = "x1"
+        y_axis = "y1"
+        x_zne = float(ta_str)
 
     return zne_estimates, modal_trigger
