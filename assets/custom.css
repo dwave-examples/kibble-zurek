@@ -55,9 +55,10 @@ p {
 }
 
 #spins label,
-#graph_display label {
+#graph-selection-radio label {
     font-size: 13px;
-    margin: 0;
+    margin: 0 0 16px;
+    color: #2A7DE1;
 }
 
 #spins label {
@@ -65,11 +66,11 @@ p {
 }
 
 #spins label:not(:first-child),
-#graph_display label:not(:first-child) {
+#graph-selection-radio label:not(:first-child) {
     margin-left: 20px;
 }
 
-#graph_display {
+#graph-selection-radio {
     margin-top: 10px;
     margin-left: 20px;
 }
@@ -79,4 +80,12 @@ p {
     justify-content: space-between;
     padding-left: 20px;
     padding-right: 20px;
+}
+
+.form-control {
+    width: auto;
+}
+
+.display-none {
+    display: none;
 }

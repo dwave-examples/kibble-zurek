@@ -16,6 +16,8 @@
 
 THUMBNAIL = "assets/dwave_logo.png"
 
+DEBUG = True
+
 APP_TITLE = "Coherent Annealing"
 MAIN_HEADER = "Coherent Annealing: KZ Simulation"
 DESCRIPTION = """\
@@ -32,5 +34,6 @@ lowest noise level.
 
 USE_CLASSICAL = True
 J_BASELINE = -1.8
+J_OPTIONS = [-1.8, -1.6, -1.4, -1.2, -1, -0.9, -0.8, -0.7]
 
 DEFAULT_QPU = "Advantage2_prototype2.6"  # If not available, the first returned will be default

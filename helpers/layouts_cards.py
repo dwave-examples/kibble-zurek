@@ -47,7 +47,7 @@ def control_card(solvers={}, init_job_status="READY"):
             html.Div(config_spins),
             html.Label("Coupling Strength (J)"),
             html.Div(get_coupling_strength_slider(ProblemType.KZ), id="coupling-strength-slider"),
-            html.Label("Quench Duration [ns]"),
+            html.Label("Quench/Anneal Duration [ns]"),
             html.Div(get_anneal_duration_setting(ProblemType.KZ), id="anneal-duration-dropdown"),
             html.Label("QPU"),
             html.Div(config_qpu_selection(solvers)),
@@ -110,23 +110,29 @@ def control_card(solvers={}, init_job_status="READY"):
         style={"height": "100%", "minHeight": "50rem"},
     )
 
+def default_graph(title, id, load_radio=False):
+    return [
+        html.H3(title),
+        html.Div(get_graph_radio_options(), id="graph-radio-options") if load_radio else "",
+        dcc.Graph(
+            id=f"{id}-graph",
+            figure=go.Figure(),
+            style={"height": "40vh", "minHeight": "20rem"},
+        ),
+    ]
 
-def graphs_card(problem_type=ProblemType.KZ):
+
+def graphs_card():
     return dbc.Card(
         [
-            html.H3("Spin States of Qubits in a 1D Ring"),
-            dcc.Graph(
-                id="spin_orientation",
-                figure=go.Figure(),
-                style={"height": "40vh", "minHeight": "20rem"},
-            ),
-            html.H3("QPU Samples Vs. Kibble-Zurek Prediction"),
-            html.Div(get_kz_graph_radio_options(problem_type), id="graph-radio-options"),
-            dcc.Graph(
-                id="sample_vs_theory",
-                figure=go.Figure(),
-                style={"height": "40vh", "minHeight": "20rem"},
-            ),
+            html.Div([
+                *default_graph("Kink Density vs Noise Ratio", "kink-v-noise"),
+                *default_graph("Kink Density vs Annealing Duration", "kink-v-anneal"),
+            ], id="kz-nm-graphs", className="display-none"),
+            html.Div([
+                *default_graph("Spin States of Qubits in a 1D Ring", "spin-orientation"),
+                *default_graph("QPU Samples vs Kibble-Zurek Prediction", "sample-v-theory", True),
+            ], id="kz-graphs"),
         ],
         color="white",
         style={"height": "100%", "minHeight": "50rem"},

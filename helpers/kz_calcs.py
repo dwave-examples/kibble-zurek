@@ -12,6 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from demo_configs import J_BASELINE
 import numpy as np
 import pandas as pd
 
@@ -84,27 +85,27 @@ def theoretical_kink_density(annealing_times_ns, J=None, schedule_name=None, b=N
     return np.power([1e-9 * t * b for t in annealing_times_ns], -0.5) / (2 * np.pi * np.sqrt(2))
 
 
-def calc_kappa(J, J_baseline=-1.8):
+def calc_kappa(J):
     """Coupling ratio
 
     See "Quantum error mitigation in quantum annealing" usage."""
-    return abs(J_baseline / J)
+    return abs(J_BASELINE / J)
 
 
-def calclambda_(J, *, qpu_name=None, schedule_name=None, J_baseline=-1.8):
-    """Time rescaling factor (relative to J_baseline)
+def calclambda_(J, *, qpu_name=None, schedule_name=None):
+    """Time rescaling factor (relative to J_BASELINE)
 
     Rate through the transition is modified non-linearly by the
-    rescaling of J. If |J| is smaller than |J_baseline| we effectively move
+    rescaling of J. If |J| is smaller than |J_BASELINE| we effectively move
     more slowly through the critical region, the ratio of timescales is > 1.
     See "Quantum error mitigation in quantum annealing" usage.
     """
     if qpu_name == "Diffusion [Classical]":
         # Fallback, assume ideal linear schedule
-        kappa = calc_kappa(J, J_baseline)
+        kappa = calc_kappa(J, J_BASELINE)
         return kappa
 
-    b_ref = theoretical_kink_density_prefactor(J_baseline, schedule_name)
+    b_ref = theoretical_kink_density_prefactor(J_BASELINE, schedule_name)
     b = theoretical_kink_density_prefactor(J, schedule_name)
 
     return b_ref / b

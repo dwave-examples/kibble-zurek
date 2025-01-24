@@ -17,12 +17,12 @@ from itertools import chain
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 
-from demo_configs import DEFAULT_QPU
+from demo_configs import DEFAULT_QPU, J_OPTIONS
 from src.demo_enums import ProblemType
 
 __all__ = [
     "get_anneal_duration_setting",
-    "get_kz_graph_radio_options",
+    "get_graph_radio_options",
     "config_spins",
     "get_coupling_strength_slider",
     "config_qpu_selection",
@@ -50,7 +50,6 @@ def get_anneal_duration_setting(problem_type):
                 {"label": "1280 ns", "value": 1280},
             ],
             value=80,  # default value
-            style={"maxWidth": "95%"},
             clearable=False,
         )
 
@@ -61,28 +60,16 @@ def get_anneal_duration_setting(problem_type):
         max=100,
         step=1,
         value=7,
-        style={"maxWidth": "95%"},
     )
 
 
-def get_kz_graph_radio_options(problem_type):
-    if problem_type is ProblemType.KZ_NM:
-        return dcc.RadioItems(
-            id="graph_display",
-            options=[
-                {"label": "Kink density vs Anneal time", "value": "kink_density"},
-                {"label": "Kink density vs Noise level", "value": "coupling"},
-            ],
-            value="coupling",
-            inputStyle={"marginRight": "10px"},
-            inline=True,
-        )
+def get_graph_radio_options():
 
     return dcc.RadioItems(
-        id="graph_display",
+        id="graph-selection-radio",
         options=[
             {"label": "Both", "value": "both"},
-            {"label": "Kink density", "value": "kink_density"},
+            {"label": "Kink Density", "value": "kink_density"},
             {"label": "Schedule", "value": "schedule"},
         ],
         value="both",
@@ -99,38 +86,24 @@ config_spins = dcc.RadioItems(
     inline=True,
 )
 
-j_marks = {
-    round(0.1 * val) if val % 10 == 0 else round(0.1 * val, 1): (
-        {"label": f"{round(0.1*val)}", "style": {"color": "white"}}
-        if val % 10 == 0
-        else {"label": f"{round(0.1*val, 1)}", "style": {"color": "white"}}
-    )
-    for val in chain(range(-20, 0, 2), range(2, 12, 2))
-}
-
-
 def get_coupling_strength_slider(problem_type):
+
     if problem_type is ProblemType.KZ_NM:
-        return html.Div(
-            [
-                dcc.Slider(
-                    id="coupling_strength",
-                    value=-1.8,
-                    marks=j_marks,
-                    min=-1.8,
-                    max=-0.6,
-                    step=None,
-                    tooltip={"placement": "bottom", "always_visible": True},
-                )
-            ]
-        )
+        marks = J_OPTIONS
+        value = -1.8
+    else:
+        marks = [
+            round(0.1 * val) if val % 10 == 0 else round(0.1 * val, 1)
+            for val in chain(range(-20, 0, 2), range(2, 12, 2))
+        ]
+        value = -1.4
 
     return html.Div(
         [
             dcc.Slider(
                 id="coupling_strength",
-                value=-1.4,
-                marks=j_marks,
+                value=value,
+                marks={mark: f"{mark}" for mark in marks},
                 step=None,
                 tooltip={"placement": "bottom", "always_visible": True},
             )
@@ -154,64 +127,60 @@ job_bar_display = {
     "NO SOLVER": [100, "danger"],
     "SUBMITTED": [40, "info"],
     "PENDING": [60, "primary"],
-    "IN_PROGRESS": [85, "dark"],
+    "IN_PROGRESS": [85, "#2A7DE1"],
     "COMPLETED": [100, "success"],
     "CANCELLED": [100, "light"],
     "FAILED": [100, "danger"],
 }
 
-modal_texts = {
-    "solver": [
-        "Leap's Quantum Computers Inaccessible",
-        [
-            html.Div(
-                [
-                    html.Div("Could not connect to a Leap quantum computer."),
-                    html.Div(
-                        [
-                            """
-                            If you are running locally, set environment variables or a
-                            dwave-cloud-client configuration file as described in the
-                            """,
-                            dcc.Link(
-                                children=[html.Div(" Ocean")],
-                                href="https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html",
-                                style={"display": "inline-block"},
-                            ),
-                            "documentation.",
-                        ],
-                        style={"display": "inline-block"},
-                    ),
-                    html.Div(
-                        [
-                            "If you are running in an online IDE, see the ",
-                            dcc.Link(
-                                children=[html.Div("system documentation")],
-                                href="https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html",
-                                style={"display": "inline-block"},
-                            ),
-                            " on supported IDEs.",
-                        ],
-                        style={"display": "inline-block"},
-                    ),
-                ]
-            )
-        ],
+model_contents = [
+    "Leap's Quantum Computers Inaccessible",
+    [
+        html.Div(
+            [
+                html.Div("Could not connect to a Leap quantum computer."),
+                html.Div(
+                    [
+                        """
+                        If you are running locally, set environment variables or a
+                        dwave-cloud-client configuration file as described in the
+                        """,
+                        dcc.Link(
+                            children=[html.Div(" Ocean")],
+                            href="https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html",
+                            style={"display": "inline-block"},
+                        ),
+                        "documentation.",
+                    ],
+                    style={"display": "inline-block"},
+                ),
+                html.Div(
+                    [
+                        "If you are running in an online IDE, see the ",
+                        dcc.Link(
+                            children=[html.Div("system documentation")],
+                            href="https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html",
+                            style={"display": "inline-block"},
+                        ),
+                        " on supported IDEs.",
+                    ],
+                    style={"display": "inline-block"},
+                ),
+            ]
+        )
     ],
-}
+]
 
 
-def dbc_modal(name):
-    name = name.split("_")[1]
+def dbc_modal():
     return [
         html.Div(
             [
                 dbc.Modal(
                     [
-                        dbc.ModalHeader(dbc.ModalTitle(modal_texts[name][0])),
-                        dbc.ModalBody(modal_texts[name][1]),
+                        dbc.ModalHeader(dbc.ModalTitle(model_contents[0])),
+                        dbc.ModalBody(model_contents[1]),
                     ],
-                    id=f"{name}_modal",
                     size="sm",
                 )
             ]

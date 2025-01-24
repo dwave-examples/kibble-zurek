@@ -12,26 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-tool_tips_demo2 = {
-    "anneal-duration-dropdown": f"""Duration of the quantum anneal. Range of 5 to 1280 nanoseconds.""",
-    "spins": f"""Number of spins in the 1D ring.""",
-    "coupling_strength": f"""Coupling strength between spins in the ferromagnetic ring. 
-Range of -1.8 to -0.6.
-""",
-    "qpu_selection": f"""Selection from quantum computers available to your account/project token.""",
-    "quench_schedule_filename": f"""The fast-anneal schedule for the selected quantum computer.
-If none exists, one from a different quantum computer is used (expect inaccuracies).
-""",
+tool_tips_kz_nm = {
+    "coupling_strength": "Coupling strength between spins in the ferromagnetic ring.",
+    "qpu_selection": "Quantum computers available to your account/project token.",
+    "quench_schedule_filename": """The fast-anneal schedule for the selected quantum computer.
+        If none exists, one from a different quantum computer is used (expect inaccuracies).""",
 }
 
-tool_tips_demo1 = {
-    "anneal-duration-dropdown": f"""Duration of the quantum anneal. Range of 5 to 100 nanoseconds.""",
-    "spins": f"""Number of spins in the 1D ring.""",
-    "coupling_strength": f"""Coupling strength between spins in the ring. 
-Range of -2 (ferromagnetic) to +1 (anti-ferromagnetic).
-""",
-    "qpu_selection": f"""Selection from quantum computers available to your account/project token.""",
-    "quench_schedule_filename": f"""The fast-anneal schedule for the selected quantum computer.
-If none exists, one from a different quantum computer is used (expect inaccuracies).
-""",
+tool_tips_kz = {
+    "coupling_strength": """Coupling strength between spins in the ring.
+        Range of -2 (ferromagnetic) to +1 (anti-ferromagnetic).""",
+    "qpu_selection": "Quantum computers available to your account/project token.",
+    "quench_schedule_filename": """The fast-anneal schedule for the selected quantum computer.
+        If none exists, one from a different quantum computer is used (expect inaccuracies).""",
 }

@@ -12,108 +12,83 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from demo_configs import J_OPTIONS
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from dash.exceptions import PreventUpdate
 
 from helpers.kz_calcs import theoretical_kink_density
 from helpers.qa import fitted_function
 from src.demo_enums import ProblemType
 
 __all__ = [
+    "kink_v_anneal_init_graph",
+    "kink_v_noise_init_graph",
     "plot_kink_densities_bg",
     "plot_kink_density",
     "plot_spin_orientation",
     "plot_zne_fitted_line",
+    "plot_ze_estimates",
 ]
 
 ta_color_theme = {
     5: "#1F77B4",  # Dark Blue
     10: "#FF7F0E",  # Dark Orange
     20: "#2CA02C",  # Dark Green
-    40: "#D62728",  # Dark Red
+    40: "#949494",  # Grey
     80: "#9467BD",  # Dark Purple
     160: "#8C564B",  # Brown
     320: "#E377C2",  # Dark Pink
     640: "#17BECF",  # Teal
     1280: "#BCBD22",  # Olive Green
 }
-coupling_color_theme = {
-    -1.8: "#1F77B4",  # Dark Blue
-    -1.6: "#FF7F0E",  # Dark Orange
-    -1.4: "#E377C2",  # Dark Pink
-    -1.2: "#2CA02C",  # Dark Green
-    -1: "#D62728",  # Dark Red
-    -0.8: "#9467BD",  # Dark Purple
-    -0.6: "#8C564B",  # Brown
-}
-coupling_label = {
-    -1.8: False,
-    -1.6: False,
-    -1.4: False,
-    -1.2: False,
-    -1: False,
-    -0.8: False,
-    -0.6: False,
-}
 
+palette = [
+    "#1F77B4",  # Dark Blue
+    "#FF7F0E",  # Dark Orange
+    "#E377C2",  # Dark Pink
+    "#2CA02C",  # Dark Green
+    "#949494",  # Grey
+    "#9467BD",  # Dark Purple
+    "#8C564B",  # Brown
+    "#17BECF",  # Teal
+] * (len(J_OPTIONS) // 8 + 1)
 
-def plot_kink_densities_bg(
-    display,
-    time_range,
-    J_base,
-    schedule_name,
-    coupling_data,
-    zne_estimates,
-    kz_data=None,
-    problem_type=None,
-):
-    """
-    Plot the background of theoretical kink density and QPU energy scales.
+coupling_color_theme = {j: palette[i] for i, j in enumerate(J_OPTIONS)}
+coupling_label = {j: False for j in J_OPTIONS}
 
-    This function generates a Plotly figure that displays the theoretical
-    predictions for kink densities along with QPU energy scales based on
-    the provided anneal schedule. It supports different display modes
-    such as "both", "kink_density", "schedule", and "coupling".
+def add_conherent_thermalized_labels(fig, time_range, n):
+    """Adds Conherent and Thermalized annotations to a Plotly fig."""
+    fig.add_annotation(
+        xref="x",
+        yref="y",
+        x=np.log10(0.25 * (time_range[1])),
+        y=np.log10(1.0 * n.min()),
+        text="Coherent",
+        axref="x",
+        ayref="y",
+        ax=np.log10(0.50 * (time_range[1])),
+        ay=np.log10(1.0 * n.min()),
+        arrowhead=5,
+    )
 
-    Args:
-        display (str): The type of plot to display. Options are:
-            - "both": Display both kink density and schedule.
-            - "kink_density": Display only the kink density plot.
-            - "schedule": Display only the anneal schedule.
-            - "coupling": Display coupling-related plots.
-        time_range (list of float): A list containing the minimum and maximum
-            quench times [min_quench_time, max_quench_time] in nanoseconds.
-        J_base (float): The base coupling strength between spins in the ring.
-        schedule_name (str): The filename of the anneal schedule CSV file.
-            If not provided, a fallback schedule is used.
-        coupling_data (dict): A dictionary containing coupling-related data
-            structured as {ta_str: [data_points]}, where each data point
-            includes "coupling_strength" and "kink_density".
-        zne_estimates (dict): A dictionary to store Zero-Noise Extrapolation
-            (ZNE) estimates structured as {ta_str: estimate}.
+    fig.add_annotation(
+        xref="x",
+        yref="y",
+        x=np.log10(0.5 * (time_range[1])),
+        y=np.log10(1.2 * n.min()),
+        text="Thermalized",
+        axref="x",
+        ayref="y",
+        ax=np.log10(0.3 * (time_range[1])),
+        ay=np.log10(1.2 * n.min()),
+        arrowhead=5,
+    )
 
-    Returns:
-        plotly.graph_objs.Figure: A Plotly figure object containing the
-        predicted kink densities and/or QPU energy scales based on the
-        specified display mode.
-    """
-    if not schedule_name:
-        schedule_name = "FALLBACK_SCHEDULE.csv"
+    return fig
 
-    schedule = pd.read_csv(f"helpers/{schedule_name}")
-
-    A_ghz = schedule["A(s) (GHz)"]
-    B_ghz = schedule["B(s) (GHz)"]
-    s = schedule["s"]
-
-    # Display in Joule
-    A_joule = A_ghz / 1.5092e24
-    B_joule = B_ghz / 1.5092e24
-
-    n = theoretical_kink_density(time_range, J_base, schedule_name)
-
+def plot_predicted_area(time_range, n):
+    """Returns predicted area scatter plots."""
     predicted_plus = go.Scatter(
         x=np.asarray(time_range),
         y=np.asarray(1.1 * n),
@@ -137,6 +112,92 @@ def plot_kink_densities_bg(
         fillcolor="white",
         showlegend=False,
     )
+    return [predicted_plus, predicted_minus]
+
+
+def get_kink_density_axis(n):
+    """Returns Kink Density y axis label."""
+    y_min = (0.9 * n).min()
+    y_max = (1.1 * n).max()
+
+    return dict(
+        title="<b>Kink Density</b>",
+        type="log",
+        range=[np.log10(y_min), np.log10(y_max)],
+    )
+
+
+def plot_ze_estimates(fig, zne_estimates):
+    """Plots zero noise estimate points."""
+    # Remove existing estimates
+    fig["data"] = tuple(
+        trace for trace in fig["data"]
+        if "name" not in trace or trace["name"] != "ZNE Estimate"
+    )
+
+    for ta_str, a in zne_estimates.items():
+        fig.add_trace(
+            go.Scatter(
+                x=[ta_str],
+                y=[a],
+                mode="markers",
+                name="ZNE Estimate",
+                marker=dict(size=12, color="purple", symbol="diamond"),
+                showlegend=False,
+                xaxis="x1",
+                yaxis="y1",
+            )
+        )
+
+    return fig
+
+
+def plot_kink_densities_bg(
+    display,
+    time_range,
+    J_base,
+    schedule_name,
+    kz_data,
+):
+    """
+    Plot the background of theoretical kink density and QPU energy scales.
+
+    This function generates a Plotly figure that displays the theoretical
+    predictions for kink densities along with QPU energy scales based on
+    the provided anneal schedule. It supports different display modes
+    such as "both", "kink_density", and "schedule".
+
+    Args:
+        display (str): The type of plot to display. Options are:
+            - "both": Display both kink density and schedule.
+            - "kink_density": Display only the kink density plot.
+            - "schedule": Display only the anneal schedule.
+            - "coupling": Display coupling-related plots.
+        time_range (list of float): A list containing the minimum and maximum
+            quench times [min_quench_time, max_quench_time] in nanoseconds.
+        J_base (float): The base coupling strength between spins in the ring.
+        schedule_name (str): The filename of the anneal schedule CSV file.
+            If not provided, a fallback schedule is used.
+
+    Returns:
+        plotly.graph_objs.Figure: A Plotly figure object containing the
+        predicted kink densities and/or QPU energy scales based on the
+        specified display mode.
+    """
+    if not schedule_name:
+        schedule_name = "FALLBACK_SCHEDULE.csv"
+
+    schedule = pd.read_csv(f"helpers/{schedule_name}")
+
+    A_ghz = schedule["A(s) (GHz)"]
+    B_ghz = schedule["B(s) (GHz)"]
+    s = schedule["s"]
+
+    # Display in Joule
+    A_joule = A_ghz / 1.5092e24
+    B_joule = B_ghz / 1.5092e24
+
+    n = theoretical_kink_density(time_range, J_base, schedule_name)
 
     x_axis = "x2"
     y_axis = "y2"
@@ -174,14 +235,7 @@ def plot_kink_densities_bg(
         range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],
     )
 
-    y_min = (0.9 * n).min()
-    y_max = (1.1 * n).max()
-
-    y_axis1 = dict(
-        title="<b>Kink Density</b>",
-        type="log",
-        range=[np.log10(y_min), np.log10(y_max)],
-    )
+    y_axis1 = get_kink_density_axis(n)
 
     x_axis2 = dict(
         title={
@@ -201,75 +255,13 @@ def plot_kink_densities_bg(
         type="linear",
     )
 
-    x_axis3 = dict(title="<b>Noise Level (-1.8/J)</b>", type="linear", range=[0, 4])
+    fig_data = plot_predicted_area(time_range, n)
 
     if display == "kink_density":
         fig_layout = go.Layout(
             xaxis=x_axis1,
             yaxis=y_axis1,
         )
-        if problem_type is ProblemType.KZ_NM:
-            _coupling_label = {
-                -1.8: False,
-                -1.6: False,
-                -1.4: False,
-                -1.2: False,
-                -1: False,
-                -0.8: False,
-                -0.6: False,
-            }
-            fig_data = [predicted_plus, predicted_minus]
-            for ta_str, data_points in coupling_data.items():
-                for point in data_points:
-                    _J = point["coupling_strength"]
-                    color = coupling_color_theme[_J]
-
-                    legend = not _coupling_label[_J]
-                    _coupling_label[_J] = True
-
-                    kink_density = point["kink_density"]
-
-                    fig_data.append(
-                        go.Scatter(
-                            x=[ta_str],
-                            y=[kink_density],
-                            xaxis="x1",
-                            yaxis="y1",
-                            mode="markers",
-                            name=f"Coupling Strength: {_J}",
-                            showlegend=legend,
-                            marker=dict(size=10, color=color, symbol="x"),
-                        )
-                    )
-                # Plot ZNE estimates
-                for ta_str, a in zne_estimates.items():
-                    fig_data.append(
-                        go.Scatter(
-                            x=[ta_str],
-                            y=[a],
-                            mode="markers",
-                            name="ZNE Estimate",
-                            marker=dict(size=12, color="purple", symbol="diamond"),
-                            showlegend=False,
-                            xaxis="x1",
-                            yaxis="y1",
-                        )
-                    )
-        else:
-            fig_data = [predicted_plus, predicted_minus]
-            if "k" in kz_data:
-                for pair in kz_data["k"]:
-                    fig_data.append(
-                        go.Scatter(
-                            x=[pair[1]],
-                            y=[pair[0]],
-                            mode="markers",
-                            marker=dict(size=10, color="black", symbol="x"),
-                            xaxis="x1",
-                            yaxis="y1",
-                            showlegend=False,
-                        )
-                    )
 
     elif display == "schedule":
         fig_layout = go.Layout(
@@ -278,48 +270,6 @@ def plot_kink_densities_bg(
         )
 
         fig_data = [energy_transverse, energy_problem]
-
-    elif display == "coupling":
-        fig_layout = go.Layout(
-            xaxis3=x_axis3,
-            yaxis1=y_axis1,
-        )
-
-        fig_data = []
-
-        # Plot data points from 'coupling_data'
-        for ta_str, data_points in coupling_data.items():
-            label = False
-            ta_value = float(ta_str)
-            color = ta_color_theme[ta_value]
-            for point in data_points:
-                lambda_ = point["lambda"]
-                kink_density = point["kink_density"]
-                if not label:
-                    fig_data.append(
-                        go.Scatter(
-                            x=[lambda_],
-                            y=[kink_density],
-                            xaxis="x3",
-                            yaxis="y1",
-                            mode="markers",
-                            name=f"Anneal Time: {ta_value} ns",
-                            showlegend=True,
-                            marker=dict(size=10, color=color, symbol="x"),
-                        )
-                    )
-                    label = True
-                else:
-                    fig_data.append(
-                        go.Scatter(
-                            x=[lambda_],
-                            y=[kink_density],
-                            xaxis="x3",
-                            yaxis="y1",
-                            showlegend=False,
-                            marker=dict(size=10, color=color, symbol="x"),
-                        )
-                    )
 
     else:  # Display both plots together
         x_axis2.update({"overlaying": "x1"})
@@ -332,53 +282,89 @@ def plot_kink_densities_bg(
             yaxis2=y_axis2,
         )
 
-        fig_data = [predicted_plus, predicted_minus, energy_transverse, energy_problem]
+        fig_data.extend([energy_transverse, energy_problem])
 
+    if display != "schedule":
         # Add previously computed kz_data points
-        if kz_data and "k" in kz_data:
-            for pair in kz_data["k"]:
-                fig_data.append(
-                    go.Scatter(
-                        x=[pair[1]],
-                        y=[pair[0]],
-                        mode="markers",
-                        marker=dict(size=10, color="black", symbol="x"),
-                        xaxis="x1",
-                        yaxis="y1",
-                        showlegend=False,
-                    )
+        for pair in kz_data:
+            fig_data.append(
+                go.Scatter(
+                    x=[pair[1]],
+                    y=[pair[0]],
+                    mode="markers",
+                    marker=dict(size=10, color="black", symbol="x"),
+                    xaxis="x1",
+                    yaxis="y1",
+                    showlegend=False,
                 )
+            )
 
     fig = go.Figure(data=fig_data, layout=fig_layout)
 
     fig.update_layout(legend=dict(x=0.1, y=0.1), margin=dict(b=5, l=5, r=20, t=10))
 
-    if display != "schedule" and display != "coupling":
-        fig.add_annotation(
-            xref="x",
-            yref="y",
-            x=np.log10(0.25 * (time_range[1])),
-            y=np.log10(1.0 * n.min()),
-            text="Coherent",
-            axref="x",
-            ayref="y",
-            ax=np.log10(0.50 * (time_range[1])),
-            ay=np.log10(1.0 * n.min()),
-            arrowhead=5,
-        )
+    if display != "schedule":
+        add_conherent_thermalized_labels(fig, time_range, n)
 
-        fig.add_annotation(
-            xref="x",
-            yref="y",
-            x=np.log10(0.5 * (time_range[1])),
-            y=np.log10(1.2 * n.min()),
-            text="Thermalized",
-            axref="x",
-            ayref="y",
-            ax=np.log10(0.3 * (time_range[1])),
-            ay=np.log10(1.2 * n.min()),
-            arrowhead=5,
-        )
+    return fig
+
+
+def kink_v_noise_init_graph(n):
+    """Initiates plot for Kink Density vs Noise Ratio.
+
+    Args:
+        n: TODO
+
+    Returns:
+        plotly.graph_objs.Figure: A Plotly figure object.
+    """
+    fig_layout = go.Layout(
+        xaxis3=dict(title="<b>Noise Ratio (-1.8/J)</b>", type="linear", range=[0, 3]),
+        yaxis1=get_kink_density_axis(n),
+    )
+
+    fig = go.Figure(data=[], layout=fig_layout)
+
+    fig.update_layout(
+        legend=dict(
+            yanchor="bottom",
+            y=0.05,
+            xanchor="right",
+            x=0.97
+        ),
+        margin=dict(b=5, l=5, r=20, t=10)
+    )
+
+    return fig
+
+
+def kink_v_anneal_init_graph(time_range, n):
+    """Initiates plot for Kink Density vs Anneal Duration.
+
+    Args:
+        time_range (list of float): A list containing the minimum and maximum
+            quench times [min_quench_time, max_quench_time] in nanoseconds.
+        n: TODO
+
+    Returns:
+        plotly.graph_objs.Figure: A Plotly figure object.
+    """
+    fig_layout = go.Layout(
+        xaxis=dict(
+            title="<b>Quench Duration [ns]</b>",
+            type="log",
+            range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],
+        ),
+        yaxis=get_kink_density_axis(n),
+    )
+
+    fig_data = plot_predicted_area(time_range, n)
+
+    fig = go.Figure(data=fig_data, layout=fig_layout)
+
+    fig.update_layout(legend=dict(x=0.1, y=0.1), margin=dict(b=5, l=5, r=20, t=10))
+
+    add_conherent_thermalized_labels(fig, time_range, n)
 
     return fig
 
@@ -410,9 +396,6 @@ def plot_kink_density(
             - If display is "schedule", returns `no_update` indicating no changes.
             - Otherwise, returns the updated Plotly figure with the new kink density marker.
     """
-    if display == "schedule":
-        raise PreventUpdate
-
     fig = go.Figure(fig_dict)
 
     if problem_type is ProblemType.KZ:
@@ -433,17 +416,17 @@ def plot_kink_density(
 
         return fig
 
-    ta_value = float(anneal_time)
-
     if display == "coupling":
-        color = ta_color_theme[ta_value]
+        color = ta_color_theme[anneal_time]
         fig.add_trace(
             go.Scatter(
                 x=[lambda_],
                 y=[kink_density],
                 xaxis="x3",
                 yaxis="y1",
-                showlegend=False,
+                mode="markers",
+                name=f"Anneal Time: {anneal_time} ns",
+                showlegend=True,
                 marker=dict(
                     size=10,
                     color=color,
@@ -451,6 +434,14 @@ def plot_kink_density(
                 ),
             )
         )
+
+        # Remove duplicate legend values
+        names = set()
+        fig.for_each_trace(
+            lambda trace:
+                trace.update(showlegend=False)
+                if (trace.name in names) else names.add(trace.name))
+
         fig.update_layout(
             xaxis3=fig.layout.xaxis3,
             yaxis1=fig.layout.yaxis1,
@@ -589,7 +580,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
     return fig
 
 
-def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_display, ta_str):
+def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, ta_str):
     """
     Fit a curve to the coupling data and plot the Zero-Noise Extrapolation (ZNE) estimate.
 
@@ -651,7 +642,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_
         )
     ]
 
-    if zne_graph_display == "coupling" and y_func_x:
+    if y_func_x:
         x_axis = "x3"
         y_axis = "y1"
         x_zne = 0
@@ -663,8 +654,8 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, zne_graph_
                 mode="lines",
                 name="Fitting Curve",
                 legendgroup=f"ta_{ta_str}",
-                line=dict(color="green", dash="dash"),
-                showlegend=True,
+                line=dict(color=ta_color_theme[int(ta_str)], dash="dash"),
+                showlegend=False,
                 xaxis=x_axis,
                 yaxis=y_axis,
             )

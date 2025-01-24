@@ -28,6 +28,7 @@ from dwave.embedding import embed_bqm, is_valid_embedding
 from dwave.system import DWaveSampler
 
 from demo_configs import (
+    DEBUG,
     DESCRIPTION,
     DESCRIPTION_NM,
     J_BASELINE,
@@ -41,7 +42,7 @@ from helpers.layouts_cards import *
 from helpers.layouts_components import *
 from helpers.plots import *
 from helpers.qa import *
-from helpers.tooltips import tool_tips_demo1, tool_tips_demo2
+from helpers.tooltips import tool_tips_kz, tool_tips_kz_nm
 from mock_kz_sampler import MockKibbleZurekSampler
 from src.demo_enums import ProblemType
 
@@ -67,12 +68,6 @@ if USE_CLASSICAL:
     qpus["Diffusion [Classical]"] = MockKibbleZurekSampler(
         topology_type="pegasus", topology_shape=[16]
     )
-
-init_job_status = "READY"
-
-if not client:
-    client = "dummy"
-
 
 # Define the Navbar with two tabs
 navbar = dbc.Navbar(
@@ -114,7 +109,7 @@ def tooltips(problem_type: Union[ProblemType, int]) -> list[dbc.Tooltip]:
     Args:
         problem_type: Either ProblemType.KZ or ProblemType.KZ_NM.
     """
-    tool_tips = tool_tips_demo1 if problem_type is ProblemType.KZ else tool_tips_demo2
+    tool_tips = tool_tips_kz if problem_type is ProblemType.KZ else tool_tips_kz_nm
 
     return [
         dbc.Tooltip(
@@ -129,12 +124,11 @@ def tooltips(problem_type: Union[ProblemType, int]) -> list[dbc.Tooltip]:
 
 app.layout = html.Div(
     [
-        dcc.Store(id="coupling_data", data={}),
-        # store zero noise extrapolation
-        dcc.Store(id="zne_estimates", data={}),
+        dcc.Store(id="coupling_data", data={}),  # KZ NM plot points
+        dcc.Store(id="zne_estimates", data={}),  # store zero noise extrapolation points
         dcc.Store(id="modal_trigger", data=False),
         dcc.Store(id="initial_warning", data=False),
-        dcc.Store(id="kz_data", data={"k": []}),
+        dcc.Store(id="kz_data", data=[]),  # KZ plot point
         dcc.Store(id="selected-problem"),
         dcc.Store(id="job_submit_time"),
         dcc.Store(id="job_id"),
@@ -159,16 +153,14 @@ app.layout = html.Div(
                                             solvers=qpus,
                                             init_job_status=init_job_status,
                                         ),
-                                        *dbc_modal("modal_solver"),
+                                        *dbc_modal(),
                                         html.Div(tooltips(ProblemType.KZ), id="tooltips"),
                                     ],
                                     width=4,
-                                    style={"minWidth": "30rem"},
                                 ),
                                 dbc.Col(  # Right: display area
-                                    graphs_card(problem_type=ProblemType.KZ),
+                                    graphs_card(),
                                     width=8,
-                                    style={"minWidth": "60rem"},
                                 ),
                             ]
                         ),
@@ -213,7 +205,8 @@ app.config["suppress_callback_exceptions"] = True
 @dash.callback(
     Output({"type": "problem-type", "index": ALL}, "className"),
     Output("selected-problem", "data"),
-    Output("graph-radio-options", "children"),
+    Output("kz-graphs", "className"),
+    Output("kz-nm-graphs", "className"),
     Output("tooltips", "children"),
     Output("anneal-duration-dropdown", "children"),
     Output("coupling-strength-slider", "children"),
@@ -252,18 +245,20 @@ def update_selected_problem_type(
     nav_class_names = [""] * len(problem_options)
     problem_type_value = ctx.triggered_id["index"] if ctx.triggered_id else ProblemType.KZ.value
     problem_type = ProblemType(problem_type_value)
+    isKZ = problem_type is ProblemType.KZ
 
     nav_class_names[problem_type_value] = "active"
 
     return (
         nav_class_names,
         problem_type_value,
-        get_kz_graph_radio_options(problem_type),
+        "" if isKZ else "display-none",
+        "display-none" if isKZ else "",
         tooltips(problem_type),
         get_anneal_duration_setting(problem_type),
         get_coupling_strength_slider(problem_type),
-        MAIN_HEADER if problem_type is ProblemType.KZ else MAIN_HEADER_NM,
-        DESCRIPTION if problem_type is ProblemType.KZ else DESCRIPTION_NM,
+        MAIN_HEADER if isKZ else MAIN_HEADER_NM,
+        DESCRIPTION if isKZ else DESCRIPTION_NM,
     )
 
 
@@ -361,147 +356,196 @@ def load_cached_embeddings(qpu_name):
 
 
 @app.callback(
-    Output("sample_vs_theory", "figure"),
-    Output("coupling_data", "data"),  # store data using dcc
-    Output("zne_estimates", "data"),  # update zne_estimates
-    Output("modal_trigger", "data"),
-    Output("kz_data", "data"),
+    Output("sample-v-theory-graph", "figure", allow_duplicate=True),
+    Output("kz_data", "data", allow_duplicate=True),
     inputs=[
-        Input("qpu_selection", "value"),
-        Input("graph_display", "value"),
-        Input("coupling_strength", "value"),  # previously input
-        Input("quench_schedule_filename", "children"),
         Input("job_submit_state", "children"),
-        Input("job_id", "data"),
-        Input("anneal_duration", "value"),
-        Input("spins", "value"),
-        Input("selected-problem", "data"),
+        State("graph-selection-radio", "value"),
+        State("coupling_strength", "value"),  # previously input
+        State("job_id", "data"),
+        State("anneal_duration", "value"),
+        State("spins", "value"),
+        State("selected-problem", "data"),
         State("embeddings_cached", "data"),
-        State("sample_vs_theory", "figure"),
-        State("coupling_data", "data"),  # access previously stored data
-        State("zne_estimates", "data"),  # Access ZNE estimates
+        State("sample-v-theory-graph", "figure"),
         State("kz_data", "data"),  # get kibble zurek data point
     ],
+    prevent_initial_call=True,
 )
-def display_graphics_kink_density(
-    qpu_name,
-    graph_display,
-    J,
-    schedule_filename,
+def add_graph_point_kz(
     job_submit_state,
+    graph_selection,
+    J,
     job_id,
     ta,
     spins,
     problem_type,
     embeddings_cached,
     figure,
-    coupling_data,
-    zne_estimates,
     kz_data,
 ):
-    """Generate graphics for kink density based on theory and QPU samples."""
-    if ctx.triggered_id == "job_submit_state" and job_submit_state != "COMPLETED":
+    """Add new point to kink density graph when KZ job finishes."""
+    if job_submit_state != "COMPLETED" or problem_type is ProblemType.KZ_NM.value:
         raise PreventUpdate
 
-    ta_min = 2
-    ta_max = 350
-    problem_type = ProblemType(problem_type)
+    embeddings_cached = json_to_dict(embeddings_cached)
+    sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])
+    _, kink_density = kink_stats(sampleset_unembedded, J)
 
-    if problem_type is ProblemType.KZ_NM:
-        # update the maximum anneal time for zne demo
-        ta_max = 1500
+    # Append the new data point
+    kz_data.append((kink_density, ta))
 
-        if ctx.triggered_id == "job_submit_state":
-            embeddings_cached = json_to_dict(embeddings_cached)
-
-            sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])
-            _, kink_density = kink_stats(sampleset_unembedded, J)
-
-            # Calculate lambda (previously kappa)
-            # Added _ to avoid keyword restriction
-            lambda_ = calclambda_(
-                J=J, qpu_name=qpu_name, schedule_name=schedule_filename, J_baseline=J_BASELINE
-            )
-
-            fig = plot_kink_density(graph_display, figure, kink_density, ta, J, lambda_)
-
-            # Initialize the list for this anneal_time if not present
-            ta_str = str(ta)
-            if ta_str not in coupling_data:
-                coupling_data[ta_str] = []
-            # Append the new data point
-            coupling_data[ta_str].append(
-                {
-                    "lambda": lambda_,
-                    "kink_density": kink_density,
-                    "coupling_strength": J,
-                }
-            )
-
-            zne_estimates, modal_trigger = plot_zne_fitted_line(
-                fig, coupling_data, qpu_name, zne_estimates, graph_display, ta_str
-            )
-
-            if graph_display == "kink_density":
-                fig = plot_kink_densities_bg(
-                    graph_display,
-                    [ta_min, ta_max],
-                    J_BASELINE,
-                    schedule_filename,
-                    coupling_data,
-                    zne_estimates,
-                    problem_type=problem_type,
-                )
-
-            return fig, coupling_data, zne_estimates, modal_trigger, kz_data
-
-        if ctx.triggered_id == "qpu_selection" or ctx.triggered_id == "spins":
-            coupling_data = {}
-            zne_estimates = {}
-
-        fig = plot_kink_densities_bg(
-            graph_display,
-            [ta_min, ta_max],
-            J_BASELINE,
-            schedule_filename,
-            coupling_data,
-            zne_estimates,
-            problem_type=problem_type,
-        )
-
-        return fig, coupling_data, zne_estimates, False, kz_data
-
-    if ctx.triggered_id == "job_submit_state":
-        embeddings_cached = json_to_dict(embeddings_cached)
-
-        sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])
-        _, kink_density = kink_stats(sampleset_unembedded, J)
-
-        # Append the new data point
-        kz_data["k"].append((kink_density, ta))
-        fig = plot_kink_density(
-            graph_display, figure, kink_density, ta, J, problem_type=problem_type
-        )
-        return fig, coupling_data, zne_estimates, False, kz_data
-
-    if ctx.triggered_id in ["qpu_selection", "spins", "coupling_strength"]:
-        kz_data = {"k": []}
-
-    fig = plot_kink_densities_bg(
-        graph_display,
-        [ta_min, ta_max],
-        J,
-        schedule_filename,
-        coupling_data,
-        zne_estimates,
-        kz_data,
-        problem_type=problem_type,
+    fig = dash.no_update if graph_selection == "schedule" else plot_kink_density(
+        graph_selection, figure, kink_density, ta, J, problem_type=ProblemType.KZ
     )
-    return fig, coupling_data, zne_estimates, False, kz_data
+    return fig, kz_data
 
 
 @app.callback(
-    Output("spin_orientation", "figure"),
+    Output("kink-v-noise-graph", "figure", allow_duplicate=True),
+    Output("kink-v-anneal-graph", "figure", allow_duplicate=True),
+    Output("coupling_data", "data", allow_duplicate=True),  # store data using dcc
+    Output("zne_estimates", "data", allow_duplicate=True),  # update zne_estimates
+    Output("modal_trigger", "data"),
+    inputs=[
+        Input("job_submit_state", "children"),
+        State("qpu_selection", "value"),
+        State("coupling_strength", "value"),  # previously input
+        State("quench_schedule_filename", "children"),
+        State("job_id", "data"),
+        State("anneal_duration", "value"),
+        State("spins", "value"),
+        State("selected-problem", "data"),
+        State("embeddings_cached", "data"),
+        State("kink-v-noise-graph", "figure"),
+        State("kink-v-anneal-graph", "figure"),
+        State("coupling_data", "data"),  # access previously stored data
+        State("zne_estimates", "data"),  # Access ZNE estimates
+    ],
+    prevent_initial_call=True,
+)
+def add_graph_point_kz_nm(
+    job_submit_state,
+    qpu_name,
+    J,
+    schedule_filename,
+    job_id,
+    ta,
+    spins,
+    problem_type,
+    embeddings_cached,
+    figure_noise,
+    figure_anneal,
+    coupling_data,
+    zne_estimates,
+):
+    """Add new point to Noise Ratio and Annealing Duration graphs when KZ Noise Mitigation job
+    finishes."""
+    if job_submit_state != "COMPLETED" or problem_type is ProblemType.KZ.value:
+        raise PreventUpdate
+
+    embeddings_cached = json_to_dict(embeddings_cached)
+    sampleset_unembedded = get_samples(client, job_id, spins, J, embeddings_cached[spins])
+    _, kink_density = kink_stats(sampleset_unembedded, J)
+
+    # Calculate lambda (previously kappa)
+    # Added _ to avoid keyword restriction
+    lambda_ = calclambda_(J=J, qpu_name=qpu_name, schedule_name=schedule_filename)
+
+    fig_noise = plot_kink_density("coupling", figure_noise, kink_density, ta, J, lambda_)
+    fig_anneal = plot_kink_density("kink_density", figure_anneal, kink_density, ta, J, lambda_)
+
+    # Initialize the list for this anneal_time if not present
+    ta_str = str(ta)
+    if ta_str not in coupling_data:
+        coupling_data[ta_str] = []
+
+    # Append the new data point
+    coupling_data[ta_str].append(
+        {
+            "lambda": lambda_,
+            "kink_density": kink_density,
+            "coupling_strength": J,
+        }
+    )
+
+    zne_estimates, modal_trigger = plot_zne_fitted_line(
+        fig_noise, coupling_data, qpu_name, zne_estimates, ta_str
+    )
+    fig_anneal = plot_ze_estimates(fig_anneal, zne_estimates)
+
+    return fig_noise, fig_anneal, coupling_data, zne_estimates, modal_trigger
+
+
+@app.callback(
+    Output("sample-v-theory-graph", "figure"),
+    Output("kz_data", "data"),
+    inputs=[
+        Input("selected-problem", "data"),
+        Input("graph-selection-radio", "value"),
+        Input("qpu_selection", "value"),
+        Input("coupling_strength", "value"),  # previously input
+        Input("spins", "value"),
+        Input("anneal_duration", "value"),
+        State("quench_schedule_filename", "children"),
+        State("kz_data", "data"),  # get kibble zurek data point
+    ],
+)
+def load_new_graph_kz(
+    problem_type,
+    graph_selection,
+    qpu_name,
+    J,
+    spins,
+    ta,
+    schedule_filename,
+    kz_data,
+):
+    """Initiates graphics for kink density based on theory and QPU samples on page load and when
+    when settings change."""
+    if problem_type is ProblemType.KZ_NM.value:
+        raise PreventUpdate
+
+    if ctx.triggered_id in ["qpu_selection", "spins", "coupling_strength"]:
+        kz_data = []
+
+    fig = plot_kink_densities_bg(
+        graph_selection,
+        [2, 350],
+        J,
+        schedule_filename,
+        kz_data,
+    )
+    return fig, kz_data
+
+
+@app.callback(
+    Output("kink-v-noise-graph", "figure"),
+    Output("kink-v-anneal-graph", "figure"),
+    Output("coupling_data", "data"),  # store data using dcc
+    Output("zne_estimates", "data"),  # update zne_estimates
+    inputs=[
+        Input("quench_schedule_filename", "children"),
+        Input("spins", "value"),
+    ],
+)
+def load_new_graphs_kz_nm(schedule_filename, spins):
+    """Initiates KZ Noise Mitigation graphs on page load and when settings change."""
+    time_range = [2, 1500]
+
+    if not schedule_filename:
+        schedule_filename = "FALLBACK_SCHEDULE.csv"
+
+    n = theoretical_kink_density(time_range, J_BASELINE, schedule_filename)
+
+    fig_noise = kink_v_noise_init_graph(n)
+    fig_anneal = kink_v_anneal_init_graph(time_range, n)
+
+    return fig_noise, fig_anneal, {}, {}
+
+
+@app.callback(
+    Output("spin-orientation-graph", "figure"),
     inputs=[
         Input("spins", "value"),
         Input("job_submit_state", "children"),
@@ -593,13 +637,13 @@ def submit_job(
 
     # ta_multiplier should be 1, unless (withNoiseMitigation and [J or schedule]) changes,
     # shouldn't change for MockSampler. In which case recalculate as
-    # ta_multiplier=calclambda_(coupling_strength, schedule, J_baseline=-1.8) as a function of the
+    # ta_multiplier=calclambda_(coupling_strength, schedule) as a function of the
     # correct schedule
     # State("ta_multiplier", "value") ? Should recalculate when J or schedule changes IFF noise mitigation tab?
     ta_multiplier = 1
 
     if problem_type is ProblemType.KZ_NM.value:
-        ta_multiplier = calclambda_(J, schedule_name=filename, J_baseline=J_BASELINE)
+        ta_multiplier = calclambda_(J, schedule_name=filename)
 
     computation = solver.sample_bqm(
         bqm=bqm_embedded,
@@ -644,7 +688,7 @@ def run_button_click(
     spins,
     qpu_name,
 ) -> RunButtonClickReturn:
-    """Manage simulation: embedding, job submission."""
+    """Start simulation run when button is clicked."""
     if qpu_name == "Diffusion [Classical]":
         return RunButtonClickReturn(
             job_submit_state="SUBMITTED",
@@ -705,7 +749,6 @@ def simulate(
     """Manage simulation: embedding, job submission."""
 
     if job_submit_state == "EMBEDDING":
-
         try:
             embedding = find_one_to_one_embedding(spins, qpus[qpu_name].edges)
             if embedding:
@@ -779,4 +822,4 @@ def toggle_modal(trigger, is_open):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=DEBUG)
