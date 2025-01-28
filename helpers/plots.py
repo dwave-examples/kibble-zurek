@@ -15,6 +15,7 @@
 from demo_configs import J_OPTIONS
 import numpy as np
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 
 from helpers.kz_calcs import theoretical_kink_density
@@ -31,31 +32,22 @@ __all__ = [
     "plot_ze_estimates",
 ]
 
+ta_values = [5, 10, 20, 40, 80, 160, 320, 640, 1280]
+
+colorscale = "Portland"
+colors_ta = px.colors.sample_colorscale(
+    colorscale, [n / (len(ta_values) - 1) for n in range(len(ta_values))]
+)
+
 ta_color_theme = {
-    5: "#1F77B4",  # Dark Blue
-    10: "#FF7F0E",  # Dark Orange
-    20: "#2CA02C",  # Dark Green
-    40: "#949494",  # Grey
-    80: "#9467BD",  # Dark Purple
-    160: "#8C564B",  # Brown
-    320: "#E377C2",  # Dark Pink
-    640: "#17BECF",  # Teal
-    1280: "#BCBD22",  # Olive Green
+    ta_value: colors_ta[len(ta_values) - i - 1] for i, ta_value in enumerate(ta_values)
 }
 
-palette = [
-    "#1F77B4",  # Dark Blue
-    "#FF7F0E",  # Dark Orange
-    "#E377C2",  # Dark Pink
-    "#2CA02C",  # Dark Green
-    "#949494",  # Grey
-    "#9467BD",  # Dark Purple
-    "#8C564B",  # Brown
-    "#17BECF",  # Teal
-] * (len(J_OPTIONS) // 8 + 1)
+colors_coupling = px.colors.sample_colorscale(
+    colorscale, [n / (len(J_OPTIONS) - 1) for n in range(len(J_OPTIONS))]
+)
 
-coupling_color_theme = {j: palette[i] for i, j in enumerate(J_OPTIONS)}
-coupling_label = {j: False for j in J_OPTIONS}
+coupling_color_theme = {j: colors_coupling[i] for i, j in enumerate(J_OPTIONS)}
 
 def add_conherent_thermalized_labels(fig, time_range, n):
     """Adds Conherent and Thermalized annotations to a Plotly fig."""
@@ -98,6 +90,7 @@ def plot_predicted_area(time_range, n):
         yaxis="y1",
         line_color="black",
         line_width=1,
+        legendrank=-1,
     )
 
     predicted_minus = go.Scatter(
@@ -427,6 +420,7 @@ def plot_kink_density(
                 mode="markers",
                 name=f"Anneal Time: {anneal_time} ns",
                 showlegend=True,
+                legendrank=anneal_time,
                 marker=dict(
                     size=10,
                     color=color,
@@ -450,9 +444,6 @@ def plot_kink_density(
 
     color = coupling_color_theme[J] if display == "kink_density" else "black"
 
-    legend = not coupling_label[J]
-    coupling_label[J] = True
-
     fig.add_trace(
         go.Scatter(
             x=[anneal_time],
@@ -461,7 +452,8 @@ def plot_kink_density(
             yaxis="y1",
             mode="markers",
             name=f"Coupling Strength: {J}",
-            showlegend=legend,
+            showlegend=True,
+            legendrank=J_OPTIONS.index(J),
             marker=dict(
                 size=10,
                 color=color,
@@ -469,6 +461,13 @@ def plot_kink_density(
             ),
         )
     )
+
+    # Remove duplicate legend values
+    names = set()
+    fig.for_each_trace(
+        lambda trace:
+            trace.update(showlegend=False)
+            if (trace.name in names) else names.add(trace.name))
 
     return fig
 

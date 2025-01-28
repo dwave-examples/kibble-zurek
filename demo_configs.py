@@ -16,7 +16,7 @@
 
 THUMBNAIL = "assets/dwave_logo.png"
 
-DEBUG = True
+DEBUG = False
 
 APP_TITLE = "Coherent Annealing"
 MAIN_HEADER = "Coherent Annealing: KZ Simulation"
