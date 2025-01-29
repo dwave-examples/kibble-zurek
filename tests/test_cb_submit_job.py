@@ -83,10 +83,9 @@ def test_job_submission(
             embeddings_cached=json_embeddings_file,
             problem_type=0,
             filename="FALLBACK_SCHEDULE.csv",
-            initial_warning=False,
         )
 
     ctx = copy_context()
     output = ctx.run(run_callback)
 
-    assert output == (1234, False, False, 0)
+    assert output == (1234, 0)

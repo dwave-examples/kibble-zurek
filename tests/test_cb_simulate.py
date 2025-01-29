@@ -37,7 +37,7 @@ def test_simulate_button_press(spins_val, cached_embedding_lengths_val, submit_s
             AttributeDict(**{"triggered_inputs": [{"prop_id": "btn_simulate.n_clicks"}]})
         )
 
-        return run_button_click(1, cached_embedding_lengths_val, spins_val, "Advantage_system4.3")
+        return run_button_click(1, cached_embedding_lengths_val, spins_val)
 
     ctx = copy_context()
 

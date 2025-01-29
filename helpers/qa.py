@@ -80,10 +80,6 @@ def get_job_status(client, job_id, job_submit_time):
     Returns:
         Embedding, as a dict of format ``{spin: [qubit]}``.
     """
-
-    if '"type": "SampleSet"' in job_id and job_submit_time == "SA":
-        return "COMPLETED"
-
     p = Problems.from_config(client.config)
 
     try:

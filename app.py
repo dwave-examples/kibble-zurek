@@ -35,7 +35,6 @@ from demo_configs import (
     MAIN_HEADER,
     MAIN_HEADER_NM,
     THUMBNAIL,
-    USE_CLASSICAL,
 )
 from helpers.kz_calcs import *
 from helpers.layouts_cards import *
@@ -43,7 +42,6 @@ from helpers.layouts_components import *
 from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips_kz, tool_tips_kz_nm
-from mock_kz_sampler import MockKibbleZurekSampler
 from src.demo_enums import ProblemType
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -63,11 +61,6 @@ except Exception:
     client = None
     init_job_status = "NO SOLVER"
 
-# Load base coupling strength and user configuration for mock sampler
-if USE_CLASSICAL:
-    qpus["Diffusion [Classical]"] = MockKibbleZurekSampler(
-        topology_type="pegasus", topology_shape=[16]
-    )
 
 # Define the Navbar with two tabs
 navbar = dbc.Navbar(
@@ -127,7 +120,6 @@ app.layout = html.Div(
         dcc.Store(id="coupling_data", data={}),  # KZ NM plot points
         dcc.Store(id="zne_estimates", data={}),  # store zero noise extrapolation points
         dcc.Store(id="modal_trigger", data=False),
-        dcc.Store(id="initial_warning", data=False),
         dcc.Store(id="kz_data", data=[]),  # KZ plot point
         dcc.Store(id="selected-problem"),
         dcc.Store(id="job_submit_time"),
@@ -172,21 +164,6 @@ app.layout = html.Div(
                                 ),
                             ],
                             id="error-modal",
-                            is_open=False,
-                        ),
-                        dbc.Modal(
-                            [
-                                dbc.ModalHeader(
-                                    dbc.ModalTitle(
-                                        "Warning", style={"color": "orange", "fontWeight": "bold"}
-                                    )
-                                ),
-                                dbc.ModalBody(
-                                    "The Classical [diffusion] option executes a Markov Chain method locally for purposes of testing the demo interface. Kinks diffuse to annihilate, but are also created/destroyed by thermal fluctuations.  The number of updates performed is set proportional to the annealing time. In the limit of no thermal noise, kinks diffuse to eliminate producing a power law, this process produces a power-law but for reasons independent of the Kibble-Zurek mechanism. In the noise mitigation demo we fit the impact of thermal fluctuations with a mixture of exponentials, by contrast with the quadratic fit appropriate to quantum dynamics.",
-                                    style={"color": "black", "fontSize": "16px"},
-                                ),
-                            ],
-                            id="warning-modal",
                             is_open=False,
                         ),
                     ],
@@ -333,10 +310,6 @@ def load_cached_embeddings(qpu_name):
 
     if qpu_name:
         for filename in [file for file in os.listdir("helpers") if ".json" in file and "emb_" in file]:
-
-            if qpu_name == "Diffusion [Classical]":
-                qpu_name = "Advantage_system6.4"
-
             if qpu_name.split(".")[0] in filename:
                 with open(f"helpers/{filename}", "r") as fp:
                     embeddings_cached = json.load(fp)
@@ -450,7 +423,7 @@ def add_graph_point_kz_nm(
 
     # Calculate lambda (previously kappa)
     # Added _ to avoid keyword restriction
-    lambda_ = calclambda_(J=J, qpu_name=qpu_name, schedule_name=schedule_filename)
+    lambda_ = calclambda_(J=J, schedule_name=schedule_filename)
 
     fig_noise = plot_kink_density("coupling", figure_noise, kink_density, ta, J, lambda_)
     fig_anneal = plot_kink_density("kink_density", figure_anneal, kink_density, ta, J, lambda_)
@@ -576,15 +549,11 @@ class SubmitJobReturn(NamedTuple):
     """Return type for the ``submit_job`` callback function."""
 
     job_id: str = dash.no_update
-    initial_warning: bool = False
-    warning_modal_open: bool = False
     wd_job_n_intervals: int = 0
 
 
 @app.callback(
     Output("job_id", "data"),
-    Output("initial_warning", "data"),
-    Output("warning-modal", "is_open"),
     Output("wd_job", "n_intervals"),
     inputs=[
         Input("job_submit_time", "data"),
@@ -595,7 +564,6 @@ class SubmitJobReturn(NamedTuple):
         State("embeddings_cached", "data"),
         State("selected-problem", "data"),
         State("quench_schedule_filename", "children"),
-        State("initial_warning", "data"),
     ],
     prevent_initial_call=True,
 )
@@ -608,7 +576,6 @@ def submit_job(
     embeddings_cached,
     problem_type,
     filename,
-    initial_warning,
 ) -> SubmitJobReturn:
     """Submit job and provide job ID."""
 
@@ -619,19 +586,6 @@ def submit_job(
     embeddings_cached = json_to_dict(embeddings_cached)
     embedding = embeddings_cached[spins]
     annealing_time = ta_ns / 1000
-
-    if qpu_name == "Diffusion [Classical]":
-        bqm_embedded = embed_bqm(bqm, embedding, qpus["Diffusion [Classical]"].adjacency)
-
-        sampleset = qpus["Diffusion [Classical]"].sample(
-            bqm_embedded, annealing_time=annealing_time
-        )
-
-        return SubmitJobReturn(
-            job_id=json.dumps(sampleset.to_serializable()),
-            initial_warning=True,
-            warning_modal_open=not initial_warning,
-        )
 
     bqm_embedded = embed_bqm(bqm, embedding, DWaveSampler(solver=solver.name).adjacency)
 
@@ -678,7 +632,6 @@ class RunButtonClickReturn(NamedTuple):
         Input("btn_simulate", "n_clicks"),
         State("embedding_is_cached", "children"),
         State("spins", "value"),
-        State("qpu_selection", "value"),
     ],
     prevent_initial_call=True,
 )
@@ -686,15 +639,8 @@ def run_button_click(
     run_btn_click,
     cached_embeddings,
     spins,
-    qpu_name,
 ) -> RunButtonClickReturn:
     """Start simulation run when button is clicked."""
-    if qpu_name == "Diffusion [Classical]":
-        return RunButtonClickReturn(
-            job_submit_state="SUBMITTED",
-            job_submit_time="SA",  # Hack to fix switch from SA to QPU
-        )
-
     if str(spins) in cached_embeddings.split(", "):  # If we have a cached embedding
         return RunButtonClickReturn(
             job_submit_state="SUBMITTED",

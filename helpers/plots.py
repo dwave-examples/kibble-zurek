@@ -621,7 +621,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, ta_str):
     y_func_x = fitted_function(
         x,
         y,
-        method="mixture_of_exponentials" if qpu_name == "Diffusion [Classical]" else "pure_quadratic",
+        method="pure_quadratic",
     )
 
     if y_func_x:

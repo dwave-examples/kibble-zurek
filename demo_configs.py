@@ -32,7 +32,6 @@ plotted, with -1.8 representing the highest energy scale corresponding to the
 lowest noise level.
 """
 
-USE_CLASSICAL = True
 J_BASELINE = -1.8
 J_OPTIONS = [-1.8, -1.6, -1.4, -1.2, -1, -0.9, -0.8, -0.7]
 

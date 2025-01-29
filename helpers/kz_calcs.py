@@ -92,7 +92,7 @@ def calc_kappa(J):
     return abs(J_BASELINE / J)
 
 
-def calclambda_(J, *, qpu_name=None, schedule_name=None):
+def calclambda_(J, *, schedule_name=None):
     """Time rescaling factor (relative to J_BASELINE)
 
     Rate through the transition is modified non-linearly by the
@@ -100,11 +100,6 @@ def calclambda_(J, *, qpu_name=None, schedule_name=None):
     more slowly through the critical region, the ratio of timescales is > 1.
     See "Quantum error mitigation in quantum annealing" usage.
     """
-    if qpu_name == "Diffusion [Classical]":
-        # Fallback, assume ideal linear schedule
-        kappa = calc_kappa(J, J_BASELINE)
-        return kappa
-
     b_ref = theoretical_kink_density_prefactor(J_BASELINE, schedule_name)
     b = theoretical_kink_density_prefactor(J, schedule_name)
 
