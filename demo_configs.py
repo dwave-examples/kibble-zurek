@@ -26,10 +26,11 @@ of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
 """
 MAIN_HEADER_NM = "Coherent Annealing: Zero-Noise Extrapolation"
 DESCRIPTION_NM = """\
-Simulate zero-temperature and zero-time extrapolations on a quantum computer using
-the Kibble-Zurek mechanism. Fitting occurs once three or more data points are
-plotted, with -1.8 representing the highest energy scale corresponding to the
-lowest noise level.
+Owing to thermal noise, coupled chains depart from closed system dynamics
+(Kibble-Zurek power law 1/2 scaling) for longer quench duration. Experiments at smaller
+coupling strength allow for the modelling of higher noise environments. We can model at
+a range of coupilng strengths (noise levels), and extrapolate towards the noise-free regime;
+thereby improving agreement with theory (closed system dynamics) to larger quench durations.
 """
 
 J_BASELINE = -1.8
