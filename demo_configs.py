@@ -19,12 +19,12 @@ THUMBNAIL = "assets/dwave_logo.png"
 DEBUG = False
 
 APP_TITLE = "Coherent Annealing"
-MAIN_HEADER = "Coherent Annealing: KZ Simulation"
+MAIN_HEADER = "Kibble-Zurek Simulation"
 DESCRIPTION = """\
 Use a quantum computer to simulate the formation of topological defects in a 1D ring 
 of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
 """
-MAIN_HEADER_NM = "Coherent Annealing: Zero-Noise Extrapolation"
+MAIN_HEADER_NM = "Zero-Noise Extrapolation"
 DESCRIPTION_NM = """\
 Owing to thermal noise, coupled chains depart from closed system dynamics
 (Kibble-Zurek power law 1/2 scaling) for longer quench duration. Experiments at smaller

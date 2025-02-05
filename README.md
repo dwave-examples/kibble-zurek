@@ -196,12 +196,11 @@ the kink density away from the predicted value.
 
 ## <a name="ZNE"></a> Zero-Noise Extrapolation
 
-Zero-Noise Extrapolation (ZNE) is a quantum error mitigation method used for quantum annealing
-as described in this [paper](https://arxiv.org/abs/2311.01306).
+Zero-Noise Extrapolation (ZNE) is a quantum error mitigation method used for quantum
+annealing, as described in [[3]](#3).
 
-A fitting function—quadratic for the Advantage solver and a multi-polynomial for the
-MockDwaveSampler can be used to calculate the theoretical zero-noise point for various coupling
-strengths at the same annealing time.
+A fitting function—quadratic for the Advantage solver can be used to calculate the theoretical
+zero-noise point for various coupling strengths at the same annealing time.
 
 <img src='assets/ZNE_fig2.png' alt='Experimental results' width='400'/>
 
@@ -273,6 +272,10 @@ Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
 <a name="2">[2]</a> King, A.D. et al.
 Computational supremacy in quantum simulation.
 https://arxiv.org/abs/2403.00910
+
+<a name="3">[3]</a> Amin, M.H., King, A.D., Raymond, J. et al.
+Quantum error mitigation in quantum annealing.
+https://arxiv.org/abs/2311.01306
 
 ## License
 

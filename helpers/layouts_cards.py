@@ -126,8 +126,8 @@ def graphs_card():
     return dbc.Card(
         [
             html.Div([
-                *default_graph("Kink Density vs Noise Ratio", "kink-v-noise"),
-                *default_graph("Kink Density vs Annealing Duration", "kink-v-anneal"),
+                *default_graph("Extrapolating Zero-Noise Density", "kink-v-noise"),
+                *default_graph("Measured and Extrapolated Kink Densities", "kink-v-anneal"),
             ], id="kz-nm-graphs", className="display-none"),
             html.Div([
                 *default_graph("Spin States of Qubits in a 1D Ring", "spin-orientation"),

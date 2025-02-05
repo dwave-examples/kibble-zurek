@@ -22,6 +22,6 @@ class ProblemType(Enum):
     @property
     def label(self):
         return {
-            ProblemType.KZ: "Kibble-Zurek Mechanism",
-            ProblemType.KZ_NM: "Kibble-Zurek Mechanism with Noise Mitigation",
+            ProblemType.KZ: "Kibble-Zurek Simulation",
+            ProblemType.KZ_NM: "Zero-Noise Extrapolation",
         }[self]
