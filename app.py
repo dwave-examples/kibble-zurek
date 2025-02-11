@@ -34,6 +34,7 @@ from demo_configs import (
     J_BASELINE,
     MAIN_HEADER,
     MAIN_HEADER_NM,
+    SHOW_TOOLTIPS,
     THUMBNAIL,
 )
 from helpers.kz_calcs import *
@@ -102,6 +103,9 @@ def tooltips(problem_type: Union[ProblemType, int]) -> list[dbc.Tooltip]:
     Args:
         problem_type: Either ProblemType.KZ or ProblemType.KZ_NM.
     """
+    if not SHOW_TOOLTIPS:
+        return []
+
     tool_tips = tool_tips_kz if problem_type is ProblemType.KZ else tool_tips_kz_nm
 
     return [
@@ -185,7 +189,7 @@ app.config["suppress_callback_exceptions"] = True
     Output("kz-graphs", "className"),
     Output("kz-nm-graphs", "className"),
     Output("tooltips", "children"),
-    Output("anneal-duration-dropdown", "children"),
+    Output("quench-duration-dropdown", "children"),
     Output("coupling-strength-slider", "children"),
     Output("main-header", "children"),
     Output("main-description", "children"),
@@ -211,7 +215,7 @@ def update_selected_problem_type(
             KZ_NM (``1`` or ``ProblemType.KZ_NM``).
         graph-radio-options: The radio options for the graph.
         tooltips: The tooltips for the settings form.
-        anneal-duration-dropdown: The duration dropdown setting.
+        quench-duration-dropdown: The duration dropdown setting.
         coupling-strength-slider: The coupling strength slider setting.
         main-header: The main header of the problem in the left column.
         main-description: The description of the problem in the left column.
@@ -232,7 +236,7 @@ def update_selected_problem_type(
         "" if isKZ else "display-none",
         "display-none" if isKZ else "",
         tooltips(problem_type),
-        get_anneal_duration_setting(problem_type),
+        get_quench_duration_setting(problem_type),
         get_coupling_strength_slider(problem_type),
         MAIN_HEADER if isKZ else MAIN_HEADER_NM,
         DESCRIPTION if isKZ else DESCRIPTION_NM,

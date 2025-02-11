@@ -47,8 +47,8 @@ def control_card(solvers={}, init_job_status="READY"):
             html.Div(config_spins),
             html.Label("Coupling Strength (J)"),
             html.Div(get_coupling_strength_slider(ProblemType.KZ), id="coupling-strength-slider"),
-            html.Label("Quench/Anneal Duration [ns]"),
-            html.Div(get_anneal_duration_setting(ProblemType.KZ), id="anneal-duration-dropdown"),
+            html.Label("Quench Duration [ns]"),
+            html.Div(get_quench_duration_setting(ProblemType.KZ), id="quench-duration-dropdown"),
             html.Label("QPU"),
             html.Div(config_qpu_selection(solvers)),
             html.P(

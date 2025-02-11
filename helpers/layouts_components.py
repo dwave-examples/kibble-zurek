@@ -21,7 +21,7 @@ from demo_configs import DEFAULT_QPU, J_OPTIONS
 from src.demo_enums import ProblemType
 
 __all__ = [
-    "get_anneal_duration_setting",
+    "get_quench_duration_setting",
     "get_graph_radio_options",
     "config_spins",
     "get_coupling_strength_slider",
@@ -34,7 +34,7 @@ __all__ = [
 ring_lengths = [512, 1024, 2048]
 
 
-def get_anneal_duration_setting(problem_type):
+def get_quench_duration_setting(problem_type):
     if problem_type is ProblemType.KZ_NM:
         return dcc.Dropdown(
             id="anneal_duration",
