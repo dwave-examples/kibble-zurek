@@ -24,6 +24,8 @@ DESCRIPTION = """\
 Use a quantum computer to simulate the formation of topological defects in a 1D ring 
 of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
 """
+
+# config settings for ZNE tab
 MAIN_HEADER_NM = "Zero-Noise Extrapolation"
 DESCRIPTION_NM = """\
 Statistics of a (target) J=-1.8 chain at quench duration t_target, can be inferred by running at
