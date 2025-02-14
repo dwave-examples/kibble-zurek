@@ -193,6 +193,7 @@ app.config["suppress_callback_exceptions"] = True
     Output("coupling-strength-slider", "children"),
     Output("main-header", "children"),
     Output("main-description", "children"),
+    Output("quench-duration-label", "children"),
     inputs=[
         Input({"type": "problem-type", "index": ALL}, "n_clicks"),
         State("selected-problem", "data"),
@@ -219,6 +220,7 @@ def update_selected_problem_type(
         coupling-strength-slider: The coupling strength slider setting.
         main-header: The main header of the problem in the left column.
         main-description: The description of the problem in the left column.
+        quench-duration-label: The label for the Quench Duration setting.
     """
     if ctx.triggered_id and selected_problem == ctx.triggered_id["index"]:
         raise PreventUpdate
@@ -240,6 +242,7 @@ def update_selected_problem_type(
         get_coupling_strength_slider(problem_type),
         MAIN_HEADER if isKZ else MAIN_HEADER_NM,
         DESCRIPTION if isKZ else DESCRIPTION_NM,
+        "Quench Duration [ns]" if isKZ else "Target Quench Duration [ns]",
     )
 
 

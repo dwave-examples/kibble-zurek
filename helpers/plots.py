@@ -312,7 +312,7 @@ def kink_v_noise_init_graph(n):
         plotly.graph_objs.Figure: A Plotly figure object.
     """
     fig_layout = go.Layout(
-        xaxis3=dict(title="<b>Noise Ratio (-1.8/J)</b>", type="linear", range=[0, 3]),
+        xaxis3=dict(title="<b>Noise ratio (t_{programmed}/t_{target})</b>", type="linear", range=[0, 3]),
         yaxis1=get_kink_density_axis(n),
     )
 
@@ -344,7 +344,7 @@ def kink_v_anneal_init_graph(time_range, n):
     """
     fig_layout = go.Layout(
         xaxis=dict(
-            title="<b>Quench Duration [ns]</b>",
+            title="<b>Target Quench Duration [ns]</b>",
             type="log",
             range=[np.log10(time_range[0] - 1), np.log10(time_range[1] + 10)],
         ),
