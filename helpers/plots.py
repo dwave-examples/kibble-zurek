@@ -306,7 +306,7 @@ def kink_v_noise_init_graph(n):
     """Initiates plot for Kink Density vs Noise Ratio.
 
     Args:
-        n: TODO
+        n: Kink density per anneal time, as a NumPy array.
 
     Returns:
         plotly.graph_objs.Figure: A Plotly figure object.
@@ -337,7 +337,7 @@ def kink_v_anneal_init_graph(time_range, n):
     Args:
         time_range (list of float): A list containing the minimum and maximum
             quench times [min_quench_time, max_quench_time] in nanoseconds.
-        n: TODO
+        n: Kink density per anneal time, as a NumPy array.
 
     Returns:
         plotly.graph_objs.Figure: A Plotly figure object.
