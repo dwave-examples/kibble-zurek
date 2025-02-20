@@ -6,3 +6,86 @@ body {
 .row {
     flex-wrap: nowrap;
 }
+
+.nav-link {
+    cursor: pointer;
+}
+
+.nav-link.active {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-link.active:hover {
+    filter: none;
+    cursor: default;
+}
+
+h1 {
+    font-size: 1.5rem;
+    color: rgb(243, 120, 32);
+}
+
+h3 {
+    font-size: 1.25rem;
+    color: rgb(243, 120, 32);
+    margin: 15px 0 0 15px;
+}
+
+label {
+    color: rgb(3, 184, 255);
+    margin-top: 16px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+p {
+    color: white;
+    font-size: 14px;
+}
+
+.progress {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+#coupling_strength {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
+
+#spins label,
+#graph-selection-radio label {
+    font-size: 13px;
+    margin: 0 0 16px;
+    color: #2A7DE1;
+}
+
+#spins label {
+    color: white;
+}
+
+#spins label:not(:first-child),
+#graph-selection-radio label:not(:first-child) {
+    margin-left: 20px;
+}
+
+#graph-selection-radio {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.form-control {
+    width: auto;
+}
+
+.display-none {
+    display: none;
+}

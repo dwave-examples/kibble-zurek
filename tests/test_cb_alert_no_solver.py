@@ -12,27 +12,28 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import pytest
-
 from contextvars import copy_context
+
+import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from app import alert_no_solver
 
-@pytest.mark.parametrize('input_val, output_val',
-    [(0, True), (1, True), (0, False), (1, False)])
+
+@pytest.mark.parametrize("input_val, output_val", [(0, True), (1, True), (0, False), (1, False)])
 def test_alert_no_solver(mocker, input_val, output_val):
     """Test that a failed cloud-client client is identified."""
 
     if output_val:
-        mocker.patch('app.client', None)
+        mocker.patch("app.client", None)
     else:
-        mocker.patch('app.client', 'dummy')
+        mocker.patch("app.client", "dummy")
 
     def run_callback():
-        context_value.set(AttributeDict(**{'triggered_inputs':
-            [{'prop_id': 'btn_simulate.n_clicks'}]}))
+        context_value.set(
+            AttributeDict(**{"triggered_inputs": [{"prop_id": "btn_simulate.n_clicks"}]})
+        )
 
         return alert_no_solver(input_val)
 
