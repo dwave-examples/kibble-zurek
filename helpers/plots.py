@@ -618,11 +618,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, ta_str):
 
     # Fit a 1st degree polynomial (linear fit)
     # Fancy non-linear function or pure quadratic (see paper) # y = a + b x^2
-    y_func_x = fitted_function(
-        x,
-        y,
-        method="pure_quadratic",
-    )
+    y_func_x = fitted_function(x, y)
 
     if y_func_x:
         zne_estimates[ta_str] = y_func_x(0)
