@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 import dimod
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -53,3 +54,15 @@ def test_format_converter():
     output = json_to_dict(json_embedding)
 
     assert output == {5: {0: [10], 1: [11]}, 512: {0: [10], 1: [11], 2: [12]}}
+
+
+def test_fitted_function():
+    """Test fitted_function."""
+
+    # f(x) = 1+x^2
+    xdata = np.array([0, 2])
+    ydata = np.array([1, 5])
+
+    output = fitted_function(xdata, ydata)
+
+    assert output(1) == pytest.approx(2)

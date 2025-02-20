@@ -31,8 +31,8 @@ DESCRIPTION_NM = """\
 Statistics of a (target) J=-1.8 chain at quench duration t_target, can be inferred by running at
 weaker coupling and longer quench duration (t_programmed). Longer programmed times (at weaker
 coupling) are subject to more noise. When collecting data at several noise levels, an extrapolation
-to a denoised result is possible. At short target time scales, there is weak environmental coupling
-and denoising has little impact. At long target time scales, there is strong environmental coupling
+to a denoised result is possible. At short target quench durations, there is weak environmental coupling
+and denoising has little impact. At long target quench durations, there is strong environmental coupling
 and denoising improves agreement with Kibble-Zurek theory.
 """
 
