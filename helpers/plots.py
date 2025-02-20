@@ -312,7 +312,7 @@ def kink_v_noise_init_graph(n):
         plotly.graph_objs.Figure: A Plotly figure object.
     """
     fig_layout = go.Layout(
-        xaxis3=dict(title="<b>Noise ratio (t_programmed/t_target)</b>", type="linear", range=[0, 3]),
+        xaxis3=dict(title="<b>Noise ratio (t<sub>programmed</sub>/t<sub>target</sub>)</b>", type="linear", range=[0, 3]),
         yaxis1=get_kink_density_axis(n),
     )
 
