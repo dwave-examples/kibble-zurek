@@ -273,9 +273,8 @@ Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
 Computational supremacy in quantum simulation.
 https://arxiv.org/abs/2403.00910
 
-<a name="3">[3]</a> Amin, M.H., King, A.D., Raymond, J. et al.
-Quantum error mitigation in quantum annealing.
-https://arxiv.org/abs/2311.01306
+<a name="3">[3]</a> Raymond, J., Amin, M.H., King, A.D. et al. Quantum error mitigation
+in quantum annealing. _npj Quantum Inf_ 11, 38 (2025). https://doi.org/10.1038/s41534-025-00977-3
 
 ## License
 
