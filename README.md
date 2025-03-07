@@ -98,27 +98,27 @@ average length increases as a function of the square root of the anneal time.
 
 ## <a name="Installation"></a> Installation
 
-You can run this example without installation in cloud-based IDEs that support 
-the [Development Containers specification](https://containers.dev/supporting)
-(aka "devcontainers").
+You can run this example without installation in cloud-based IDEs that support the
+[Development Containers specification](https://containers.dev/supporting) (aka "devcontainers")
+such as GitHub Codespaces.
 
-For development environments that do not support ``devcontainers``, install 
-requirements:
+For development environments that do not support `devcontainers`, install requirements:
 
-    pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
-If you are cloning the repo to your local system, working in a 
-[virtual environment](https://docs.python.org/3/library/venv.html) is 
-recommended.
+If you are cloning the repo to your local system, working in a
+[virtual environment](https://docs.python.org/3/library/venv.html) is recommended.
 
 ## <a name="Usage"></a> Usage
 
-Your development environment should be configured to 
-[access Leap’s Solvers](https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html).
-You can see information about supported IDEs and authorizing access to your 
-Leap account [here](https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html).  
+Your development environment should be configured to access the
+[Leap&trade; quantum cloud service](https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html).
+You can see information about supported IDEs and authorizing access to your Leap account
+[here](https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html).
 
-To run the demo:
+Run the following terminal command to start the Dash application:
 
 ```bash
 python app.py
@@ -126,12 +126,16 @@ python app.py
 
 Access the user interface with your browser at http://127.0.0.1:8050/.
 
-The demo program opens an interface where you can configure 
-problems, submit these problems to a quantum computer, and compare the results
-to the Kibble-Zurek predictions.
+The demo program opens an interface where you can configure problems and submit these problems to
+a solver.
+
+Configuration options can be found in the [demo_configs.py](demo_configs.py) file.
 
 *Hover over an input field to see a description of the input and its range of*
 *supported values.*
+
+<!-- TODO: Add a note about: You can download schedules from
+https://docs.dwavesys.com/docs/latest/doc_physical_properties.html -->
 
 ## <a name="Model-Overview"></a> Model Overview
 
@@ -189,6 +193,17 @@ green lines.
 Note that as you increase the anneal time, you move from the coherent regime 
 and the returned samples are increasingly affected by thermalization, pushing 
 the kink density away from the predicted value.  
+
+## <a name="ZNE"></a> Zero-Noise Extrapolation
+
+Zero-Noise Extrapolation (ZNE) is a quantum error mitigation method used for quantum
+annealing, as described in [[3]](#3).
+
+A fitting function—quadratic for the Advantage solver can be used to calculate the theoretical
+zero-noise point for various coupling strengths at the same annealing time.
+
+<img src='assets/ZNE_fig2.png' alt='Experimental results' width='400'/>
+
 
 ## <a name="Code"></a> Code
 
@@ -257,6 +272,9 @@ Nat. Phys. 18, 1324–1328 (2022). https://doi.org/10.1038/s41567-022-01741-6
 <a name="2">[2]</a> King, A.D. et al.
 Computational supremacy in quantum simulation.
 https://arxiv.org/abs/2403.00910
+
+<a name="3">[3]</a> Raymond, J., Amin, M.H., King, A.D. et al. Quantum error mitigation
+in quantum annealing. _npj Quantum Inf_ 11, 38 (2025). https://doi.org/10.1038/s41534-025-00977-3
 
 ## License
 

@@ -13,53 +13,79 @@
 #    limitations under the License.
 
 from contextvars import copy_context
+
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from app import submit_job
 
-json_embeddings_file = { \
-    "3": {"1": [11], "0": [10], "2": [12]}, \
-    "5": {"1": [11], "0": [10], "2": [12], "3": [13], "4": [14]} }
+json_embeddings_file = {
+    "3": {"1": [11], "0": [10], "2": [12]},
+    "5": {"1": [11], "0": [10], "2": [12], "3": [13], "4": [14]},
+}
 
-class mock_computation():
-    def wait_id(self): 
+
+class mock_computation:
+    def wait_id(self):
         return 1234
 
-class mock_solver():
+
+class mock_solver:
     def __init__(self):
         self.name = "dummy"
+
     def sample_bqm(self, **kwargs):
         return mock_computation()
 
-class mock_qpus():
+
+class mock_qpus:
     def __init__(self):
-        self.solvers = {'Advantage_system88.4': mock_solver()}
+        self.solvers = {"Advantage_system88.4": mock_solver()}
+
     def __getitem__(self, indx):
         return self.solvers[indx]
 
-class dwave_sampler():
+
+class dwave_sampler:
     def __init__(self, solver):
         self.adjacency = {
             10: {11, 12, 13, 14},
             11: {10, 12, 13, 14},
-            12: {10, 11, 13, 14},}
-    
-def test_job_submission(mocker,):
+            12: {10, 11, 13, 14},
+        }
+
+
+def test_job_submission(
+    mocker,
+):
     """Test job submission."""
 
-    mocker.patch('app.qpus', new=mock_qpus())
-    mocker.patch('app.DWaveSampler', new=dwave_sampler)
+    mocker.patch("app.qpus", new=mock_qpus())
+    mocker.patch("app.DWaveSampler", new=dwave_sampler)
 
     def run_callback():
-        context_value.set(AttributeDict(**
-            {'triggered_inputs': [{'prop_id': 'job_submit_time.children'},]}))
+        context_value.set(
+            AttributeDict(
+                **{
+                    "triggered_inputs": [
+                        {"prop_id": "job_submit_time.children"},
+                    ]
+                }
+            )
+        )
 
-        return submit_job('11:45AM', 'Advantage_system88.4', 3, 2.3, 7, json_embeddings_file)
+        return submit_job(
+            job_submit_time="11:45AM",
+            qpu_name="Advantage_system88.4",
+            spins=3,
+            J=2.3,
+            ta_ns=7,
+            embeddings_cached=json_embeddings_file,
+            problem_type=0,
+            filename="FALLBACK_SCHEDULE.csv",
+        )
 
     ctx = copy_context()
     output = ctx.run(run_callback)
-        
-    assert output == (1234)
-    
 
+    assert output == (1234, 0)

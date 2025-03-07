@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import pytest
-
 from contextvars import copy_context
+
+import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
@@ -22,17 +22,22 @@ from app import set_progress_bar
 from helpers.layouts_components import job_bar_display
 
 parametrize_vals = [
-(f'{status}', job_bar_display[status][0], job_bar_display[status][1]) for status in job_bar_display.keys()]
-parametrize_vals.extend([tuple(['BREAK FUNCTION', 'exception', 'exception'])])
+    (f"{status}", job_bar_display[status][0], job_bar_display[status][1])
+    for status in job_bar_display.keys()
+]
+parametrize_vals.extend([tuple(["BREAK FUNCTION", "exception", "exception"])])
 
-@pytest.mark.parametrize('job_submit_state_val, bar_job_status_value, bar_job_status_color',
-parametrize_vals)
+
+@pytest.mark.parametrize(
+    "job_submit_state_val, bar_job_status_value, bar_job_status_color", parametrize_vals
+)
 def test_set_progress_bar(job_submit_state_val, bar_job_status_value, bar_job_status_color):
     """Test job-submission progress bar."""
 
     def run_callback():
-        context_value.set(AttributeDict(**
-            {'triggered_inputs': [{'prop_id': 'job_submit_state.children'}]}))
+        context_value.set(
+            AttributeDict(**{"triggered_inputs": [{"prop_id": "job_submit_state.children"}]})
+        )
 
         return set_progress_bar(job_submit_state_val)
 
@@ -42,4 +47,4 @@ def test_set_progress_bar(job_submit_state_val, bar_job_status_value, bar_job_st
         output = ctx.run(run_callback)
         assert output == (bar_job_status_value, bar_job_status_color)
     except KeyError:
-        assert job_submit_state_val == 'BREAK FUNCTION'
+        assert job_submit_state_val == "BREAK FUNCTION"
