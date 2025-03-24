@@ -5,7 +5,7 @@
 # Coherent Annealing: Kibble-Zurek Simulation on a QPU
 
 A demonstration of using the 
-[fast-anneal protocol](https://docs.dwavesys.com/docs/latest/c_qpu_annealing.html) 
+[fast-anneal protocol](https://docs.dwavequantum.com/en/latest/quantum_research/annealing.html) 
 on a quantum computer to simulate the formation of topological defects 
 in a 1D ring of spins undergoing a phase transition, as described by the 
 [Kibble-Zurek mechanism](https://en.wikipedia.org/wiki/Kibble%E2%80%93Zurek_mechanism).
@@ -114,9 +114,10 @@ If you are cloning the repo to your local system, working in a
 ## <a name="Usage"></a> Usage
 
 Your development environment should be configured to access the
-[Leap&trade; quantum cloud service](https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html).
-You can see information about supported IDEs and authorizing access to your Leap account
-[here](https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html).
+Leap&trade; quantum cloud service. You can see information about supported IDEs
+and authorizing access to your Leap account
+[here](https://docs.dwavequantum.com/en/latest/leap_sapi/dev_env.html) and
+[here](https://docs.dwavequantum.com/en/latest/ocean/sapi_access_basic.html).
 
 Run the following terminal command to start the Dash application:
 
@@ -133,9 +134,6 @@ Configuration options can be found in the [demo_configs.py](demo_configs.py) fil
 
 *Hover over an input field to see a description of the input and its range of*
 *supported values.*
-
-<!-- TODO: Add a note about: You can download schedules from
-https://docs.dwavesys.com/docs/latest/doc_physical_properties.html -->
 
 ## <a name="Model-Overview"></a> Model Overview
 
@@ -194,6 +192,9 @@ Note that as you increase the anneal time, you move from the coherent regime
 and the returned samples are increasingly affected by thermalization, pushing 
 the kink density away from the predicted value.  
 
+You can download schedules from the
+[documentation site](https://docs.dwavequantum.com/en/latest/quantum_research/solver_properties_specific.html)
+
 ## <a name="ZNE"></a> Zero-Noise Extrapolation
 
 Zero-Noise Extrapolation (ZNE) is a quantum error mitigation method used for quantum
@@ -237,7 +238,7 @@ You can find more information in the documentation and comments in those files.
 
 Article [[2]](#2) predicts a characteristic energy scale that is 20% smaller 
 than that of the 
-[published annealing schedule](https://docs.dwavesys.com/docs/latest/doc_physical_properties.html) 
+[published annealing schedule](https://docs.dwavequantum.com/en/latest/quantum_research/solver_properties_specific.html) 
 for quantum computer ``Advantage_system4.1`` used by the Kibble-Zurek calculation
 in the ``theoretical_kink_density()`` function. A comparable discrepancy between 
 the published and spectral-fit schedule is found in [[1]](#1) (see section 
@@ -248,18 +249,18 @@ to the published schedules.
 
 ---
 **Note:** Standard practice for submitting problems to Leap solvers is to use
-a [dwave-system](https://docs.ocean.dwavesys.com/en/stable/docs_system/sdk_index.html)
+a [dwave-system](https://docs.dwavequantum.com/en/latest/ocean/api_ref_system/index.html)
 sampler; for example, you typically use
-[DWaveSampler](https://docs.ocean.dwavesys.com/en/stable/docs_system/reference/samplers.html)
+[DWaveSampler](https://docs.dwavequantum.com/en/latest/ocean/api_ref_samplers/index.html)
 for Ising problems. The code in this example uses the
-[dwave-cloud-client](https://docs.ocean.dwavesys.com/en/stable/docs_cloud/sdk_index.html),
+[dwave-cloud-client](https://docs.dwavequantum.com/en/latest/ocean/api_ref_cloud/index.html),
 which enables finer control over communications with the Solver API (SAPI).
 
 If you are learning to submit problems to Leap solvers, use a ``dwave-system``
 solver, with its higher level of abstraction and thus greater simplicity,
 as demonstrated in most the code examples of the
 [example collection](https://github.com/dwave-examples) and in the
-[Ocean documentation](https://docs.ocean.dwavesys.com/en/stable/index.html).
+[Ocean documentation](https://docs.dwavequantum.com/en/latest/ocean/index.html).
 
 ---
 
