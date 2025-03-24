@@ -21,7 +21,7 @@ predictions.
 * [Usage](#Usage)
 * [Model Overview](#Model-Overview)
 * [Code](#Code)
-* [License](License)
+* [License](#License)
 
 ## <a name="The-Kibble-Zurek-Mechanism"></a> The Kibble-Zurek Mechanism
 
