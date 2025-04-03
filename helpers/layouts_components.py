@@ -147,7 +147,7 @@ model_contents = [
                         """,
                         dcc.Link(
                             children=[html.Div(" Ocean")],
-                            href="https://docs.ocean.dwavesys.com/en/stable/overview/sapi.html",
+                            href="https://docs.dwavequantum.com/en/latest/ocean/sapi_access_basic.html",
                             style={"display": "inline-block"},
                         ),
                         "documentation.",
@@ -159,7 +159,7 @@ model_contents = [
                         "If you are running in an online IDE, see the ",
                         dcc.Link(
                             children=[html.Div("system documentation")],
-                            href="https://docs.dwavesys.com/docs/latest/doc_leap_dev_env.html",
+                            href="https://docs.dwavequantum.com/en/latest/leap_sapi/dev_env.html",
                             style={"display": "inline-block"},
                         ),
                         " on supported IDEs.",
