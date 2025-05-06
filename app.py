@@ -14,6 +14,7 @@
 
 import datetime
 import json
+import logging
 import os
 from typing import NamedTuple, Union
 
@@ -44,6 +45,9 @@ from helpers.plots import *
 from helpers.qa import *
 from helpers.tooltips import tool_tips_kz, tool_tips_kz_nm
 from src.demo_enums import ProblemType
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
