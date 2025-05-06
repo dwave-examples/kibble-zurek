@@ -46,8 +46,9 @@ from helpers.qa import *
 from helpers.tooltips import tool_tips_kz, tool_tips_kz_nm
 from src.demo_enums import ProblemType
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+if not DEBUG:
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.WARNING)
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
