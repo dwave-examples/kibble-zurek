@@ -252,6 +252,19 @@ def update_selected_problem_type(
 
 
 @app.callback(
+    Output("anneal_duration", "className", allow_duplicate=True),
+    Output("btn_simulate", "disabled", allow_duplicate=True),
+    Input("anneal_duration", "value"),
+    prevent_initial_call=True,
+)
+def validate_quench_duration(ta):
+    """Validate quench duration and prevent run if invalid."""
+    invalid = not ta or ta < 5 or ta > 100
+
+    return "error" if invalid else "", invalid
+
+
+@app.callback(
     Output("solver_modal", "is_open"),
     Input("btn_simulate", "n_clicks"),
 )
@@ -468,22 +481,20 @@ def add_graph_point_kz_nm(
     inputs=[
         Input("selected-problem", "data"),
         Input("graph-selection-radio", "value"),
-        Input("qpu_selection", "value"),
+        Input("quench_schedule_filename", "children"),
         Input("coupling_strength", "value"),  # previously input
         Input("spins", "value"),
         Input("anneal_duration", "value"),
-        State("quench_schedule_filename", "children"),
         State("kz_data", "data"),  # get kibble zurek data point
     ],
 )
 def load_new_graph_kz(
     problem_type,
     graph_selection,
-    qpu_name,
+    schedule_filename,
     J,
     spins,
     ta,
-    schedule_filename,
     kz_data,
 ):
     """Initiates graphics for kink density based on theory and QPU samples on page load and when
@@ -491,7 +502,7 @@ def load_new_graph_kz(
     if problem_type is ProblemType.KZ_NM.value:
         raise PreventUpdate
 
-    if ctx.triggered_id in ["qpu_selection", "spins", "coupling_strength"]:
+    if ctx.triggered_id in ["quench_schedule_filename", "spins", "coupling_strength"]:
         kz_data = []
 
     fig = plot_kink_densities_bg(
@@ -512,10 +523,14 @@ def load_new_graph_kz(
     inputs=[
         Input("quench_schedule_filename", "children"),
         Input("spins", "value"),
+        Input("selected-problem", "data"),
     ],
 )
-def load_new_graphs_kz_nm(schedule_filename, spins):
+def load_new_graphs_kz_nm(schedule_filename, spins, problem_type):
     """Initiates KZ Noise Mitigation graphs on page load and when settings change."""
+    if problem_type is ProblemType.KZ.value:
+        raise PreventUpdate
+
     time_range = [2, 1500]
 
     if not schedule_filename:
