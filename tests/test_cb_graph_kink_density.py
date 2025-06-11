@@ -14,6 +14,7 @@
 
 from contextvars import copy_context
 
+from src.demo_enums import ProblemType
 import dimod
 import numpy as np
 import plotly
@@ -58,15 +59,15 @@ samples = dimod.as_samples(
 sampleset = dimod.SampleSet.from_samples(samples, "SPIN", 0)
 
 parametrize_vals = [
-    ("kz_graph_display", "both", "", 0),
-    ("kz_graph_display", "kink_density", "", 0),
-    ("kz_graph_display", "schedule", "", 0),
-    ("coupling_strength", "schedule", "", 0),
-    ("quench_schedule_filename", "schedule", "", 0),
-    ("job_submit_state", "", "SUBMITTED", 1),
-    ("job_submit_state", "", "PENDING", 1),
-    ("job_submit_state", "", "COMPLETED", 0),
-    ("job_submit_state", "", "COMPLETED", 1),
+    ("kz_graph_display", "both", "", ProblemType.KZ.value),
+    ("kz_graph_display", "kink_density", "", ProblemType.KZ.value),
+    ("kz_graph_display", "schedule", "", ProblemType.KZ.value),
+    ("coupling_strength", "schedule", "", ProblemType.KZ.value),
+    ("quench_schedule_filename", "schedule", "", ProblemType.KZ.value),
+    ("job_submit_state", "", "SUBMITTED", ProblemType.KZ_NM.value),
+    ("job_submit_state", "", "PENDING", ProblemType.KZ_NM.value),
+    ("job_submit_state", "", "COMPLETED", ProblemType.KZ.value),
+    ("job_submit_state", "", "COMPLETED", ProblemType.KZ_NM.value),
 ]
 
 
@@ -104,7 +105,7 @@ def test_add_graph_point_kz(mocker, trigger_val, kz_graph_display_val, job_submi
 
     ctx = copy_context()
 
-    if job_submit_state_val == "COMPLETED" and problem_type == 0:
+    if job_submit_state_val == "COMPLETED" and problem_type == ProblemType.KZ.value:
         output = ctx.run(run_callback)
 
         assert type(output[0]) == plotly.graph_objects.Figure
@@ -151,7 +152,7 @@ def test_add_graph_point_kz_nm(mocker, trigger_val, kz_graph_display_val, job_su
 
     ctx = copy_context()
 
-    if job_submit_state_val == "COMPLETED" and problem_type == 1:
+    if job_submit_state_val == "COMPLETED" and problem_type == ProblemType.KZ_NM.value:
         output = ctx.run(run_callback)
 
         assert type(output[0]) == plotly.graph_objects.Figure
@@ -186,17 +187,16 @@ def test_load_new_graph_kz(mocker, trigger_val, kz_graph_display_val, job_submit
         return load_new_graph_kz(
             problem_type=problem_type,
             graph_selection=kz_graph_display_val,
-            qpu_name=None,
+            schedule_filename="FALLBACK_SCHEDULE.csv",
             J=-1.4,
             spins=5,
             ta=10,
-            schedule_filename="FALLBACK_SCHEDULE.csv",
             kz_data=[],
         )
 
     ctx = copy_context()
 
-    if problem_type == 0:
+    if problem_type == ProblemType.KZ.value:
         output = ctx.run(run_callback)
 
         assert type(output[0]) == plotly.graph_objects.Figure
@@ -228,12 +228,18 @@ def test_load_new_graphs_kz_nm(mocker, trigger_val, kz_graph_display_val, job_su
         return load_new_graphs_kz_nm(
             schedule_filename="FALLBACK_SCHEDULE.csv",
             spins=5,
+            problem_type=problem_type,
         )
 
     ctx = copy_context()
-    output = ctx.run(run_callback)
 
-    assert type(output[0]) == plotly.graph_objects.Figure
-    assert type(output[1]) == plotly.graph_objects.Figure
-    assert output[2] == {}
-    assert output[3] == {}
+    if problem_type == ProblemType.KZ_NM.value:
+        output = ctx.run(run_callback)
+
+        assert type(output[0]) == plotly.graph_objects.Figure
+        assert type(output[1]) == plotly.graph_objects.Figure
+        assert output[2] == {}
+        assert output[3] == {}
+    else:
+        with pytest.raises(PreventUpdate):
+            ctx.run(run_callback)
