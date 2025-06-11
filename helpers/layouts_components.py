@@ -112,11 +112,18 @@ def get_coupling_strength_slider(problem_type):
 
 
 def config_qpu_selection(solvers):
+    default_value = "No Leap Access"
+
+    if DEFAULT_QPU in solvers:
+        default_value = DEFAULT_QPU
+    elif len(solvers):
+        default_value = list(solvers.keys())[0]
+
     return dcc.Dropdown(
         id="qpu_selection",
         options=[{"label": qpu_name, "value": qpu_name} for qpu_name in solvers],
         placeholder="Select a quantum computer",
-        value=DEFAULT_QPU if DEFAULT_QPU in solvers else list(solvers.keys())[0],
+        value=default_value,
         clearable=False,
     )
 
