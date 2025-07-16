@@ -46,6 +46,6 @@ DESCRIPTION_NM = [
 J_BASELINE = -1.8
 J_OPTIONS = [-1.8, -1.6, -1.4, -1.2, -1, -0.9, -0.8, -0.7]
 
-DEFAULT_QPU = "Advantage2_system1.3"  # If not available, the first returned will be default
+DEFAULT_QPU = "Advantage2_system1.4"  # If not available, the first returned will be default
 
 SHOW_TOOLTIPS = False  # Determines whether tooltips are on or off
