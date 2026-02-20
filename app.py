@@ -795,4 +795,4 @@ def toggle_modal(trigger, is_open):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=DEBUG)
+    app.run(debug=DEBUG)
