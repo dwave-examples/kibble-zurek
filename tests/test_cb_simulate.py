@@ -20,7 +20,7 @@ from dash import no_update
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import SimulateReturn, run_button_click, simulate
+from demo_callbacks import SimulateReturn, run_button_click, simulate
 
 before_test = datetime.datetime.now().strftime("%c")
 parametrize_vals = [(512, "512, 1024", "SUBMITTED"), (2048, "512, 1024", "EMBEDDING")]

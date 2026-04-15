@@ -17,7 +17,7 @@ from contextvars import copy_context
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import submit_job
+from demo_callbacks import submit_job
 
 json_embeddings_file = {
     "3": {"1": [11], "0": [10], "2": [12]},

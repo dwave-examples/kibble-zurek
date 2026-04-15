@@ -21,7 +21,7 @@ from dash._callback_context import context_value
 from dash._utils import AttributeDict
 from dash.exceptions import PreventUpdate
 
-from app import display_graphics_spin_ring
+from demo_callbacks import display_graphics_spin_ring
 
 json_embeddings_file = {
     "512": {"1": [11], "0": [10], "2": [12]},

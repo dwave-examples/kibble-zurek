@@ -14,7 +14,7 @@ This example employs quantum annealing in the coherent regime of a D-Wave
 quantum processing unit (QPU), producing samples that align with the theoretical
 predictions.
 
-![Simulation vs Predicted](assets/simulation_vs_predicted.png)
+![Simulation vs Predicted](static/simulation_vs_predicted.png)
 
 * [The Kibble-Zurek Mechanism](#The-Kibble-Zurek-Mechanism)
 * [Installation](#Installation)
@@ -37,7 +37,7 @@ Some macroscopic phase transitions are familiar: a changing temperature will
 transition water (a liquid) to ice (a solid); it can also change the magnetic
 properties of metal.
 
-<img src='assets/phase_transitions.png' alt='Phase Transitions' width='500'/>
+<img src='static/phase_transitions.png' alt='Phase Transitions' width='500'/>
 
 In both cases, the material transitions between **disorderly** and **orderly**
 states:
@@ -53,7 +53,7 @@ Kibble's original formulation explained the transition of the hot post-Big Bang
 universe from highly symmetric to its current state, with its non-uniform
 distribution of galaxies etc.
 
-<img src='assets/universe.png' alt='Big bang to Current Universe' width='500'/>
+<img src='static/universe.png' alt='Big bang to Current Universe' width='500'/>
 
 Zurek expanded the idea to condensed matter and quantum phase transitions.
 
@@ -65,7 +65,7 @@ from a state of spins in superposition to a state that has alternating segments
 of up/down spins. Switches from one segment to the next are called "kinks" (an
 example of topological defects).
 
-<img src='assets/1D_kinks.jpg' alt='1D Spin Ring Kinks' width='400'/>
+<img src='static/1D_kinks.jpg' alt='1D Spin Ring Kinks' width='400'/>
 
 ### Transition Rate
 
@@ -79,14 +79,14 @@ Consider two extreme cases:
     At the end of a sufficiently slow anneal, the system ends in one of its two
     ground states: all spins up or all spins down.
 
-<img src='assets/1D_adiabatic.jpg' alt='1D Spin Ring Adiabatic' width='400'/>
+<img src='static/1D_adiabatic.jpg' alt='1D Spin Ring Adiabatic' width='400'/>
 
 2.  **Instantaneous quench**.
 
     Each spin independently orients up or down (in an unbiased system, both
     outcomes have equal probablility).
 
-<img src='assets/1D_instantaneous.jpg' alt='1D Spin Ring Instantaneous' width='400'/>
+<img src='static/1D_instantaneous.jpg' alt='1D Spin Ring Instantaneous' width='400'/>
 
 In between these two extremes, for fast quenches, the system ends in a state
 of alternating segments of up/down spins. The average length of these segments
@@ -94,7 +94,7 @@ increases with the quench/anneal time. For this example of a quantum phase
 transition (a 1D ring of spins), the Kibble-Zurek mechanism predicts that the
 average length increases as a function of the square root of the anneal time.
 
-<img src='assets/1D_finite.jpg' alt='1D Spin Ring Finite' width='400'/>
+<img src='static/1D_finite.jpg' alt='1D Spin Ring Finite' width='400'/>
 
 ## <a name="Installation"></a> Installation
 
@@ -159,10 +159,10 @@ on the quantum computer is done as follows.
 To calculate kink density from samples returned from the quantum computer,
 define a *kink operator*,
 
-![formula kink operator](assets/formula_kink_operator.png),
+![formula kink operator](static/formula_kink_operator.png),
 
 where J is the coupling strength between qubits and
-![formula sigma](assets/formula_sigma.png) is the Pauli operator on the i-th
+![formula sigma](static/formula_sigma.png) is the Pauli operator on the i-th
 qubit. Put simply, for any sample returned from the quantum computer, the
 operator gives 1 if there is a kink between qubits i and i+1 (i.e., if the
 pair of qubits at the end of the anneal have different values for negative J
@@ -171,7 +171,7 @@ the operator gives 0.
 
 Define a *kink-density operator* as,
 
-![formula kink densityoperator](assets/formula_kink_density_operator.png),
+![formula kink densityoperator](static/formula_kink_density_operator.png),
 
 where L is the length of the chain of spins (the number of qubits coupled
 together).
@@ -189,7 +189,7 @@ coupling and fast anneals, the kink density is unaffected by temperature and
 agrees quantitatively with closed-system coherent quantum theory, shown as dotted
 green lines.
 
-<img src='assets/experimental_results.png' alt='Experimental results' width='400'/>
+<img src='static/experimental_results.png' alt='Experimental results' width='400'/>
 
 Note that as you increase the anneal time, you move from the coherent regime
 and the returned samples are increasingly affected by thermalization, pushing
@@ -206,7 +206,7 @@ annealing, as described in [[3]](#3).
 A fitting function—quadratic for the Advantage solver can be used to calculate the theoretical
 zero-noise point for various coupling strengths at the same annealing time.
 
-<img src='assets/ZNE_fig2.png' alt='Experimental results' width='400'/>
+<img src='static/ZNE_fig2.png' alt='Experimental results' width='400'/>
 
 
 ## <a name="Code"></a> Code

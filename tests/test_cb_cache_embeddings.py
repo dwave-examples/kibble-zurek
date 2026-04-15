@@ -19,7 +19,7 @@ import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import load_cached_embeddings
+from demo_callbacks import load_cached_embeddings
 
 embedding_filenames = [
     "emb_Advantage_system4.1.json",

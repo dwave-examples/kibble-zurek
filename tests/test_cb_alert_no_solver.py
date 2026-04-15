@@ -18,7 +18,7 @@ import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import alert_no_solver
+from demo_callbacks import alert_no_solver
 
 
 @pytest.mark.parametrize("input_val, output_val", [(0, True), (1, True), (0, False), (1, False)])

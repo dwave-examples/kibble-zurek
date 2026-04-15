@@ -23,7 +23,7 @@ from dash._callback_context import context_value
 from dash._utils import AttributeDict
 from dash.exceptions import PreventUpdate
 
-from app import add_graph_point_kz, add_graph_point_kz_nm, load_new_graph_kz, load_new_graphs_kz_nm
+from demo_callbacks import add_graph_point_kz, add_graph_point_kz_nm, load_new_graph_kz, load_new_graphs_kz_nm
 
 json_embeddings_file = {
     "512": {"1": [11], "0": [10], "2": [12]},

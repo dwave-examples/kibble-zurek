@@ -19,7 +19,7 @@ from dash._callback_context import context_value
 from dash._utils import AttributeDict
 from dash.exceptions import PreventUpdate
 
-from app import disable_buttons
+from demo_callbacks import disable_buttons
 from helpers.layouts_components import ring_lengths
 
 parametrize_names = [

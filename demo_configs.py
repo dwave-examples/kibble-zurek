@@ -16,9 +16,7 @@
 
 from dash import html
 
-THUMBNAIL = "assets/dwave_logo.png"
-
-DEBUG = False
+THUMBNAIL = "static/dwave_logo.svg"
 
 APP_TITLE = "Coherent Annealing"
 MAIN_HEADER = "Kibble-Zurek Simulation"
@@ -49,3 +47,32 @@ J_OPTIONS = [-1.8, -1.6, -1.4, -1.2, -1, -0.9, -0.8, -0.7]
 DEFAULT_QPU = "Advantage2_system1"  # If not available, the first returned will be default
 
 SHOW_TOOLTIPS = False  # Determines whether tooltips are on or off
+
+RING_LENGTHS = [512, 1024, 2048]
+
+JOB_BAR_DISPLAY = {
+    "READY": [0, "link"],
+    "EMBEDDING": [20, "warning"],
+    "NO SOLVER": [100, "danger"],
+    "SUBMITTED": [40, "info"],
+    "PENDING": [60, "primary"],
+    "IN_PROGRESS": [85, "#2A7DE1"],
+    "COMPLETED": [100, "success"],
+    "CANCELLED": [100, "light"],
+    "FAILED": [100, "danger"],
+}
+
+TOOL_TIPS_KZ_NM = {
+    "coupling_strength": "Coupling strength between spins in the ferromagnetic ring.",
+    "qpu_selection": "Quantum computers available to your account/project token.",
+    "quench_schedule_filename": """The fast-anneal schedule for the selected quantum computer.
+        If none exists, one from a different quantum computer is used (expect inaccuracies).""",
+}
+
+TOOL_TIPS_KZ = {
+    "coupling_strength": """Coupling strength between spins in the ring.
+        Range of -2 (ferromagnetic) to +1 (anti-ferromagnetic).""",
+    "qpu_selection": "Quantum computers available to your account/project token.",
+    "quench_schedule_filename": """The fast-anneal schedule for the selected quantum computer.
+        If none exists, one from a different quantum computer is used (expect inaccuracies).""",
+}

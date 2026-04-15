@@ -18,7 +18,7 @@ import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import set_schedule
+from demo_callbacks import set_schedule
 
 all_schedules = [
     "09-1263A-B_Advantage_system4.1_fast_annealing_schedule.csv",

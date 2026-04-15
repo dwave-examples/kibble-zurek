@@ -564,7 +564,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
 
     fig.add_layout_image(
         dict(
-            source="assets/spin_states.png",
+            source="static/spin_states.png",
             xref="paper",
             yref="paper",
             x=0.95,
