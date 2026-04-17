@@ -27,19 +27,11 @@ of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
 
 # config settings for ZNE tab
 MAIN_HEADER_NM = "Zero-Noise Extrapolation"
-DESCRIPTION_NM = [
-    "Statistics of a (target) J=-1.8 chain at quench duration t",
-    html.Sub("target"),
-    ", can be inferred by running at weaker coupling and longer quench duration (t",
-    html.Sub("programmed"),
-    """). Longer programmed times (at weaker
-    coupling) are subject to more noise. When collecting data at several noise levels,
-    an extrapolation to a denoised result is possible. At short target quench durations,
-    there is weak environmental coupling and denoising has little impact. At long target
-    quench durations, there is strong environmental coupling and denoising improves
-    agreement with Kibble-Zurek theory.
+DESCRIPTION_NM = """
+    Statistics of a target J=-1.8 chain can be inferred by running with weaker
+    coupling and longer quench duration, however, these runs are subject to more noise.
+    Extrapolation to a denoised result is possible by collecting data at several noise levels.
     """
-]
 
 J_BASELINE = -1.8
 J_OPTIONS = [-1.8, -1.6, -1.4, -1.2, -1, -0.9, -0.8, -0.7]

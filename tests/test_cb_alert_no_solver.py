@@ -32,7 +32,7 @@ def test_alert_no_solver(mocker, input_val, output_val):
 
     def run_callback():
         context_value.set(
-            AttributeDict(**{"triggered_inputs": [{"prop_id": "btn_simulate.n_clicks"}]})
+            AttributeDict(**{"triggered_inputs": [{"prop_id": "run-button.n_clicks"}]})
         )
 
         return alert_no_solver(input_val)

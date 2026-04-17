@@ -29,7 +29,7 @@ def theoretical_kink_density_prefactor(J, schedule_name=None):
     """Time rescaling factor.
 
     Calculate the rescaling of time necessary to replicate
-    the behaviour of a linearized schedule at coupling strength 1.
+    the behavior of a linearized schedule at coupling strength 1.
     See: "Error Mitigation in Quantum Annealing".
 
     Args:

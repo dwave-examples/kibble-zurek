@@ -202,8 +202,13 @@ def radio(label: str, id: str, options: list, value: str, inline: bool = True) -
                 value=value,
                 children=dmc.Group(
                     [
-                        dmc.Radio(option["label"], value=option["value"], color=THEME_COLOR)
-                        for option in options
+                        dmc.Radio(
+                            option["label"],
+                            value=option["value"],
+                            color=THEME_COLOR,
+                            id={"type": f"{id}-option", "index": i},
+                        )
+                        for i, option in enumerate(options)
                     ]
                 ),
             ),
@@ -235,7 +240,7 @@ def get_quench_duration_setting(problem_type):
             dropdown(
                 "Target Quench Duration [ns]",
                 "anneal_duration",
-                sorted(dropdown_options, key=lambda op: op["value"]),
+                dropdown_options,
                 value="80 ns"
             )
         ], id="quench-duration-setting")
@@ -285,7 +290,7 @@ def generate_settings_form() -> html.Div:
             radio(
                 "Spins",
                 "spins",
-                sorted(spin_options, key=lambda op: op["value"]),
+                spin_options,
                 spin_options[0]["value"],
             ),
             slider(
@@ -306,10 +311,12 @@ def generate_settings_form() -> html.Div:
                 value=default_value,
             ),
             html.P(
-                ["Quench Schedule: ", html.Span(id="quench_schedule_filename")]
+                ["Quench Schedule: ", html.Span(id="quench_schedule_filename")],
+                className="caption",
             ),
             html.P(
                 ["Cached Embeddings: ", html.Span(id="embedding_is_cached")],
+                className="caption",
             ),
         ],
     )
@@ -320,7 +327,7 @@ def generate_run_buttons() -> html.Div:
     return html.Div(
         id="button-group",
         children=[
-            html.Button("Run Simulation", id="btn_simulate", className="button"),
+            html.Button("Run Simulation", id="run-button", className="button"),
             html.Button(
                 "Cancel Simulation",
                 id="cancel-button",
@@ -349,15 +356,15 @@ def default_graph(title: str, id: str, load_radio: bool = False):
         ) if load_radio else (),
         dcc.Graph(
             id=f"{id}-graph",
-            # figure=go.Figure(),
-            style={"height": "40vh", "minHeight": "20rem"},
+            responsive=True,
+            config={"displayModeBar": False},
         ),
     ])
 
 
 def show_progress():
     init_job_status="READY"
-    job_status_color = "red" if init_job_status == "NO SOLVER" else "white"
+    job_status_style = {"color": "#AA3A3C"} if init_job_status == "NO SOLVER" else {}
 
     return html.Div(
         [
@@ -373,12 +380,10 @@ def show_progress():
                     html.Span(
                         id="job_submit_state",
                         children=f"{init_job_status}",
-                        style={
-                            "color": job_status_color,
-                            "fontSize": 12,
-                        },
+                        style=job_status_style,
                     ),
                 ],
+                className="caption",
             ),
         ]
     )
@@ -391,33 +396,33 @@ def no_solver_modal():
         children=[
             html.Div(
                 [
-                    html.Div("Could not connect to a Leap quantum computer."),
-                    html.Div(
+                    html.H2("Could not connect to a Leap quantum computer"),
+                    html.P(
                         [
                             """
                             If you are running locally, set environment variables or a
                             dwave-cloud-client configuration file as described in the
                             """,
-                            dcc.Link(
-                                children=[html.Div(" Ocean")],
+                            html.A(
+                                " Ocean",
                                 href="https://docs.dwavequantum.com/en/latest/ocean/sapi_access_basic.html",
-                                style={"display": "inline-block"},
+                                target="_blank",
+                                rel="noopener",
                             ),
-                            "documentation.",
+                            " documentation.",
                         ],
-                        style={"display": "inline-block"},
                     ),
-                    html.Div(
+                    html.P(
                         [
                             "If you are running in an online IDE, see the ",
-                            dcc.Link(
-                                children=[html.Div("system documentation")],
+                            html.A(
+                                "system documentation",
                                 href="https://docs.dwavequantum.com/en/latest/leap_sapi/dev_env.html",
-                                style={"display": "inline-block"},
+                                target="_blank",
+                                rel="noopener",
                             ),
                             " on supported IDEs.",
                         ],
-                        style={"display": "inline-block"},
                     ),
                 ]
             )
@@ -552,7 +557,7 @@ def create_interface():
                         children=[
                             dmc.Tabs(
                                 id="tabs",
-                                value="input-tab",
+                                value=f"tab-{ProblemType.KZ.value}",
                                 color="white",
                                 children=[
                                     html.Header(
@@ -565,12 +570,12 @@ def create_interface():
                                                             dmc.TabsTab(
                                                                 ProblemType.KZ.label,
                                                                 id={"type": "problem-type", "index": 0},
-                                                                value="input-tab"
+                                                                value=f"tab-{ProblemType.KZ.value}"
                                                             ),
                                                             dmc.TabsTab(
                                                                 ProblemType.KZ_NM.label,
                                                                 id={"type": "problem-type", "index": 1},
-                                                                value="results-tab"
+                                                                value=f"tab-{ProblemType.KZ_NM.value}"
                                                             )
                                                         ]
                                                     ),
@@ -580,7 +585,7 @@ def create_interface():
                                         ],
                                     ),
                                     dmc.TabsPanel(
-                                        value="input-tab",
+                                        value=f"tab-{ProblemType.KZ.value}",
                                         tabIndex="12",
                                         children=[
                                             html.Div(
@@ -593,7 +598,7 @@ def create_interface():
                                         ],
                                     ),
                                     dmc.TabsPanel(
-                                        value="results-tab",
+                                        value=f"tab-{ProblemType.KZ_NM.value}",
                                         tabIndex="13",
                                         children=[
                                             html.Div(

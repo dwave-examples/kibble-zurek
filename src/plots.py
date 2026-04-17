@@ -1,6 +1,6 @@
 # Copyright 2025 D-Wave
 #
-#    Licensed under the A_ghzpache License, Version 2.0 (the "License");
+#    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
 #
@@ -543,7 +543,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
         data=[spins_up, spins_down],
         layout=go.Layout(
             showlegend=False,
-            margin=dict(b=0, l=0, r=0, t=40),
+            margin=dict(b=0, l=0, r=0, t=0),
             scene=dict(
                 xaxis=dict(
                     showticklabels=False,

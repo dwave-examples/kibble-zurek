@@ -41,8 +41,8 @@ Dash reads all css files contained in `/assets/` so no imports are necessary.
     --box-shadow: 0 0 1rem rgba(66, 82, 121, 0.2);
     --font: "proxima-nova", "Helvetica Neue", sans-serif;
     --banner-height: 6.5rem;
-    --left-col-width: 29rem;
+    --left-col-width: 29.5rem;
     --problem-details-height: 8rem;
-    --title-section-height: 13.5rem;
+    --title-section-height: 15rem;
     /*** Add new variables here ***/
 }

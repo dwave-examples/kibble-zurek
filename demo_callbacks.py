@@ -18,6 +18,7 @@ import os
 from typing import NamedTuple, Union
 
 import dash
+from dash import MATCH
 from demo_interface import CLIENT, SOLVERS, generate_tooltips, get_quench_duration_setting, get_slider_marks
 import dimod
 import numpy as np
@@ -33,6 +34,7 @@ from demo_configs import (
     JOB_BAR_DISPLAY,
     MAIN_HEADER,
     MAIN_HEADER_NM,
+    RING_LENGTHS,
 )
 from src.kz_calcs import *
 from src.plots import *
@@ -40,10 +42,36 @@ from src.qa import *
 from src.demo_enums import ProblemType
 
 
+@dash.callback(
+    Output({"type": "to-collapse-class", "index": MATCH}, "className"),
+    Output({"type": "collapse-trigger", "index": MATCH}, "aria-expanded"),
+    inputs=[
+        Input({"type": "collapse-trigger", "index": MATCH}, "n_clicks"),
+        State({"type": "to-collapse-class", "index": MATCH}, "className"),
+    ],
+    prevent_initial_call=True,
+)
+def toggle_left_column(collapse_trigger: int, to_collapse_class: str) -> tuple[str, str]:
+    """Toggles a 'collapsed' class that hides and shows some aspect of the UI.
+
+    Args:
+        collapse_trigger (int): The (total) number of times a collapse button has been clicked.
+        to_collapse_class (str): Current class name of the thing to collapse, 'collapsed' if not
+            visible, empty string if visible.
+
+    Returns:
+        str: The new class name of the thing to collapse.
+        str: The aria-expanded value.
+    """
+
+    classes = to_collapse_class.split(" ") if to_collapse_class else []
+    if "collapsed" in classes:
+        classes.remove("collapsed")
+        return " ".join(classes), "true"
+    return to_collapse_class + " collapsed" if to_collapse_class else "collapsed", "false"
 
 
 @dash.callback(
-    Output({"type": "problem-type", "index": ALL}, "className"),
     Output("selected-problem", "data"),
     Output("tooltips", "children"),
     Output("quench-duration-setting", "children"),
@@ -52,47 +80,43 @@ from src.demo_enums import ProblemType
     Output("main-header", "children"),
     Output("main-description", "children"),
     inputs=[
-        Input({"type": "problem-type", "index": ALL}, "n_clicks"),
+        Input("tabs", "value"),
         State("selected-problem", "data"),
     ],
 )
 def update_selected_problem_type(
-    problem_options: list[int],
+    tab_value: str,
     selected_problem: Union[ProblemType, int],
 ) -> tuple[str, int, list, float, dict[float, str], str, str]:
     """Updates the problem that is selected (KZ or KZ_NM), hides/shows settings accordingly,
         and updates the navigation options to indicate the currently active problem option.
 
     Args:
-        problem_options: A list containing the number of times each problem option has been clicked.
+        tab_value: The value of the currently selected tab.
         selected_problem: The currently selected problem.
 
     Returns:
-        problem-type-class (list): A list of classes for the header problem navigation options.
-        selected-period (int): Either KZ (``0`` or ``ProblemType.KZ``) or
+        selected-problem (int): Either KZ (``0`` or ``ProblemType.KZ``) or
             KZ_NM (``1`` or ``ProblemType.KZ_NM``).
-        graph-radio-options: The radio options for the graph.
         tooltips: The tooltips for the settings form.
         quench-duration-setting: The quench duration setting.
-        coupling-strength-slider: The coupling strength slider setting.
+        coupling_strength-value: The value of the coupling strength slider setting.
+        coupling_strength-marks: The marks of the coupling strength slider setting.
         main-header: The main header of the problem in the left column.
         main-description: The description of the problem in the left column.
     """
-    if ctx.triggered_id and selected_problem == ctx.triggered_id["index"]:
+    selected_problem_value = int(tab_value.split("-")[-1])
+
+    if selected_problem == selected_problem_value:
         raise PreventUpdate
 
-    nav_class_names = [""] * len(problem_options)
-    problem_type_value = ctx.triggered_id["index"] if ctx.triggered_id else ProblemType.KZ.value
-    problem_type = ProblemType(problem_type_value)
+    problem_type = ProblemType(selected_problem_value)
     isKZ = problem_type is ProblemType.KZ
-
-    nav_class_names[problem_type_value] = "active"
 
     slider_value, slider_marks = get_slider_marks(problem_type)
 
     return (
-        nav_class_names,
-        problem_type_value,
+        selected_problem_value,
         generate_tooltips(problem_type),
         get_quench_duration_setting(problem_type),
         slider_value,
@@ -104,12 +128,13 @@ def update_selected_problem_type(
 
 @dash.callback(
     Output("anneal_duration", "className", allow_duplicate=True),
-    Output("btn_simulate", "disabled", allow_duplicate=True),
+    Output("run-button", "disabled", allow_duplicate=True),
     Input("anneal_duration", "value"),
     prevent_initial_call=True,
 )
-def validate_quench_duration(ta):
+def validate_quench_duration(ta: int | str):
     """Validate quench duration and prevent run if invalid."""
+    ta = int(ta.split(" ")[0]) if isinstance(ta, str) else ta
     invalid = not ta or ta < 5 or ta > 100
 
     return "error" if invalid else "", invalid
@@ -117,26 +142,25 @@ def validate_quench_duration(ta):
 
 @dash.callback(
     Output("no-solver-modal", "opened"),
-    Input("btn_simulate", "n_clicks"),
+    Input("run-button", "n_clicks"),
 )
-def alert_no_solver(dummy):
+def alert_no_solver(run_btn):
     """Notify if no quantum computer is accessible."""
 
-    return ctx.triggered_id == "btn_simulate" and not CLIENT
+    return not CLIENT
 
 
 @dash.callback(
     Output("anneal_duration", "disabled"),
     Output("coupling_strength", "disabled"),
-    Output("spins", "options"),
+    Output({"type": "spins-option", "index": ALL}, "disabled"),
     Output("qpu_selection", "disabled"),
     inputs=[
         Input("job_submit_state", "children"),
-        State("spins", "options"),
     ],
     prevent_initial_call=True,
 )
-def disable_buttons(job_submit_state, spins_options):
+def disable_buttons(job_submit_state):
     """Disable user input during job submissions."""
     running_states = ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]
     done_states = ["COMPLETED", "CANCELLED", "FAILED"]
@@ -145,10 +169,7 @@ def disable_buttons(job_submit_state, spins_options):
     if job_submit_state not in running_states + done_states:
         raise PreventUpdate
 
-    for inx, _ in enumerate(spins_options):
-        spins_options[inx]["disabled"] = is_running
-
-    return is_running, is_running, spins_options, is_running
+    return is_running, is_running, [is_running]*len(RING_LENGTHS), is_running
 
 
 @dash.callback(
@@ -238,6 +259,7 @@ def add_graph_point_kz(
         raise PreventUpdate
 
     spins = int(spins)
+    ta = int(ta.split(" ")[0]) if isinstance(ta, str) else ta
     embeddings_cached = json_to_dict(embeddings_cached)
     sampleset_unembedded = get_samples(CLIENT, job_id, spins, J, embeddings_cached[spins])
     _, kink_density = kink_stats(sampleset_unembedded, J)
@@ -295,6 +317,7 @@ def add_graph_point_kz_nm(
         raise PreventUpdate
 
     spins = int(spins)
+    ta = int(ta.split(" ")[0]) if isinstance(ta, str) else ta
     embeddings_cached = json_to_dict(embeddings_cached)
     sampleset_unembedded = get_samples(CLIENT, job_id, spins, J, embeddings_cached[spins])
     _, kink_density = kink_stats(sampleset_unembedded, J)
@@ -462,6 +485,7 @@ def submit_job(
 
     solver = SOLVERS[qpu_name]
     spins = int(spins)
+    ta_ns = int(ta_ns.split(" ")[0]) if isinstance(ta_ns, str) else ta_ns
 
     bqm = create_bqm(num_spins=spins, coupling_strength=J)
 
@@ -497,7 +521,7 @@ def submit_job(
 class RunButtonClickReturn(NamedTuple):
     """Return type for the ``run_button_click`` callback function."""
 
-    btn_simulate_disabled: bool = True
+    run_button_disabled: bool = True
     wd_job_disabled: bool = False
     wd_job_n_intervals: int = 0
     job_submit_state: str = dash.no_update
@@ -505,13 +529,13 @@ class RunButtonClickReturn(NamedTuple):
 
 
 @dash.callback(
-    Output("btn_simulate", "disabled"),
+    Output("run-button", "disabled"),
     Output("wd_job", "disabled"),
     Output("wd_job", "n_intervals", allow_duplicate=True),
     Output("job_submit_state", "children"),
     Output("job_submit_time", "data"),
     inputs=[
-        Input("btn_simulate", "n_clicks"),
+        Input("run-button", "n_clicks"),
         State("embedding_is_cached", "children"),
         State("spins", "value"),
     ],
@@ -535,7 +559,7 @@ def run_button_click(
 class SimulateReturn(NamedTuple):
     """Return type for the ``simulate`` callback function."""
 
-    btn_simulate_disabled: bool = dash.no_update
+    run_button_disabled: bool = dash.no_update
     wd_job_disabled: bool = dash.no_update
     wd_job_interval: int = dash.no_update
     wd_job_n_intervals: int = dash.no_update
@@ -546,7 +570,7 @@ class SimulateReturn(NamedTuple):
 
 
 @dash.callback(
-    Output("btn_simulate", "disabled", allow_duplicate=True),
+    Output("run-button", "disabled", allow_duplicate=True),
     Output("wd_job", "disabled", allow_duplicate=True),
     Output("wd_job", "interval"),
     Output("wd_job", "n_intervals", allow_duplicate=True),
@@ -593,13 +617,13 @@ def simulate(
                 )
 
             return SimulateReturn(
-                btn_simulate_disabled=False,
+                run_button_disabled=False,
                 wd_job_disabled=True,
                 job_submit_state="FAILED",
             )
         except Exception:
             return SimulateReturn(
-                btn_simulate_disabled=False,
+                run_button_disabled=False,
                 wd_job_disabled=True,
                 job_submit_state="FAILED",
             )
@@ -619,7 +643,7 @@ def simulate(
         )
 
     return SimulateReturn(
-        btn_simulate_disabled=False,
+        run_button_disabled=False,
         wd_job_disabled=True,
         job_submit_state=(
             dash.no_update if job_submit_state in ["COMPLETED", "CANCELLED", "FAILED"] else "ERROR"
@@ -644,9 +668,9 @@ def set_progress_bar(job_submit_state):
 
 
 @dash.callback(
-    Output("error-modal", "is_open"),
+    Output("error-modal", "opened"),
     Input("modal_trigger", "data"),
-    State("error-modal", "is_open"),
+    State("error-modal", "opened"),
 )
 def toggle_modal(trigger, is_open):
     return True if trigger else is_open

@@ -34,7 +34,7 @@ def test_simulate_button_press(spins_val, cached_embedding_lengths_val, submit_s
 
     def run_callback():
         context_value.set(
-            AttributeDict(**{"triggered_inputs": [{"prop_id": "btn_simulate.n_clicks"}]})
+            AttributeDict(**{"triggered_inputs": [{"prop_id": "run-button.n_clicks"}]})
         )
 
         return run_button_click(1, cached_embedding_lengths_val, spins_val)
@@ -90,7 +90,7 @@ def mock_find_embedding(spins, dummy_edges):
 
 parametrize_names = (
     "job_id_val, job_submit_state_in, "
-    + "spins_val, embeddings_cached_in, btn_simulate_disabled_out, wd_job_disabled_out, "
+    + "spins_val, embeddings_cached_in, run_button_disabled_out, wd_job_disabled_out, "
     + "wd_job_intervals_out, wd_job_n_out, job_submit_state_out, job_submit_time_out, "
     + "embeddings_cached_out, embedding_is_cached_out"
 )
@@ -260,7 +260,7 @@ def test_simulate_states(
     job_submit_state_in,
     spins_val,
     embeddings_cached_in,
-    btn_simulate_disabled_out,
+    run_button_disabled_out,
     wd_job_disabled_out,
     wd_job_intervals_out,
     wd_job_n_out,
@@ -295,7 +295,7 @@ def test_simulate_states(
     output = ctx.run(run_callback)
 
     expected_output = SimulateReturn(
-        btn_simulate_disabled=btn_simulate_disabled_out,
+        run_button_disabled=run_button_disabled_out,
         wd_job_disabled=wd_job_disabled_out,
         wd_job_interval=wd_job_intervals_out,
         wd_job_n_intervals=wd_job_n_out,
