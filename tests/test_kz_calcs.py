@@ -18,7 +18,7 @@ import dimod
 import pandas as pd
 import pytest
 
-from helpers.kz_calcs import *
+from src.kz_calcs import *
 
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

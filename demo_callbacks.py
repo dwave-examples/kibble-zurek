@@ -34,9 +34,9 @@ from demo_configs import (
     MAIN_HEADER,
     MAIN_HEADER_NM,
 )
-from helpers.kz_calcs import *
-from helpers.plots import *
-from helpers.qa import *
+from src.kz_calcs import *
+from src.plots import *
+from src.qa import *
 from src.demo_enums import ProblemType
 
 

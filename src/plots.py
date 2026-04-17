@@ -18,8 +18,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from helpers.kz_calcs import theoretical_kink_density
-from helpers.qa import fitted_function
+from src.kz_calcs import theoretical_kink_density
+from src.qa import fitted_function
 from src.demo_enums import ProblemType
 
 __all__ = [

@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from helpers.qa import *
+from src.qa import *
 
 
 def test_create_bqm():
