@@ -67,3 +67,17 @@ custom CSS can be added below.
 .caption span {
     font-weight: 600;
 }
+
+.progress-bar {
+    border-radius: 1rem;
+}
+
+.progress {
+    width: 60%;
+}
+
+.progress-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

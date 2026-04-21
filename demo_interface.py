@@ -19,6 +19,7 @@ from itertools import chain
 
 from dash import dcc, html
 import dash_mantine_components as dmc
+import dash_bootstrap_components as dbc
 
 from demo_configs import (
     DEFAULT_QPU,
@@ -300,6 +301,8 @@ def generate_settings_form() -> html.Div:
                     "value": slider_value,
                     "min": slider_marks[0]["value"],
                     "max": slider_marks[-1]["value"],
+                    "step": 0.1,
+                    "restrictToMarks": True,
                 },
                 marks=slider_marks,
             ),
@@ -368,12 +371,6 @@ def show_progress():
 
     return html.Div(
         [
-            html.Progress(
-                id="bar_job_status",
-                value="0",
-                # color="link",
-                style={"width": "60%"},
-            ),
             html.P(
                 [
                     "Status: ",
@@ -385,7 +382,13 @@ def show_progress():
                 ],
                 className="caption",
             ),
-        ]
+            dbc.Progress(
+                id="bar_job_status",
+                value=0,
+                color="link",
+            ),
+        ],
+        className="progress-wrapper",
     )
 
 

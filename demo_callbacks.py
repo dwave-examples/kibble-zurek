@@ -77,6 +77,8 @@ def toggle_left_column(collapse_trigger: int, to_collapse_class: str) -> tuple[s
     Output("quench-duration-setting", "children"),
     Output("coupling_strength", "value"),
     Output("coupling_strength", "marks"),
+    Output("coupling_strength", "min"),
+    Output("coupling_strength", "max"),
     Output("main-header", "children"),
     Output("main-description", "children"),
     inputs=[
@@ -87,7 +89,7 @@ def toggle_left_column(collapse_trigger: int, to_collapse_class: str) -> tuple[s
 def update_selected_problem_type(
     tab_value: str,
     selected_problem: Union[ProblemType, int],
-) -> tuple[str, int, list, float, dict[float, str], str, str]:
+) -> tuple[str, int, list, float, dict[float, str], float, float, str, str]:
     """Updates the problem that is selected (KZ or KZ_NM), hides/shows settings accordingly,
         and updates the navigation options to indicate the currently active problem option.
 
@@ -102,6 +104,8 @@ def update_selected_problem_type(
         quench-duration-setting: The quench duration setting.
         coupling_strength-value: The value of the coupling strength slider setting.
         coupling_strength-marks: The marks of the coupling strength slider setting.
+        coupling_strength-min: The minimum value of the coupling strength slider setting.
+        coupling_strength-max: The maximum value of the coupling strength slider setting.
         main-header: The main header of the problem in the left column.
         main-description: The description of the problem in the left column.
     """
@@ -121,6 +125,8 @@ def update_selected_problem_type(
         get_quench_duration_setting(problem_type),
         slider_value,
         slider_marks,
+        slider_marks[0]["value"],
+        slider_marks[-1]["value"],
         MAIN_HEADER if isKZ else MAIN_HEADER_NM,
         DESCRIPTION if isKZ else DESCRIPTION_NM,
     )
@@ -653,18 +659,19 @@ def simulate(
 
 @dash.callback(
     Output("bar_job_status", "value"),
-    # Output("bar_job_status", "color"),
+    Output("bar_job_status", "color"),
     Input("job_submit_state", "children"),
 )
 def set_progress_bar(job_submit_state):
     """Update progress bar for job submissions."""
 
     if ctx.triggered_id:
-        return f"{JOB_BAR_DISPLAY[job_submit_state][0]}"
-        # return JOB_BAR_DISPLAY[job_submit_state][0], JOB_BAR_DISPLAY[job_submit_state][1]
+        print(JOB_BAR_DISPLAY[job_submit_state][0])
+        # return JOB_BAR_DISPLAY[job_submit_state][0]
+        return JOB_BAR_DISPLAY[job_submit_state][0], JOB_BAR_DISPLAY[job_submit_state][1]
 
-    return f"{JOB_BAR_DISPLAY['READY'][0]}"
-    # return JOB_BAR_DISPLAY["READY"][0], JOB_BAR_DISPLAY["READY"][1]
+    # return JOB_BAR_DISPLAY["READY"][0]
+    return JOB_BAR_DISPLAY["READY"][0], JOB_BAR_DISPLAY["READY"][1]
 
 
 @dash.callback(
