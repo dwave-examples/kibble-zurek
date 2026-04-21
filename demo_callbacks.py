@@ -140,7 +140,9 @@ def update_selected_problem_type(
 )
 def validate_quench_duration(ta: int | str):
     """Validate quench duration and prevent run if invalid."""
-    ta = int(ta.split(" ")[0]) if isinstance(ta, str) else ta
+    if isinstance(ta, str):
+        raise PreventUpdate
+
     invalid = not ta or ta < 5 or ta > 100
 
     return "error" if invalid else "", invalid
