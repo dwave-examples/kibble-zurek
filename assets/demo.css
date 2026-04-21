@@ -30,7 +30,7 @@ custom CSS can be added below.
     display: flex;
     flex-direction: column;
     height: 50%;
-    margin: 1rem;
+    margin: 1rem 2rem;
 }
 
 .progress {

@@ -44,9 +44,12 @@ try:
     SOLVERS = {
         qpu.name: qpu for qpu in CLIENT.get_solvers(fast_anneal_time_range__covers=[0.005, 0.1])
     }
+
     if len(SOLVERS) < 1:
         raise Exception
+
     init_job_status = "READY"
+
 except Exception:
     SOLVERS = {}
     CLIENT = None
@@ -294,17 +297,20 @@ def generate_settings_form() -> html.Div:
                 spin_options,
                 spin_options[0]["value"],
             ),
-            slider(
-                "Coupling Strength (J)",
-                "coupling_strength",
-                {
-                    "value": slider_value,
-                    "min": slider_marks[0]["value"],
-                    "max": slider_marks[-1]["value"],
-                    "step": 0.1,
-                    "restrictToMarks": True,
-                },
-                marks=slider_marks,
+            html.Div(
+                slider(
+                    "Coupling Strength (J)",
+                    "coupling_strength",
+                    {
+                        "value": slider_value,
+                        "min": slider_marks[0]["value"],
+                        "max": slider_marks[-1]["value"],
+                        "step": 0.1,
+                        "restrictToMarks": True,
+                    },
+                    marks=slider_marks,
+                ),
+                id="coupling-strength-wrapper",
             ),
             get_quench_duration_setting(ProblemType.KZ),
             dropdown(
@@ -385,7 +391,9 @@ def show_progress():
             dbc.Progress(
                 id="bar_job_status",
                 value=0,
-                color="link",
+                color=THEME_COLOR,
+                label="Job progress",
+                hide_label=True,
             ),
         ],
         className="progress-wrapper",
@@ -456,9 +464,11 @@ def generate_tooltips(problem_type: ProblemType = ProblemType.KZ):
 
     return [
         dmc.Tooltip(
-            message,
-            target=target,
+            label=message,
+            target=f"#{target}",
             id=f"tooltip_{target}",
+            multiline=True,
+            w=300,
         )
         for target, message in tool_tips.items()
     ]
@@ -524,7 +534,7 @@ def create_interface():
                                                                 generate_settings_form(),
                                                                 generate_run_buttons(),
                                                                 show_progress(),
-                                                                html.Div(generate_tooltips(), id="tooltips"),
+                                                                html.Div(children=generate_tooltips(), id="tooltips"),
                                                             ],
                                                             className="settings-and-buttons",
                                                         ),
