@@ -30,6 +30,7 @@ custom CSS can be added below.
     display: flex;
     flex-direction: column;
     height: 50%;
+    min-height: 18.75rem;
     margin: 1rem 2rem;
 }
 
@@ -80,4 +81,20 @@ custom CSS can be added below.
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+@media screen and (max-width: 1300px) {
+    .banner {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .banner button {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .banner img {
+        display: none;
+    }
 }

@@ -392,8 +392,6 @@ def show_progress():
                 id="bar_job_status",
                 value=0,
                 color=THEME_COLOR,
-                label="Job progress",
-                hide_label=True,
             ),
         ],
         className="progress-wrapper",
