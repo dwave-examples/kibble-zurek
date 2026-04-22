@@ -109,6 +109,10 @@ custom CSS can be added below.
     background-color: var(--red-light);
 }
 
+.no-schedule {
+    color: var(--orange);
+}
+
 @media screen and (max-width: 1300px) {
     .banner {
         padding-left: 0;

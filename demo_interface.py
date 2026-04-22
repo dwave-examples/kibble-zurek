@@ -319,11 +319,11 @@ def generate_settings_form() -> html.Div:
                 value=default_value,
             ),
             html.P(
-                ["Quench Schedule: ", html.Span(id="quench-schedule-filename")],
+                ["Quench Schedule: ", html.Span(id="schedule-filename")],
                 className="caption",
             ),
             html.P(
-                ["Cached Embeddings: ", html.Span(id="embedding-is-cached")],
+                ["Cached Embeddings: ", html.Span(id="cached-embeddings")],
                 className="caption",
             ),
         ],
@@ -494,10 +494,10 @@ def create_interface():
             dcc.Store(id="zne-estimates", data={}),  # store zero noise extrapolation points
             dcc.Store(id="modal-trigger", data=False),
             dcc.Store(id="kz-data", data=[]),  # KZ plot point
-            dcc.Store(id="selected-problem"),
+            dcc.Store(id="selected-problem-type"),
             dcc.Store(id="job-submit-time"),
             dcc.Store(id="job-id"),
-            dcc.Store(id="embeddings-cached", data={}),
+            dcc.Store(id="embeddings", data={}),
             dcc.Interval(
                 id="wd-job",
                 interval=500,
