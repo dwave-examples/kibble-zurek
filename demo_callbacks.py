@@ -75,10 +75,10 @@ def toggle_left_column(collapse_trigger: int, to_collapse_class: str) -> tuple[s
     Output("selected-problem", "data"),
     Output("tooltips", "children"),
     Output("quench-duration-setting", "children"),
-    Output("coupling_strength", "value"),
-    Output("coupling_strength", "marks"),
-    Output("coupling_strength", "min"),
-    Output("coupling_strength", "max"),
+    Output("coupling-strength", "value"),
+    Output("coupling-strength", "marks"),
+    Output("coupling-strength", "min"),
+    Output("coupling-strength", "max"),
     Output("main-header", "children"),
     Output("main-description", "children"),
     inputs=[
@@ -102,10 +102,10 @@ def update_selected_problem_type(
             KZ_NM (``1`` or ``ProblemType.KZ_NM``).
         tooltips: The tooltips for the settings form.
         quench-duration-setting: The quench duration setting.
-        coupling_strength-value: The value of the coupling strength slider setting.
-        coupling_strength-marks: The marks of the coupling strength slider setting.
-        coupling_strength-min: The minimum value of the coupling strength slider setting.
-        coupling_strength-max: The maximum value of the coupling strength slider setting.
+        coupling-strength-value: The value of the coupling strength slider setting.
+        coupling-strength-marks: The marks of the coupling strength slider setting.
+        coupling-strength-min: The minimum value of the coupling strength slider setting.
+        coupling-strength-max: The maximum value of the coupling strength slider setting.
         main-header: The main header of the problem in the left column.
         main-description: The description of the problem in the left column.
     """
@@ -133,9 +133,9 @@ def update_selected_problem_type(
 
 
 @dash.callback(
-    Output("anneal_duration", "className", allow_duplicate=True),
+    Output("anneal-duration", "className", allow_duplicate=True),
     Output("run-button", "disabled", allow_duplicate=True),
-    Input("anneal_duration", "value"),
+    Input("anneal-duration", "value"),
     prevent_initial_call=True,
 )
 def validate_quench_duration(ta: int | str):
@@ -159,12 +159,12 @@ def alert_no_solver(run_btn):
 
 
 @dash.callback(
-    Output("anneal_duration", "disabled"),
-    Output("coupling_strength", "disabled"),
+    Output("anneal-duration", "disabled"),
+    Output("coupling-strength", "disabled"),
     Output({"type": "spins-option", "index": ALL}, "disabled"),
-    Output("qpu_selection", "disabled"),
+    Output("qpu-selection", "disabled"),
     inputs=[
-        Input("job_submit_state", "children"),
+        Input("job-submit-state", "children"),
     ],
     prevent_initial_call=True,
 )
@@ -181,9 +181,9 @@ def disable_buttons(job_submit_state):
 
 
 @dash.callback(
-    Output("quench_schedule_filename", "children"),
-    Output("quench_schedule_filename", "style"),
-    Input("qpu_selection", "value"),
+    Output("quench-schedule-filename", "children"),
+    Output("quench-schedule-filename", "style"),
+    Input("qpu-selection", "value"),
 )
 def set_schedule(qpu_name):
     """Set the schedule for the selected QPU."""
@@ -204,9 +204,9 @@ def set_schedule(qpu_name):
 
 
 @dash.callback(
-    Output("embeddings_cached", "data"),
-    Output("embedding_is_cached", "children"),
-    Input("qpu_selection", "value"),
+    Output("embeddings-cached", "data"),
+    Output("embedding-is-cached", "children"),
+    Input("qpu-selection", "value"),
 )
 def load_cached_embeddings(qpu_name):
     """Cache embeddings for the selected QPU."""
@@ -235,18 +235,18 @@ def load_cached_embeddings(qpu_name):
 
 @dash.callback(
     Output("sample-v-theory-graph", "figure", allow_duplicate=True),
-    Output("kz_data", "data", allow_duplicate=True),
+    Output("kz-data", "data", allow_duplicate=True),
     inputs=[
-        Input("job_submit_state", "children"),
+        Input("job-submit-state", "children"),
         State("graph-selection-radio", "value"),
-        State("coupling_strength", "value"),  # previously input
-        State("job_id", "data"),
-        State("anneal_duration", "value"),
+        State("coupling-strength", "value"),  # previously input
+        State("job-id", "data"),
+        State("anneal-duration", "value"),
         State("spins", "value"),
         State("selected-problem", "data"),
-        State("embeddings_cached", "data"),
+        State("embeddings-cached", "data"),
         State("sample-v-theory-graph", "figure"),
-        State("kz_data", "data"),  # get kibble zurek data point
+        State("kz-data", "data"),  # get kibble zurek data point
     ],
     prevent_initial_call=True,
 )
@@ -284,23 +284,23 @@ def add_graph_point_kz(
 @dash.callback(
     Output("kink-v-noise-graph", "figure", allow_duplicate=True),
     Output("kink-v-anneal-graph", "figure", allow_duplicate=True),
-    Output("coupling_data", "data", allow_duplicate=True),  # store data using dcc
-    Output("zne_estimates", "data", allow_duplicate=True),  # update zne_estimates
-    Output("modal_trigger", "data"),
+    Output("coupling-data", "data", allow_duplicate=True),  # store data using dcc
+    Output("zne-estimates", "data", allow_duplicate=True),  # update zne_estimates
+    Output("modal-trigger", "data"),
     inputs=[
-        Input("job_submit_state", "children"),
-        State("qpu_selection", "value"),
-        State("coupling_strength", "value"),  # previously input
-        State("quench_schedule_filename", "children"),
-        State("job_id", "data"),
-        State("anneal_duration", "value"),
+        Input("job-submit-state", "children"),
+        State("qpu-selection", "value"),
+        State("coupling-strength", "value"),  # previously input
+        State("quench-schedule-filename", "children"),
+        State("job-id", "data"),
+        State("anneal-duration", "value"),
         State("spins", "value"),
         State("selected-problem", "data"),
-        State("embeddings_cached", "data"),
+        State("embeddings-cached", "data"),
         State("kink-v-noise-graph", "figure"),
         State("kink-v-anneal-graph", "figure"),
-        State("coupling_data", "data"),  # access previously stored data
-        State("zne_estimates", "data"),  # Access ZNE estimates
+        State("coupling-data", "data"),  # access previously stored data
+        State("zne-estimates", "data"),  # Access ZNE estimates
     ],
     prevent_initial_call=True,
 )
@@ -347,7 +347,7 @@ def add_graph_point_kz_nm(
         {
             "lambda": lambda_,
             "kink_density": kink_density,
-            "coupling_strength": J,
+            "coupling-strength": J,
         }
     )
 
@@ -360,15 +360,15 @@ def add_graph_point_kz_nm(
 
 
 @dash.callback(
-    Output("job_submit_state", "children", allow_duplicate=True),
+    Output("job-submit-state", "children", allow_duplicate=True),
     inputs=[
         Input("selected-problem", "data"),
         Input("graph-selection-radio", "value"),
-        Input("quench_schedule_filename", "children"),
-        Input("coupling_strength", "value"),
+        Input("quench-schedule-filename", "children"),
+        Input("coupling-strength", "value"),
         Input("spins", "value"),
-        Input("anneal_duration", "value"),
-        Input("qpu_selection", "value"),
+        Input("anneal-duration", "value"),
+        Input("qpu-selection", "value"),
     ],
     prevent_initial_call=True,
 )
@@ -387,15 +387,15 @@ def reset_progress(
 
 @dash.callback(
     Output("sample-v-theory-graph", "figure"),
-    Output("kz_data", "data"),
+    Output("kz-data", "data"),
     inputs=[
         Input("selected-problem", "data"),
         Input("graph-selection-radio", "value"),
-        Input("quench_schedule_filename", "children"),
-        Input("coupling_strength", "value"),  # previously input
+        Input("quench-schedule-filename", "children"),
+        Input("coupling-strength", "value"),  # previously input
         Input("spins", "value"),
-        Input("anneal_duration", "value"),
-        State("kz_data", "data"),  # get kibble zurek data point
+        Input("anneal-duration", "value"),
+        State("kz-data", "data"),  # get kibble zurek data point
     ],
 )
 def load_new_graph_kz(
@@ -412,7 +412,7 @@ def load_new_graph_kz(
     if problem_type is ProblemType.KZ_NM.value:
         raise PreventUpdate
 
-    if ctx.triggered_id in ["quench_schedule_filename", "spins", "coupling_strength"]:
+    if ctx.triggered_id in ["quench-schedule-filename", "spins", "coupling-strength"]:
         kz_data = []
 
     fig = plot_kink_densities_bg(
@@ -428,10 +428,10 @@ def load_new_graph_kz(
 @dash.callback(
     Output("kink-v-noise-graph", "figure"),
     Output("kink-v-anneal-graph", "figure"),
-    Output("coupling_data", "data"),  # store data using dcc
-    Output("zne_estimates", "data"),  # update zne_estimates
+    Output("coupling-data", "data"),  # store data using dcc
+    Output("zne-estimates", "data"),  # update zne_estimates
     inputs=[
-        Input("quench_schedule_filename", "children"),
+        Input("quench-schedule-filename", "children"),
         Input("spins", "value"),
         Input("selected-problem", "data"),
     ],
@@ -458,10 +458,10 @@ def load_new_graphs_kz_nm(schedule_filename, spins, problem_type):
     Output("spin-orientation-graph", "figure"),
     inputs=[
         Input("spins", "value"),
-        Input("job_submit_state", "children"),
-        State("job_id", "data"),
-        State("coupling_strength", "value"),
-        State("embeddings_cached", "data"),
+        Input("job-submit-state", "children"),
+        State("job-id", "data"),
+        State("coupling-strength", "value"),
+        State("embeddings-cached", "data"),
     ],
 )
 def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_cached):
@@ -469,7 +469,7 @@ def display_graphics_spin_ring(spins, job_submit_state, job_id, J, embeddings_ca
     best_sample = None
     spins = int(spins)
 
-    if ctx.triggered_id == "job_submit_state":
+    if ctx.triggered_id == "job-submit-state":
         if job_submit_state != "COMPLETED":
             raise PreventUpdate
 
@@ -491,17 +491,17 @@ class SubmitJobReturn(NamedTuple):
 
 
 @dash.callback(
-    Output("job_id", "data"),
-    Output("wd_job", "n_intervals"),
+    Output("job-id", "data"),
+    Output("wd-job", "n_intervals"),
     inputs=[
-        Input("job_submit_time", "data"),
-        State("qpu_selection", "value"),
+        Input("job-submit-time", "data"),
+        State("qpu-selection", "value"),
         State("spins", "value"),
-        State("coupling_strength", "value"),
-        State("anneal_duration", "value"),
-        State("embeddings_cached", "data"),
+        State("coupling-strength", "value"),
+        State("anneal-duration", "value"),
+        State("embeddings-cached", "data"),
         State("selected-problem", "data"),
-        State("quench_schedule_filename", "children"),
+        State("quench-schedule-filename", "children"),
     ],
     prevent_initial_call=True,
 )
@@ -564,13 +564,13 @@ class RunButtonClickReturn(NamedTuple):
 
 @dash.callback(
     Output("run-button", "disabled"),
-    Output("wd_job", "disabled"),
-    Output("wd_job", "n_intervals", allow_duplicate=True),
-    Output("job_submit_state", "children"),
-    Output("job_submit_time", "data"),
+    Output("wd-job", "disabled"),
+    Output("wd-job", "n_intervals", allow_duplicate=True),
+    Output("job-submit-state", "children"),
+    Output("job-submit-time", "data"),
     inputs=[
         Input("run-button", "n_clicks"),
-        State("embedding_is_cached", "children"),
+        State("embedding-is-cached", "children"),
         State("spins", "value"),
     ],
     prevent_initial_call=True,
@@ -605,21 +605,21 @@ class SimulateReturn(NamedTuple):
 
 @dash.callback(
     Output("run-button", "disabled", allow_duplicate=True),
-    Output("wd_job", "disabled", allow_duplicate=True),
-    Output("wd_job", "interval"),
-    Output("wd_job", "n_intervals", allow_duplicate=True),
-    Output("job_submit_state", "children", allow_duplicate=True),
-    Output("job_submit_time", "data", allow_duplicate=True),
-    Output("embeddings_cached", "data", allow_duplicate=True),
-    Output("embedding_is_cached", "children", allow_duplicate=True),
+    Output("wd-job", "disabled", allow_duplicate=True),
+    Output("wd-job", "interval"),
+    Output("wd-job", "n_intervals", allow_duplicate=True),
+    Output("job-submit-state", "children", allow_duplicate=True),
+    Output("job-submit-time", "data", allow_duplicate=True),
+    Output("embeddings-cached", "data", allow_duplicate=True),
+    Output("embedding-is-cached", "children", allow_duplicate=True),
     inputs=[
-        Input("wd_job", "n_intervals"),
-        State("job_id", "data"),
-        State("job_submit_state", "children"),
-        State("job_submit_time", "data"),
+        Input("wd-job", "n_intervals"),
+        State("job-id", "data"),
+        State("job-submit-state", "children"),
+        State("job-submit-time", "data"),
         State("spins", "value"),
-        State("qpu_selection", "value"),
-        State("embeddings_cached", "data"),
+        State("qpu-selection", "value"),
+        State("embeddings-cached", "data"),
     ],
     prevent_initial_call=True,
 )
@@ -687,7 +687,7 @@ def simulate(
 
 @dash.callback(
     Output("job-status-progress", "style"),
-    Input("job_submit_state", "children"),
+    Input("job-submit-state", "children"),
 )
 def set_progress_bar(job_submit_state):
     """Update progress bar for job submissions."""
@@ -700,7 +700,7 @@ def set_progress_bar(job_submit_state):
 
 @dash.callback(
     Output("error-modal", "opened"),
-    Input("modal_trigger", "data"),
+    Input("modal-trigger", "data"),
     State("error-modal", "opened"),
 )
 def toggle_modal(trigger, is_open):

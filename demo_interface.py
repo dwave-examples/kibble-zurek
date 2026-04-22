@@ -242,16 +242,16 @@ def get_quench_duration_setting(problem_type):
         return html.Div([
             dropdown(
                 "Target Quench Duration [ns]",
-                "anneal_duration",
+                "anneal-duration",
                 dropdown_options,
                 value="80 ns"
             )
         ], id="quench-duration-setting")
 
     return html.Div([
-        html.Label("Quench Duration [ns]", htmlFor="anneal_duration"),
+        html.Label("Quench Duration [ns]", htmlFor="anneal-duration"),
         dmc.NumberInput(
-            id="anneal_duration",
+            id="anneal-duration",
             type="number",
             min=5,
             max=100,
@@ -299,7 +299,7 @@ def generate_settings_form() -> html.Div:
             html.Div(
                 slider(
                     "Coupling Strength (J)",
-                    "coupling_strength",
+                    "coupling-strength",
                     {
                         "value": slider_value,
                         "min": slider_marks[0]["value"],
@@ -314,16 +314,16 @@ def generate_settings_form() -> html.Div:
             get_quench_duration_setting(ProblemType.KZ),
             dropdown(
                 "QPU",
-                "qpu_selection",
+                "qpu-selection",
                 sorted(qpu_options, key=lambda op: op["value"]),
                 value=default_value,
             ),
             html.P(
-                ["Quench Schedule: ", html.Span(id="quench_schedule_filename")],
+                ["Quench Schedule: ", html.Span(id="quench-schedule-filename")],
                 className="caption",
             ),
             html.P(
-                ["Cached Embeddings: ", html.Span(id="embedding_is_cached")],
+                ["Cached Embeddings: ", html.Span(id="embedding-is-cached")],
                 className="caption",
             ),
         ],
@@ -380,7 +380,7 @@ def show_progress():
                 [
                     "Status: ",
                     html.Span(
-                        id="job_submit_state",
+                        id="job-submit-state",
                         children=f"{init_job_status}",
                         style=job_status_style,
                     ),
@@ -470,7 +470,6 @@ def generate_tooltips(problem_type: ProblemType = ProblemType.KZ):
         dmc.Tooltip(
             label=message,
             target=f"#{target}",
-            id=f"tooltip_{target}",
             multiline=True,
             w=300,
             color="#202239"
@@ -491,16 +490,16 @@ def create_interface():
                 className="skip-link",
                 tabIndex=1,
             ),
-            dcc.Store(id="coupling_data", data={}),  # KZ NM plot points
-            dcc.Store(id="zne_estimates", data={}),  # store zero noise extrapolation points
-            dcc.Store(id="modal_trigger", data=False),
-            dcc.Store(id="kz_data", data=[]),  # KZ plot point
+            dcc.Store(id="coupling-data", data={}),  # KZ NM plot points
+            dcc.Store(id="zne-estimates", data={}),  # store zero noise extrapolation points
+            dcc.Store(id="modal-trigger", data=False),
+            dcc.Store(id="kz-data", data=[]),  # KZ plot point
             dcc.Store(id="selected-problem"),
-            dcc.Store(id="job_submit_time"),
-            dcc.Store(id="job_id"),
-            dcc.Store(id="embeddings_cached", data={}),
+            dcc.Store(id="job-submit-time"),
+            dcc.Store(id="job-id"),
+            dcc.Store(id="embeddings-cached", data={}),
             dcc.Interval(
-                id="wd_job",
+                id="wd-job",
                 interval=500,
                 n_intervals=0,
                 disabled=True,
@@ -622,7 +621,7 @@ def create_interface():
                                             html.Div(
                                                 className="tab-content-wrapper",
                                                 children=[
-                                                    default_graph("Zero-noise Extrapolation of Kink Density", "kink-v-noise"),
+                                                    default_graph("Zero-Noise Extrapolation of Kink Density", "kink-v-noise"),
                                                     default_graph("Measured and Extrapolated Kink Densities", "kink-v-anneal"),
                                                 ],
                                             )

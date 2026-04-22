@@ -54,15 +54,15 @@ JOB_BAR_DISPLAY = {
 
 TOOL_TIPS_KZ_NM = {
     "coupling-strength-wrapper": "Coupling strength between spins in the ferromagnetic ring.",
-    "qpu_selection": "Quantum computers available to your account/project token.",
-    "quench_schedule_filename": """The fast-anneal schedule for the selected quantum computer.
+    "qpu-selection": "Quantum computers available to your account/project token.",
+    "quench-schedule-filename": """The fast-anneal schedule for the selected quantum computer.
         If none exists, one from a different quantum computer is used (expect inaccuracies).""",
 }
 
 TOOL_TIPS_KZ = {
     "coupling-strength-wrapper": """Coupling strength between spins in the ring.
         Range of -2 (ferromagnetic) to +1 (anti-ferromagnetic).""",
-    "qpu_selection": "Quantum computers available to your account/project token.",
-    "quench_schedule_filename": """The fast-anneal schedule for the selected quantum computer.
+    "qpu-selection": "Quantum computers available to your account/project token.",
+    "quench-schedule-filename": """The fast-anneal schedule for the selected quantum computer.
         If none exists, one from a different quantum computer is used (expect inaccuracies).""",
 }

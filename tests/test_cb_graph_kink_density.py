@@ -62,12 +62,12 @@ parametrize_vals = [
     ("kz_graph_display", "both", "", ProblemType.KZ.value),
     ("kz_graph_display", "kink_density", "", ProblemType.KZ.value),
     ("kz_graph_display", "schedule", "", ProblemType.KZ.value),
-    ("coupling_strength", "schedule", "", ProblemType.KZ.value),
-    ("quench_schedule_filename", "schedule", "", ProblemType.KZ.value),
-    ("job_submit_state", "", "SUBMITTED", ProblemType.KZ_NM.value),
-    ("job_submit_state", "", "PENDING", ProblemType.KZ_NM.value),
-    ("job_submit_state", "", "COMPLETED", ProblemType.KZ.value),
-    ("job_submit_state", "", "COMPLETED", ProblemType.KZ_NM.value),
+    ("coupling-strength", "schedule", "", ProblemType.KZ.value),
+    ("quench-schedule-filename", "schedule", "", ProblemType.KZ.value),
+    ("job-submit-state", "", "SUBMITTED", ProblemType.KZ_NM.value),
+    ("job-submit-state", "", "PENDING", ProblemType.KZ_NM.value),
+    ("job-submit-state", "", "COMPLETED", ProblemType.KZ.value),
+    ("job-submit-state", "", "COMPLETED", ProblemType.KZ_NM.value),
 ]
 
 
