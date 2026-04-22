@@ -83,6 +83,27 @@ custom CSS can be added below.
     align-items: center;
 }
 
+/* Custom Progress Bar Styles */
+.progress-bar {
+    width: 60%;
+    height: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--blue-darker);
+    border-radius: 1rem;
+    transition: width 0.6s ease, backgroundColor 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
 @media screen and (max-width: 1300px) {
     .banner {
         padding-left: 0;

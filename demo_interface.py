@@ -19,7 +19,6 @@ from itertools import chain
 
 from dash import dcc, html
 import dash_mantine_components as dmc
-import dash_bootstrap_components as dbc
 
 from demo_configs import (
     DEFAULT_QPU,
@@ -388,10 +387,16 @@ def show_progress():
                 ],
                 className="caption",
             ),
-            dbc.Progress(
-                id="bar_job_status",
-                value=0,
-                color=THEME_COLOR,
+            html.Div(
+                className="progress-bar",
+                title="Job Progress",
+                **{"aria-label": "Job progress indicator"},
+                children=[
+                    html.Div(
+                        id="job-status-progress",
+                        className="progress-bar-fill",
+                    )
+                ],
             ),
         ],
         className="progress-wrapper",

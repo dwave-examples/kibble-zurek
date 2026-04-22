@@ -45,6 +45,8 @@ def test_set_progress_bar(job_submit_state_val, bar_job_status_value, bar_job_st
 
     try:
         output = ctx.run(run_callback)
-        assert output == (bar_job_status_value, bar_job_status_color)
+        assert output["width"] == f"{bar_job_status_value}%"
+        assert output["backgroundColor"] == bar_job_status_color
+
     except KeyError:
         assert job_submit_state_val == "BREAK FUNCTION"

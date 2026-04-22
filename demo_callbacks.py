@@ -660,20 +660,16 @@ def simulate(
 
 
 @dash.callback(
-    Output("bar_job_status", "value"),
-    Output("bar_job_status", "color"),
+    Output("job-status-progress", "style"),
     Input("job_submit_state", "children"),
 )
 def set_progress_bar(job_submit_state):
     """Update progress bar for job submissions."""
-
-    if ctx.triggered_id:
-        print(JOB_BAR_DISPLAY[job_submit_state][0])
-        # return JOB_BAR_DISPLAY[job_submit_state][0]
-        return JOB_BAR_DISPLAY[job_submit_state][0], JOB_BAR_DISPLAY[job_submit_state][1]
-
-    # return JOB_BAR_DISPLAY["READY"][0]
-    return JOB_BAR_DISPLAY["READY"][0], JOB_BAR_DISPLAY["READY"][1]
+    
+    return {
+        "width": f"{JOB_BAR_DISPLAY[job_submit_state if ctx.triggered_id else 'READY'][0]}%",
+        "backgroundColor": JOB_BAR_DISPLAY[job_submit_state if ctx.triggered_id else 'READY'][1],
+    }
 
 
 @dash.callback(

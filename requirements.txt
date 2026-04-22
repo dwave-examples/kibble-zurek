@@ -1,5 +1,4 @@
 dash[diskcache]~=4.0
-dash-bootstrap-components~=2.0
 dash-mantine-components~=2.5
 dwave-ocean-sdk~=9.3
 pandas~=2.3
