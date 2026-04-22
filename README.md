@@ -14,14 +14,54 @@ This example employs quantum annealing in the coherent regime of a D-Wave
 quantum processing unit (QPU), producing samples that align with the theoretical
 predictions.
 
-![Simulation vs Predicted](static/simulation_vs_predicted.png)
+![Demo Interface](static/demo.png "Image of demo interface")
 
-* [The Kibble-Zurek Mechanism](#The-Kibble-Zurek-Mechanism)
 * [Installation](#Installation)
 * [Usage](#Usage)
+* [The Kibble-Zurek Mechanism](#The-Kibble-Zurek-Mechanism)
 * [Model Overview](#Model-Overview)
 * [Code](#Code)
 * [License](#License)
+
+## <a name="Installation"></a> Installation
+
+You can run this example without installation in cloud-based IDEs that support the
+[Development Containers Specification](https://containers.dev/supporting) (aka "devcontainers")
+such as GitHub Codespaces.
+
+For development environments that do not support `devcontainers`, install requirements:
+
+```bash
+pip install -r requirements.txt
+```
+
+If you are cloning the repo to your local system, working in a
+[virtual environment](https://docs.python.org/3/library/venv.html) is recommended.
+
+## <a name="Usage"></a> Usage
+
+Your development environment should be configured to access the
+[Leap&trade; quantum cloud service](https://docs.dwavequantum.com/en/latest/ocean/sapi_access_basic.html).
+You can see information about supported IDEs and authorizing access to your Leap account
+[here](https://docs.dwavequantum.com/en/latest/ocean/leap_authorization.html).
+
+Run the following terminal command to start the Dash application:
+
+```bash
+python app.py
+```
+
+Access the user interface with your browser at http://127.0.0.1:8050/.
+
+The demo program opens an interface where you can configure problems and submit these problems to
+a solver.
+
+Configuration options can be found in the [demo_configs.py](demo_configs.py) file.
+
+> [!NOTE]\
+> If you plan on editing any files while the application is running, please run the application
+with the `--debug` command-line argument for live reloads and easier debugging:
+`python app.py --debug`
 
 ## <a name="The-Kibble-Zurek-Mechanism"></a> The Kibble-Zurek Mechanism
 
@@ -96,48 +136,6 @@ average length increases as a function of the square root of the anneal time.
 
 <img src='static/1D_finite.jpg' alt='1D Spin Ring Finite' width='400'/>
 
-## <a name="Installation"></a> Installation
-
-You can run this example without installation in cloud-based IDEs that support the
-[Development Containers specification](https://containers.dev/supporting)
-(aka "devcontainers") such as GitHub Codespaces.
-
-For development environments that do not support `devcontainers`, install
-requirements:
-
-```bash
-pip install -r requirements.txt
-```
-
-If you are cloning the repo to your local system, working in a
-[virtual environment](https://docs.python.org/3/library/venv.html) is
-recommended.
-
-## <a name="Usage"></a> Usage
-
-Your development environment should be configured to access the
-Leap&trade; quantum cloud service. You can see information about supported IDEs
-and authorizing access to your Leap account
-[here](https://docs.dwavequantum.com/en/latest/leap_sapi/dev_env.html) and
-[here](https://docs.dwavequantum.com/en/latest/ocean/sapi_access_basic.html).
-
-Run the following terminal command to start the Dash application:
-
-```bash
-python app.py
-```
-
-Access the user interface with your browser at http://127.0.0.1:8050/.
-
-The demo program opens an interface where you can configure problems and submit
-these problems to a solver.
-
-Configuration options can be found in the [demo_configs.py](demo_configs.py)
-file.
-
-*Hover over an input field to see a description of the input and its range of*
-*supported values.*
-
 ## <a name="Model-Overview"></a> Model Overview
 
 Quantum simulation is valuable for demonstrating and understanding the
@@ -159,10 +157,10 @@ on the quantum computer is done as follows.
 To calculate kink density from samples returned from the quantum computer,
 define a *kink operator*,
 
-![formula kink operator](static/formula_kink_operator.png),
+![formula kink operator](static/formula_kink_operator.png "Image of formula kink operator"),
 
 where J is the coupling strength between qubits and
-![formula sigma](static/formula_sigma.png) is the Pauli operator on the i-th
+![formula sigma](static/formula_sigma.png "Image of formula sigma") is the Pauli operator on the i-th
 qubit. Put simply, for any sample returned from the quantum computer, the
 operator gives 1 if there is a kink between qubits i and i+1 (i.e., if the
 pair of qubits at the end of the anneal have different values for negative J
@@ -171,7 +169,7 @@ the operator gives 0.
 
 Define a *kink-density operator* as,
 
-![formula kink densityoperator](static/formula_kink_density_operator.png),
+![formula kink-density operator](static/formula_kink_density_operator.png "Image of formula kink-density operator"),
 
 where L is the length of the chain of spins (the number of qubits coupled
 together).
@@ -207,6 +205,8 @@ A fitting function—quadratic for the Advantage solver can be used to calculate
 zero-noise point for various coupling strengths at the same annealing time.
 
 <img src='static/ZNE_fig2.png' alt='Experimental results' width='400'/>
+
+![Zero-Noise Extrapolation Demo Interface](static/demo2.png "Image of Zero-Noise Extrapolation demo interface")
 
 
 ## <a name="Code"></a> Code
