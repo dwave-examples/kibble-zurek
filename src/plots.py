@@ -579,7 +579,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
     return fig
 
 
-def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, ta_str):
+def plot_zne_fitted_line(fig, coupling_data, zne_estimates, ta_str):
     """
     Fit a curve to the coupling data and plot the Zero-Noise Extrapolation (ZNE) estimate.
 
@@ -594,8 +594,6 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, ta_str):
         coupling_data (dict): A dictionary containing coupling-related data
             structured as {ta_str: [data_points]}, where each data point
             includes "lambda" and "kink_density".
-        qpu_name (str): The name of the Quantum Processing Unit (QPU) used.
-            Determines the fitting method.
         zne_estimates (dict): A dictionary to store Zero-Noise Extrapolation
             (ZNE) estimates structured as {ta_str: estimate}.
         kz_graph_display (str): The type of graph display. Typically aligns with

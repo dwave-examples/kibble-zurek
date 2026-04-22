@@ -352,11 +352,37 @@ def add_graph_point_kz_nm(
     )
 
     zne_estimates, modal_trigger = plot_zne_fitted_line(
-        fig_noise, coupling_data, qpu_name, zne_estimates, ta_str
+        fig_noise, coupling_data, zne_estimates, ta_str
     )
     fig_anneal = plot_ze_estimates(fig_anneal, zne_estimates)
 
     return fig_noise, fig_anneal, coupling_data, zne_estimates, modal_trigger
+
+
+@dash.callback(
+    Output("job_submit_state", "children", allow_duplicate=True),
+    inputs=[
+        Input("selected-problem", "data"),
+        Input("graph-selection-radio", "value"),
+        Input("quench_schedule_filename", "children"),
+        Input("coupling_strength", "value"),
+        Input("spins", "value"),
+        Input("anneal_duration", "value"),
+        Input("qpu_selection", "value"),
+    ],
+    prevent_initial_call=True,
+)
+def reset_progress(
+    problem_type,
+    graph_selection,
+    schedule_filename,
+    J,
+    spins,
+    ta,
+    qpu_selection,
+):
+    """Resets the progress on setting change."""
+    return "READY"
 
 
 @dash.callback(

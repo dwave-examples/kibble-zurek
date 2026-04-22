@@ -390,7 +390,6 @@ def show_progress():
             html.Div(
                 className="progress-bar",
                 title="Job Progress",
-                **{"aria-label": "Job progress indicator"},
                 children=[
                     html.Div(
                         id="job-status-progress",
@@ -407,6 +406,7 @@ def no_solver_modal():
     return dmc.Modal(
         title="Leap's Quantum Computers Inaccessible",
         id="no-solver-modal",
+        centered=True,
         children=[
             html.Div(
                 [
@@ -447,8 +447,9 @@ def error_modal():
     return dmc.Modal(
         title="Error",
         id="error-modal",
+        centered=True,
         children=[
-            html.Div(
+            html.P(
                 "Fitting function failed likely due to ill conditioned data, please collect more."
             )
         ],
@@ -472,6 +473,7 @@ def generate_tooltips(problem_type: ProblemType = ProblemType.KZ):
             id=f"tooltip_{target}",
             multiline=True,
             w=300,
+            color="#202239"
         )
         for target, message in tool_tips.items()
     ]

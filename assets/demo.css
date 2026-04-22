@@ -81,6 +81,7 @@ custom CSS can be added below.
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 0.5rem;
 }
 
 /* Custom Progress Bar Styles */
@@ -102,6 +103,10 @@ custom CSS can be added below.
     display: flex;
     align-items: center;
     justify-content: flex-end;
+}
+
+.mantine-Modal-header {
+    background-color: var(--red-light);
 }
 
 @media screen and (max-width: 1300px) {

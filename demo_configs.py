@@ -36,7 +36,7 @@ J_OPTIONS = [-1.8, -1.6, -1.4, -1.2, -1, -0.9, -0.8, -0.7]
 
 DEFAULT_QPU = "Advantage2_system1"  # If not available, the first returned will be default
 
-SHOW_TOOLTIPS = True  # Determines whether tooltips are on or off
+SHOW_TOOLTIPS = False  # Determines whether tooltips are on or off
 
 RING_LENGTHS = [512, 1024, 2048]
 
