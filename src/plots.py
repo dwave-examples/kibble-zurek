@@ -180,7 +180,7 @@ def plot_kink_densities_bg(
     if not schedule_name:
         schedule_name = "FALLBACK_SCHEDULE.csv"
 
-    schedule = pd.read_csv(f"helpers/{schedule_name}")
+    schedule = pd.read_csv(f"schedules_and_embeddings/{schedule_name}")
 
     A_ghz = schedule["A(s) (GHz)"]
     B_ghz = schedule["B(s) (GHz)"]

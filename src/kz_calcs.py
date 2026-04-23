@@ -46,7 +46,7 @@ def theoretical_kink_density_prefactor(J, schedule_name=None):
     if not schedule_name:
         schedule_name = "FALLBACK_SCHEDULE.csv"
 
-    schedule = pd.read_csv(f"helpers/{schedule_name}")
+    schedule = pd.read_csv(f"schedules_and_embeddings/{schedule_name}")
 
     COMPENSATION_SCHEDULE_ENERGY = 0.8 if "Advantage_system" in schedule_name else 1.0
 

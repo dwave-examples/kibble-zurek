@@ -215,7 +215,7 @@ def set_schedule(qpu_name: str) -> tuple[str, str]:
     schedule_filename_class = "no-schedule"
 
     if qpu_name:
-        for filename in [file for file in os.listdir("helpers") if "schedule.csv" in file.lower()]:
+        for filename in [file for file in os.listdir("schedules_and_embeddings") if "schedule.csv" in file.lower()]:
 
             if qpu_name.split(".")[0] in filename:  # Accepts & reddens older versions
                 schedule_filename = filename
@@ -245,9 +245,9 @@ def load_cached_embeddings(qpu_name: str) -> tuple[dict, str]:
     embeddings = {}  # Wipe out previous QPU's embeddings
 
     if qpu_name:
-        for filename in [file for file in os.listdir("helpers") if ".json" in file and "emb_" in file]:
+        for filename in [file for file in os.listdir("schedules_and_embeddings") if ".json" in file and "emb_" in file]:
             if qpu_name.split(".")[0] in filename:
-                with open(f"helpers/{filename}", "r") as fp:
+                with open(f"schedules_and_embeddings/{filename}", "r") as fp:
                     embeddings = json.load(fp)
 
                 embeddings = json_to_dict(embeddings)

@@ -212,10 +212,10 @@ zero-noise point for various coupling strengths at the same annealing time.
 ## <a name="Code"></a> Code
 
 Most the code related to configuring and analyzing the Ising problem is in the
-[helpers/qa.py](helpers/qa.py) and [helpers/kz_calcs.py](helpers/kz_calcs.py)
+[schedules_and_embeddings/qa.py](schedules_and_embeddings/qa.py) and [schedules_and_embeddings/kz_calcs.py](schedules_and_embeddings/kz_calcs.py)
 files. The remaining files mostly support the user interface.
 
-The [helpers/qa.py](helpers/qa.py) file provides the following functions related
+The [schedules_and_embeddings/qa.py](schedules_and_embeddings/qa.py) file provides the following functions related
 to the use of the quantum computer:
 
 *   ``create_bqm()`` generates a binary quadratic model (BQM) to represent the
@@ -228,7 +228,7 @@ to the use of the quantum computer:
 
 *   Additional convenience functions.
 
-The [helpers/kz_calcs.py](helpers/kz_calcs.py) file provides the following
+The [schedules_and_embeddings/kz_calcs.py](schedules_and_embeddings/kz_calcs.py) file provides the following
 functions related to Kibble-Zurek calculations:
 
 *   ``theoretical_kink_density()`` calculates the kink density predicted for

@@ -22,7 +22,7 @@ from src.kz_calcs import *
 
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-schedule = pd.read_csv(project_dir + "/helpers/FALLBACK_SCHEDULE.csv")
+schedule = pd.read_csv(project_dir + "/schedules_and_embeddings/FALLBACK_SCHEDULE.csv")
 
 
 @pytest.mark.parametrize(
