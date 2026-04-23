@@ -13,12 +13,15 @@
 # limitations under the License.
 
 """This file stores the Dash HTML layout for the app."""
+
 from __future__ import annotations
+
 from enum import EnumMeta
 from itertools import chain
 
-from dash import dcc, html
 import dash_mantine_components as dmc
+from dash import dcc, html
+from dwave.cloud import Client
 
 from demo_configs import (
     DEFAULT_QPU,
@@ -32,8 +35,6 @@ from demo_configs import (
     TOOL_TIPS_KZ_NM,
 )
 from src.demo_enums import ProblemType
-from dwave.cloud import Client
-
 
 THEME_COLOR = "#2d4376"
 
@@ -72,10 +73,14 @@ def slider(label: str, id: str, config: dict, marks: list | None = None) -> html
                 id=id,
                 className="slider",
                 **config,
-                marks=marks if marks else [
-                    {"value": config["min"], "label": f'{config["min"]}'},
-                    {"value": config["max"], "label": f'{config["max"]}'},
-                ],
+                marks=(
+                    marks
+                    if marks
+                    else [
+                        {"value": config["min"], "label": f'{config["min"]}'},
+                        {"value": config["max"], "label": f'{config["max"]}'},
+                    ]
+                ),
                 labelAlwaysOn=True,
                 thumbLabel=f"{label} slider",
                 color=THEME_COLOR,
@@ -108,8 +113,8 @@ def range_slider(label: str, id: str, config: dict) -> html.Div:
                 thumbFromLabel=f"{label} slider start",
                 thumbToLabel=f"{label} slider end",
                 color=THEME_COLOR,
-            )
-        ]
+            ),
+        ],
     )
 
 
@@ -155,7 +160,9 @@ def checklist(label: str, id: str, options: list, values: list, inline: bool = T
                 value=values,
                 children=dmc.Group(
                     [
-                        dmc.Checkbox(label=option["label"], value=option["value"], color=THEME_COLOR)
+                        dmc.Checkbox(
+                            label=option["label"], value=option["value"], color=THEME_COLOR
+                        )
                         for option in options
                     ],
                 ),
@@ -239,34 +246,38 @@ def get_quench_duration_setting(problem_type):
     options = [5, 10, 20, 40, 80, 160, 320, 640, 1280]
     dropdown_options = generate_options([f"{option} ns" for option in options])
     if problem_type is ProblemType.KZ_NM:
-        return html.Div([
-            dropdown(
-                "Target Quench Duration [ns]",
-                "anneal-duration",
-                dropdown_options,
-                value="80 ns"
-            )
-        ], id="quench-duration-setting")
-
-    return html.Div([
-        html.Label("Quench Duration [ns]", htmlFor="anneal-duration"),
-        dmc.NumberInput(
-            id="anneal-duration",
-            type="number",
-            min=5,
-            max=100,
-            step=1,
-            value=7,
+        return html.Div(
+            [
+                dropdown(
+                    "Target Quench Duration [ns]",
+                    "anneal-duration",
+                    dropdown_options,
+                    value="80 ns",
+                )
+            ],
+            id="quench-duration-setting",
         )
-    ], id="quench-duration-setting")
+
+    return html.Div(
+        [
+            html.Label("Quench Duration [ns]", htmlFor="anneal-duration"),
+            dmc.NumberInput(
+                id="anneal-duration",
+                type="number",
+                min=5,
+                max=100,
+                step=1,
+                value=7,
+            ),
+        ],
+        id="quench-duration-setting",
+    )
 
 
 def generate_options(options: list | EnumMeta) -> list[dict]:
     """Generates options for dropdowns, checklists, radios, etc."""
     if isinstance(options, EnumMeta):
-        return [
-            {"label": option.label, "value": f"{option.value}"} for option in options
-        ]
+        return [{"label": option.label, "value": f"{option.value}"} for option in options]
 
     return [{"label": f"{option}", "value": f"{option}"} for option in options]
 
@@ -345,33 +356,40 @@ def generate_run_buttons() -> html.Div:
         ],
     )
 
+
 def default_graph(title: str, id: str, load_radio: bool = False):
     radio_options = [
         {"label": "Both", "value": "both"},
         {"label": "Kink Density", "value": "kink_density"},
         {"label": "Schedule", "value": "schedule"},
     ]
-    return html.Div([
-        html.H3(title),
-        html.Div(
-            radio(
-                "",
-                "graph-selection-radio",
-                sorted(radio_options, key=lambda op: op["value"]),
-                radio_options[0]["value"],
+    return html.Div(
+        [
+            html.H3(title),
+            (
+                html.Div(
+                    radio(
+                        "",
+                        "graph-selection-radio",
+                        sorted(radio_options, key=lambda op: op["value"]),
+                        radio_options[0]["value"],
+                    ),
+                    id="graph-radio-options",
+                )
+                if load_radio
+                else ()
             ),
-            id="graph-radio-options"
-        ) if load_radio else (),
-        dcc.Graph(
-            id=f"{id}-graph",
-            responsive=True,
-            config={"displayModeBar": False},
-        ),
-    ])
+            dcc.Graph(
+                id=f"{id}-graph",
+                responsive=True,
+                config={"displayModeBar": False},
+            ),
+        ]
+    )
 
 
 def show_progress():
-    init_job_status="READY"
+    init_job_status = "READY"
     job_status_style = {"color": "#AA3A3C"} if init_job_status == "NO SOLVER" else {}
 
     return html.Div(
@@ -443,6 +461,7 @@ def no_solver_modal():
         ],
     )
 
+
 def error_modal():
     return dmc.Modal(
         title="Error",
@@ -454,6 +473,7 @@ def error_modal():
             )
         ],
     )
+
 
 def generate_tooltips(problem_type: ProblemType = ProblemType.KZ):
     """Tooltip generator.
@@ -467,13 +487,7 @@ def generate_tooltips(problem_type: ProblemType = ProblemType.KZ):
     tool_tips = TOOL_TIPS_KZ if problem_type is ProblemType.KZ else TOOL_TIPS_KZ_NM
 
     return [
-        dmc.Tooltip(
-            label=message,
-            target=f"#{target}",
-            multiline=True,
-            w=300,
-            color="#202239"
-        )
+        dmc.Tooltip(label=message, target=f"#{target}", multiline=True, w=300, color="#202239")
         for target, message in tool_tips.items()
     ]
 
@@ -538,7 +552,10 @@ def create_interface():
                                                                 generate_settings_form(),
                                                                 generate_run_buttons(),
                                                                 show_progress(),
-                                                                html.Div(children=generate_tooltips(), id="tooltips"),
+                                                                html.Div(
+                                                                    children=generate_tooltips(),
+                                                                    id="tooltips",
+                                                                ),
                                                             ],
                                                             className="settings-and-buttons",
                                                         ),
@@ -586,14 +603,20 @@ def create_interface():
                                                         [
                                                             dmc.TabsTab(
                                                                 ProblemType.KZ.label,
-                                                                id={"type": "problem-type", "index": 0},
-                                                                value=f"tab-{ProblemType.KZ.value}"
+                                                                id={
+                                                                    "type": "problem-type",
+                                                                    "index": 0,
+                                                                },
+                                                                value=f"tab-{ProblemType.KZ.value}",
                                                             ),
                                                             dmc.TabsTab(
                                                                 ProblemType.KZ_NM.label,
-                                                                id={"type": "problem-type", "index": 1},
-                                                                value=f"tab-{ProblemType.KZ_NM.value}"
-                                                            )
+                                                                id={
+                                                                    "type": "problem-type",
+                                                                    "index": 1,
+                                                                },
+                                                                value=f"tab-{ProblemType.KZ_NM.value}",
+                                                            ),
                                                         ]
                                                     ),
                                                 ]
@@ -608,8 +631,15 @@ def create_interface():
                                             html.Div(
                                                 className="tab-content-wrapper",
                                                 children=[
-                                                    default_graph("Spin States of Qubits in a 1D Ring", "spin-orientation"),
-                                                    default_graph("QPU Samples vs Kibble-Zurek Prediction", "sample-v-theory", True),
+                                                    default_graph(
+                                                        "Spin States of Qubits in a 1D Ring",
+                                                        "spin-orientation",
+                                                    ),
+                                                    default_graph(
+                                                        "QPU Samples vs Kibble-Zurek Prediction",
+                                                        "sample-v-theory",
+                                                        True,
+                                                    ),
                                                 ],
                                             )
                                         ],
@@ -621,8 +651,14 @@ def create_interface():
                                             html.Div(
                                                 className="tab-content-wrapper",
                                                 children=[
-                                                    default_graph("Zero-Noise Extrapolation of Kink Density", "kink-v-noise"),
-                                                    default_graph("Measured and Extrapolated Kink Densities", "kink-v-anneal"),
+                                                    default_graph(
+                                                        "Zero-Noise Extrapolation of Kink Density",
+                                                        "kink-v-noise",
+                                                    ),
+                                                    default_graph(
+                                                        "Measured and Extrapolated Kink Densities",
+                                                        "kink-v-anneal",
+                                                    ),
                                                 ],
                                             )
                                         ],

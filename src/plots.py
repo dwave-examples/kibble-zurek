@@ -12,15 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from demo_configs import J_OPTIONS
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+from demo_configs import J_OPTIONS
+from src.demo_enums import ProblemType
 from src.kz_calcs import theoretical_kink_density
 from src.qa import fitted_function
-from src.demo_enums import ProblemType
 
 __all__ = [
     "kink_v_anneal_init_graph",
@@ -48,6 +48,7 @@ colors_coupling = px.colors.sample_colorscale(
 )
 
 coupling_color_theme = {j: colors_coupling[i] for i, j in enumerate(J_OPTIONS)}
+
 
 def add_conherent_thermalized_labels(fig, time_range, n):
     """Adds Conherent and Thermalized annotations to a Plotly fig."""
@@ -78,6 +79,7 @@ def add_conherent_thermalized_labels(fig, time_range, n):
     )
 
     return fig
+
 
 def plot_predicted_area(time_range, n):
     """Returns predicted area scatter plots."""
@@ -124,8 +126,7 @@ def plot_ze_estimates(fig, zne_estimates):
     """Plots zero noise estimate points."""
     # Remove existing estimates
     fig["data"] = tuple(
-        trace for trace in fig["data"]
-        if "name" not in trace or trace["name"] != "ZNE Estimate"
+        trace for trace in fig["data"] if "name" not in trace or trace["name"] != "ZNE Estimate"
     )
 
     for ta_str, a in zne_estimates.items():
@@ -312,20 +313,19 @@ def kink_v_noise_init_graph(n):
         plotly.graph_objs.Figure: A Plotly figure object.
     """
     fig_layout = go.Layout(
-        xaxis3=dict(title="<b>Noise ratio (t<sub>programmed</sub>/t<sub>target</sub>)</b>", type="linear", range=[0, 3]),
+        xaxis3=dict(
+            title="<b>Noise ratio (t<sub>programmed</sub>/t<sub>target</sub>)</b>",
+            type="linear",
+            range=[0, 3],
+        ),
         yaxis1=get_kink_density_axis(n),
     )
 
     fig = go.Figure(data=[], layout=fig_layout)
 
     fig.update_layout(
-        legend=dict(
-            yanchor="bottom",
-            y=0.05,
-            xanchor="right",
-            x=0.97
-        ),
-        margin=dict(b=5, l=5, r=20, t=10)
+        legend=dict(yanchor="bottom", y=0.05, xanchor="right", x=0.97),
+        margin=dict(b=5, l=5, r=20, t=10),
     )
 
     return fig
@@ -432,9 +432,10 @@ def plot_kink_density(
         # Remove duplicate legend values
         names = set()
         fig.for_each_trace(
-            lambda trace:
-                trace.update(showlegend=False)
-                if (trace.name in names) else names.add(trace.name))
+            lambda trace: (
+                trace.update(showlegend=False) if (trace.name in names) else names.add(trace.name)
+            )
+        )
 
         fig.update_layout(
             xaxis3=fig.layout.xaxis3,
@@ -465,9 +466,10 @@ def plot_kink_density(
     # Remove duplicate legend values
     names = set()
     fig.for_each_trace(
-        lambda trace:
-            trace.update(showlegend=False)
-            if (trace.name in names) else names.add(trace.name))
+        lambda trace: (
+            trace.update(showlegend=False) if (trace.name in names) else names.add(trace.name)
+        )
+    )
 
     return fig
 
@@ -630,8 +632,7 @@ def plot_zne_fitted_line(fig, coupling_data, zne_estimates, ta_str):
         trace
         for trace in fig.data
         if not (
-            trace.name in ["Fitting Curve", "ZNE Estimate"]
-            and trace.legendgroup == f"ta_{ta_str}"
+            trace.name in ["Fitting Curve", "ZNE Estimate"] and trace.legendgroup == f"ta_{ta_str}"
         )
     ]
 

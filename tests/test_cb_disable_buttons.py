@@ -14,13 +14,13 @@
 
 from contextvars import copy_context
 
-from demo_configs import RING_LENGTHS
 import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 from dash.exceptions import PreventUpdate
 
 from demo_callbacks import disable_buttons
+from demo_configs import RING_LENGTHS
 
 parametrize_names = [
     "job_submit_state_val",
@@ -30,8 +30,8 @@ parametrize_names = [
     "qpu_selection_val",
 ]
 
-spins_disabled = [True]*len(RING_LENGTHS)
-spins_enabled = [False]*len(RING_LENGTHS)
+spins_disabled = [True] * len(RING_LENGTHS)
+spins_enabled = [False] * len(RING_LENGTHS)
 parametrize_vals = [
     ("EMBEDDING", True, True, spins_disabled, True),
     ("SUBMITTED", True, True, spins_disabled, True),

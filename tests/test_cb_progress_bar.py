@@ -14,12 +14,12 @@
 
 from contextvars import copy_context
 
-from demo_configs import JOB_BAR_DISPLAY
 import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
 from demo_callbacks import set_progress_bar
+from demo_configs import JOB_BAR_DISPLAY
 
 parametrize_vals = [
     (f"{status}", JOB_BAR_DISPLAY[status][0], JOB_BAR_DISPLAY[status][1])

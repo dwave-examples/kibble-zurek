@@ -18,15 +18,13 @@ import os
 from typing import NamedTuple
 
 import dash
-from dash import MATCH
-from demo_interface import CLIENT, SOLVERS, generate_tooltips, get_quench_duration_setting, get_slider_marks
 import dimod
 import numpy as np
-from dash import ALL, Input, Output, State, ctx
+import plotly.graph_objects as go
+from dash import ALL, MATCH, Input, Output, State, ctx
 from dash.exceptions import PreventUpdate
 from dwave.embedding import embed_bqm, is_valid_embedding
 from dwave.system import DWaveSampler
-import plotly.graph_objects as go
 
 from demo_configs import (
     DESCRIPTION,
@@ -37,10 +35,17 @@ from demo_configs import (
     MAIN_HEADER_NM,
     RING_LENGTHS,
 )
+from demo_interface import (
+    CLIENT,
+    SOLVERS,
+    generate_tooltips,
+    get_quench_duration_setting,
+    get_slider_marks,
+)
+from src.demo_enums import ProblemType
 from src.kz_calcs import *
 from src.plots import *
 from src.qa import *
-from src.demo_enums import ProblemType
 
 
 @dash.callback(
@@ -192,7 +197,7 @@ def disable_buttons(job_submit_state: str) -> tuple[bool, bool, list[bool], bool
     if job_submit_state not in running_states + done_states:
         raise PreventUpdate
 
-    return is_running, is_running, [is_running]*len(RING_LENGTHS), is_running
+    return is_running, is_running, [is_running] * len(RING_LENGTHS), is_running
 
 
 @dash.callback(
@@ -215,7 +220,11 @@ def set_schedule(qpu_name: str) -> tuple[str, str]:
     schedule_filename_class = "no-schedule"
 
     if qpu_name:
-        for filename in [file for file in os.listdir("schedules_and_embeddings") if "schedule.csv" in file.lower()]:
+        for filename in [
+            file
+            for file in os.listdir("schedules_and_embeddings")
+            if "schedule.csv" in file.lower()
+        ]:
 
             if qpu_name.split(".")[0] in filename:  # Accepts & reddens older versions
                 schedule_filename = filename
@@ -233,7 +242,7 @@ def set_schedule(qpu_name: str) -> tuple[str, str]:
 )
 def load_cached_embeddings(qpu_name: str) -> tuple[dict, str]:
     """Cache embeddings for the selected QPU.
-    
+
     Args:
         qpu_name: The name of the selected QPU.
 
@@ -245,7 +254,11 @@ def load_cached_embeddings(qpu_name: str) -> tuple[dict, str]:
     embeddings = {}  # Wipe out previous QPU's embeddings
 
     if qpu_name:
-        for filename in [file for file in os.listdir("schedules_and_embeddings") if ".json" in file and "emb_" in file]:
+        for filename in [
+            file
+            for file in os.listdir("schedules_and_embeddings")
+            if ".json" in file and "emb_" in file
+        ]:
             if qpu_name.split(".")[0] in filename:
                 with open(f"schedules_and_embeddings/{filename}", "r") as fp:
                     embeddings = json.load(fp)
@@ -294,7 +307,7 @@ def add_graph_point_kz(
     kz_data: list,
 ) -> tuple[go.Figure, list]:
     """Add new point to kink density graph when KZ job finishes.
-    
+
     Args:
         job_submit_state: The current state of the job submission process.
         graph_selection: The value of the graph selection radio, either "schedule", "kink_density",
@@ -308,7 +321,7 @@ def add_graph_point_kz(
         embeddings: A dictionary of cached embeddings for different numbers of spins.
         figure: The current figure for the sample vs theory graph.
         kz_data: The existing data points for the kink density graph.
-    
+
     Returns:
         fig: The updated figure for the sample vs theory graph, with a new point added.
         kz_data: The data points for the kink density graph, either unchanged or with a new point
@@ -326,8 +339,12 @@ def add_graph_point_kz(
     # Append the new data point
     kz_data.append((kink_density, ta))
 
-    fig = dash.no_update if graph_selection == "schedule" else plot_kink_density(
-        graph_selection, figure, kink_density, ta, J, problem_type=ProblemType.KZ
+    fig = (
+        dash.no_update
+        if graph_selection == "schedule"
+        else plot_kink_density(
+            graph_selection, figure, kink_density, ta, J, problem_type=ProblemType.KZ
+        )
     )
     return fig, kz_data
 
@@ -461,7 +478,7 @@ def load_new_graph_kz(
 ) -> tuple[go.Figure, list]:
     """Initiates graphics for kink density based on theory and QPU samples on page load and when
     when settings change.
-    
+
     Args:
         problem_type: Either KZ (``0`` or ``ProblemType.KZ``) or
             KZ_NM (``1`` or ``ProblemType.KZ_NM``).
@@ -472,7 +489,7 @@ def load_new_graph_kz(
         spins: The value of the spins setting.
         ta: The value of the anneal duration setting, in nanoseconds.
         kz_data: The existing data points for the kink density graph.
-        
+
     Returns:
         fig: The figure for the sample vs theory graph, either initialized or updated with new
             data point.
@@ -553,14 +570,14 @@ def display_graphics_spin_ring(
     spins: str, job_submit_state: str, job_id: str, J: float, embeddings: dict
 ) -> go.Figure:
     """Generate graphics for spin-ring display.
-    
+
     Args:
         spins: The value of the spins setting.
         job_submit_state: The current state of the job submission process.
         job_id: The ID of the submitted job.
         J: The value of the coupling strength setting.
         embeddings: A dictionary of cached embeddings for different numbers of spins.
-    
+
     Returns:
         A plotly Figure representing the spin orientations.
     """
@@ -614,7 +631,7 @@ def submit_job(
     filename: str,
 ) -> SubmitJobReturn:
     """Submit job and provide job ID.
-    
+
     Args:
         job_submit_time: The time that the job was submitted.
         qpu_name: The name of the quantum processing unit (QPU) to which the job is being submitted.
@@ -625,7 +642,7 @@ def submit_job(
         problem_type: Either KZ (``0`` or ``ProblemType.KZ``) or
             KZ_NM (``1`` or ``ProblemType.KZ_NM``).
         filename: The name of the schedule file being used.
-        
+
     Returns: A NamedTuple, SubmitJobReturn, containing:
         job_id: The ID of the job that was submitted.
         wd_job_n_intervals: The number of intervals that have passed since the simulation started.
@@ -695,7 +712,7 @@ def run_button_click(
     spins: str,
 ) -> RunButtonClickReturn:
     """Start simulation run when button is clicked.
-    
+
     Args:
         run_btn_click: The number of times the run button has been clicked.
         cached_embeddings: A string representation of which embeddings are cached.
@@ -760,7 +777,7 @@ def simulate(
     embeddings: dict,
 ) -> SimulateReturn:
     """Manage simulation: embedding, job submission.
-    
+
     Args:
         interval: The number of intervals that have passed since the simulation started.
         job_id: The ID of the job that was submitted.
@@ -838,10 +855,10 @@ def simulate(
 )
 def set_progress_bar(job_submit_state: str) -> dict:
     """Update progress bar for job submissions."""
-    
+
     return {
         "width": f"{JOB_BAR_DISPLAY[job_submit_state if ctx.triggered_id else 'READY'][0]}%",
-        "backgroundColor": JOB_BAR_DISPLAY[job_submit_state if ctx.triggered_id else 'READY'][1],
+        "backgroundColor": JOB_BAR_DISPLAY[job_submit_state if ctx.triggered_id else "READY"][1],
     }
 
 

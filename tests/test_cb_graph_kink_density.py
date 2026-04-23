@@ -14,7 +14,6 @@
 
 from contextvars import copy_context
 
-from src.demo_enums import ProblemType
 import dimod
 import numpy as np
 import plotly
@@ -23,7 +22,13 @@ from dash._callback_context import context_value
 from dash._utils import AttributeDict
 from dash.exceptions import PreventUpdate
 
-from demo_callbacks import add_graph_point_kz, add_graph_point_kz_nm, load_new_graph_kz, load_new_graphs_kz_nm
+from demo_callbacks import (
+    add_graph_point_kz,
+    add_graph_point_kz_nm,
+    load_new_graph_kz,
+    load_new_graphs_kz_nm,
+)
+from src.demo_enums import ProblemType
 
 json_embeddings_file = {
     "512": {"1": [11], "0": [10], "2": [12]},
@@ -74,7 +79,9 @@ parametrize_vals = [
 @pytest.mark.parametrize(
     "trigger_val, kz_graph_display_val, job_submit_state_val, problem_type", parametrize_vals
 )
-def test_add_graph_point_kz(mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type):
+def test_add_graph_point_kz(
+    mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type
+):
     """Test graph of kink density."""
 
     mocker.patch("demo_callbacks.get_samples", return_value=sampleset)
@@ -118,7 +125,9 @@ def test_add_graph_point_kz(mocker, trigger_val, kz_graph_display_val, job_submi
 @pytest.mark.parametrize(
     "trigger_val, kz_graph_display_val, job_submit_state_val, problem_type", parametrize_vals
 )
-def test_add_graph_point_kz_nm(mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type):
+def test_add_graph_point_kz_nm(
+    mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type
+):
     """Test graph of kink density."""
 
     mocker.patch("demo_callbacks.get_samples", return_value=sampleset)
@@ -168,7 +177,9 @@ def test_add_graph_point_kz_nm(mocker, trigger_val, kz_graph_display_val, job_su
 @pytest.mark.parametrize(
     "trigger_val, kz_graph_display_val, job_submit_state_val, problem_type", parametrize_vals
 )
-def test_load_new_graph_kz(mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type):
+def test_load_new_graph_kz(
+    mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type
+):
     """Test graph of kink density."""
 
     mocker.patch("demo_callbacks.get_samples", return_value=sampleset)
@@ -209,7 +220,9 @@ def test_load_new_graph_kz(mocker, trigger_val, kz_graph_display_val, job_submit
 @pytest.mark.parametrize(
     "trigger_val, kz_graph_display_val, job_submit_state_val, problem_type", parametrize_vals
 )
-def test_load_new_graphs_kz_nm(mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type):
+def test_load_new_graphs_kz_nm(
+    mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type
+):
     """Test graph of kink density."""
 
     mocker.patch("demo_callbacks.get_samples", return_value=sampleset)

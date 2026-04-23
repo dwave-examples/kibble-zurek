@@ -18,8 +18,8 @@ import dimod
 import numpy as np
 from dwave.cloud.api import Problems, exceptions
 from dwave.embedding import unembed_sampleset
-from numpy.polynomial.polynomial import Polynomial
 from minorminer.subgraph import find_subgraph
+from numpy.polynomial.polynomial import Polynomial
 
 __all__ = [
     "create_bqm",
@@ -62,7 +62,7 @@ def find_one_to_one_embedding(spins, sampler_edgelist, timeout=60):
     Returns:
         Embedding, as a dict of format {spin: [qubit]}.
     """
-    ring_edges = {(i, (i+1) % spins) for i in range(spins)}
+    ring_edges = {(i, (i + 1) % spins) for i in range(spins)}
     emb_1to1 = find_subgraph(ring_edges, sampler_edgelist, timeout=timeout)
 
     return {k: (v,) for k, v in emb_1to1.items()}
