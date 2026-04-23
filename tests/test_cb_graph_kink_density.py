@@ -77,7 +77,7 @@ parametrize_vals = [
 def test_add_graph_point_kz(mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type):
     """Test graph of kink density."""
 
-    mocker.patch("app.get_samples", return_value=sampleset)
+    mocker.patch("demo_callbacks.get_samples", return_value=sampleset)
 
     def run_callback():
         context_value.set(
@@ -98,7 +98,7 @@ def test_add_graph_point_kz(mocker, trigger_val, kz_graph_display_val, job_submi
             ta=10,
             spins=5,
             problem_type=problem_type,
-            embeddings_cached=json_embeddings_file,
+            embeddings=json_embeddings_file,
             figure=sample_vs_theory,
             kz_data=[],
         )
@@ -121,7 +121,7 @@ def test_add_graph_point_kz(mocker, trigger_val, kz_graph_display_val, job_submi
 def test_add_graph_point_kz_nm(mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type):
     """Test graph of kink density."""
 
-    mocker.patch("app.get_samples", return_value=sampleset)
+    mocker.patch("demo_callbacks.get_samples", return_value=sampleset)
 
     def run_callback():
         context_value.set(
@@ -143,7 +143,7 @@ def test_add_graph_point_kz_nm(mocker, trigger_val, kz_graph_display_val, job_su
             ta=10,
             spins=5,
             problem_type=problem_type,
-            embeddings_cached=json_embeddings_file,
+            embeddings=json_embeddings_file,
             figure_noise=sample_vs_theory,
             figure_anneal=sample_vs_theory,
             coupling_data={},
@@ -171,7 +171,7 @@ def test_add_graph_point_kz_nm(mocker, trigger_val, kz_graph_display_val, job_su
 def test_load_new_graph_kz(mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type):
     """Test graph of kink density."""
 
-    mocker.patch("app.get_samples", return_value=sampleset)
+    mocker.patch("demo_callbacks.get_samples", return_value=sampleset)
 
     def run_callback():
         context_value.set(
@@ -212,7 +212,7 @@ def test_load_new_graph_kz(mocker, trigger_val, kz_graph_display_val, job_submit
 def test_load_new_graphs_kz_nm(mocker, trigger_val, kz_graph_display_val, job_submit_state_val, problem_type):
     """Test graph of kink density."""
 
-    mocker.patch("app.get_samples", return_value=sampleset)
+    mocker.patch("demo_callbacks.get_samples", return_value=sampleset)
 
     def run_callback():
         context_value.set(

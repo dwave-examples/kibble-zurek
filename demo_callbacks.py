@@ -727,7 +727,7 @@ class SimulateReturn(NamedTuple):
     job_submit_state: str = dash.no_update
     job_submit_time: str = dash.no_update
     embeddings: dict = dash.no_update
-    embedding_is_cached: str = dash.no_update
+    cached_embeddings: str = dash.no_update
 
 
 @dash.callback(
@@ -778,12 +778,12 @@ def simulate(
         job_submit_state: The new state of the job submission process.
         job_submit_time: The time that the job was submitted.
         embeddings: The dictionary of cached embeddings for different numbers of spins.
-        embedding_is_cached: A string representation of which embeddings are cached.
+        cached_embeddings: A string representation of which embeddings are cached.
     """
-    spins = int(spins)
 
     if job_submit_state == "EMBEDDING":
         try:
+            spins = int(spins)
             embedding = find_one_to_one_embedding(spins, SOLVERS[qpu_name].edges)
             if embedding:
                 embeddings = json_to_dict(embeddings)
@@ -794,7 +794,7 @@ def simulate(
                     job_submit_state="SUBMITTED",
                     job_submit_time=datetime.datetime.now().strftime("%c"),
                     embeddings=embeddings,
-                    embedding_is_cached=", ".join(str(em) for em in embeddings.keys()),
+                    cached_embeddings=", ".join(str(em) for em in embeddings.keys()),
                 )
 
             return SimulateReturn(

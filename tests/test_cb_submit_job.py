@@ -60,15 +60,15 @@ def test_job_submission(
 ):
     """Test job submission."""
 
-    mocker.patch("app.qpus", new=mock_qpus())
-    mocker.patch("app.DWaveSampler", new=dwave_sampler)
+    mocker.patch("demo_callbacks.SOLVERS", new=mock_qpus())
+    mocker.patch("demo_callbacks.DWaveSampler", new=dwave_sampler)
 
     def run_callback():
         context_value.set(
             AttributeDict(
                 **{
                     "triggered_inputs": [
-                        {"prop_id": "job_submit_time.children"},
+                        {"prop_id": "job-submit-time.children"},
                     ]
                 }
             )
@@ -79,8 +79,8 @@ def test_job_submission(
             qpu_name="Advantage_system88.4",
             spins=3,
             J=2.3,
-            ta_ns=7,
-            embeddings_cached=json_embeddings_file,
+            ta=7,
+            embeddings=json_embeddings_file,
             problem_type=0,
             filename="FALLBACK_SCHEDULE.csv",
         )

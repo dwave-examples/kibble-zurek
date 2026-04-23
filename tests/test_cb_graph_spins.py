@@ -72,14 +72,14 @@ def test_graph_spins_spin_trigger(spins_val, job_submit_state_val, embeddings_ca
 def test_graph_spins_job_trigger(mocker, spins_val, job_submit_state_val, embeddings_cached_val):
     """Test graph of spin ring: job-state trigger."""
 
-    mocker.patch("app.get_samples", return_value=sampleset)
+    mocker.patch("demo_callbacks.get_samples", return_value=sampleset)
 
     def run_callback():
         context_value.set(
             AttributeDict(
                 **{
                     "triggered_inputs": [
-                        {"prop_id": "job_submit_state.children"},
+                        {"prop_id": "job-submit-state.children"},
                     ]
                 }
             )

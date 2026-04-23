@@ -14,41 +14,39 @@
 
 from contextvars import copy_context
 
+from demo_configs import RING_LENGTHS
 import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 from dash.exceptions import PreventUpdate
 
 from demo_callbacks import disable_buttons
-from helpers.layouts_components import ring_lengths
 
 parametrize_names = [
     "job_submit_state_val",
-    "spins_val_in",
     "anneal_duration_val",
     "coupling_strength_val",
     "spins_val_out",
     "qpu_selection_val",
 ]
 
-spins_disabled = [{"disabled": True} for _ in ring_lengths]
-spins_enabled = [{"disabled": False} for _ in ring_lengths]
+spins_disabled = [True]*len(RING_LENGTHS)
+spins_enabled = [False]*len(RING_LENGTHS)
 parametrize_vals = [
-    ("EMBEDDING", spins_disabled, True, True, spins_disabled, True),
-    ("SUBMITTED", spins_disabled, True, True, spins_disabled, True),
-    ("PENDING", spins_disabled, True, True, spins_disabled, True),
-    ("IN_PROGRESS", spins_disabled, True, True, spins_disabled, True),
-    ("COMPLETED", spins_enabled, False, False, spins_enabled, False),
-    ("CANCELLED", spins_enabled, False, False, spins_enabled, False),
-    ("FAILED", spins_enabled, False, False, spins_enabled, False),
-    ("FAKE", spins_enabled, False, False, spins_enabled, False),
+    ("EMBEDDING", True, True, spins_disabled, True),
+    ("SUBMITTED", True, True, spins_disabled, True),
+    ("PENDING", True, True, spins_disabled, True),
+    ("IN_PROGRESS", True, True, spins_disabled, True),
+    ("COMPLETED", False, False, spins_enabled, False),
+    ("CANCELLED", False, False, spins_enabled, False),
+    ("FAILED", False, False, spins_enabled, False),
+    ("FAKE", False, False, spins_enabled, False),
 ]
 
 
 @pytest.mark.parametrize(parametrize_names, parametrize_vals)
 def test_disable_buttons(
     job_submit_state_val,
-    spins_val_in,
     anneal_duration_val,
     coupling_strength_val,
     spins_val_out,
@@ -66,7 +64,7 @@ def test_disable_buttons(
             )
         )
 
-        return disable_buttons(job_submit_state_val, spins_val_in)
+        return disable_buttons(job_submit_state_val)
 
     ctx = copy_context()
 

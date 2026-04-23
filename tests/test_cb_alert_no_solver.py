@@ -26,9 +26,9 @@ def test_alert_no_solver(mocker, input_val, output_val):
     """Test that a failed cloud-client client is identified."""
 
     if output_val:
-        mocker.patch("app.client", None)
+        mocker.patch("demo_callbacks.CLIENT", None)
     else:
-        mocker.patch("app.client", "dummy")
+        mocker.patch("demo_callbacks.CLIENT", "dummy")
 
     def run_callback():
         context_value.set(

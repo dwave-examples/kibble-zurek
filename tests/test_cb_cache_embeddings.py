@@ -66,9 +66,9 @@ parametrize_vals = [
 def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_emb_file):
     """Test the caching of embeddings: triggered by QPU selection."""
 
-    mocker.patch("app.os.listdir", return_value=embeddings)
+    mocker.patch("demo_callbacks.os.listdir", return_value=embeddings)
     mocker.patch("builtins.open", return_value=StringIO(json_emb_file))
-    mocker.patch("app.qpus", new=mock_qpu())
+    mocker.patch("demo_callbacks.SOLVERS", new=mock_qpu())
 
     def run_callback():
         context_value.set(
