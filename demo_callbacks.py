@@ -66,8 +66,10 @@ def toggle_left_column(collapse_trigger: int, to_collapse_class: str) -> tuple[s
             visible, empty string if visible.
 
     Returns:
-        str: The new class name of the thing to collapse.
-        str: The aria-expanded value.
+        A tuple containing:
+
+        - str: The new class name of the thing to collapse.
+        - str: The aria-expanded value.
     """
 
     classes = to_collapse_class.split(" ") if to_collapse_class else []
@@ -118,16 +120,18 @@ def update_selected_problem_type(
         problem_type: The currently selected problem.
 
     Returns:
-        problem_type: Either KZ (``0`` or ``ProblemType.KZ``) or
-            KZ_NM (``1`` or ``ProblemType.KZ_NM``).
-        tooltips: The tooltips for the settings form.
-        quench_duration_setting: The quench duration setting.
-        coupling_strength_value: The value of the coupling strength slider setting.
-        coupling_strength_marks: The marks of the coupling strength slider setting.
-        coupling_strength_min: The minimum value of the coupling strength slider setting.
-        coupling_strength_max: The maximum value of the coupling strength slider setting.
-        main_header: The main header of the problem in the left column.
-        main_description: The description of the problem in the left column.
+        A NamedTuple, UpdateSelectedProblemTypeReturn, containing:
+
+        - problem_type: Either KZ (``0`` or ``ProblemType.KZ``) or KZ_NM (``1`` or
+        ``ProblemType.KZ_NM``).
+        - tooltips: The tooltips for the settings form.
+        - quench_duration_setting: The quench duration setting.
+        - coupling_strength_value: The value of the coupling strength slider setting.
+        - coupling_strength_marks: The marks of the coupling strength slider setting.
+        - coupling_strength_min: The minimum value of the coupling strength slider setting.
+        - coupling_strength_max: The maximum value of the coupling strength slider setting.
+        - main_header: The main header of the problem in the left column.
+        - main_description: The description of the problem in the left column.
     """
     problem_type_value = int(tab_value.split("-")[-1])
 
@@ -185,10 +189,12 @@ def disable_buttons(job_submit_state: str) -> tuple[bool, bool, list[bool], bool
         job_submit_state: The current state of the job submission process.
 
     Returns:
-        anneal-duration-disabled: Whether the anneal duration input should be disabled.
-        coupling-strength-disabled: Whether the coupling strength input should be disabled.
-        spins-options-disabled: A list of whether each spins option should be disabled.
-        qpu-selection-disabled: Whether the QPU selection input should be disabled.
+        A tuple containing:
+
+        - bool: Whether the anneal duration input should be disabled.
+        - bool: Whether the coupling strength input should be disabled.
+        - list[bool]: A list of whether each spins option should be disabled.
+        - bool: Whether the QPU selection input should be disabled.
     """
     running_states = ["EMBEDDING", "SUBMITTED", "PENDING", "IN_PROGRESS"]
     done_states = ["COMPLETED", "CANCELLED", "FAILED"]
@@ -212,8 +218,10 @@ def set_schedule(qpu_name: str) -> tuple[str, str]:
         qpu_name: The name of the selected QPU.
 
     Returns:
-        schedule-filename: The name of the schedule file to use for the selected QPU.
-        schedule-filename-class: The class to apply to the schedule filename display.
+        A tuple containing:
+
+        - str: The name of the schedule file to use for the selected QPU.
+        - str: The class to apply to the schedule filename display.
     """
 
     schedule_filename = "FALLBACK_SCHEDULE.csv"
@@ -247,8 +255,10 @@ def load_cached_embeddings(qpu_name: str) -> tuple[dict, str]:
         qpu_name: The name of the selected QPU.
 
     Returns:
-        embeddings: A dictionary of cached embeddings for different numbers of spins.
-        cached-embeddings: A string indicating which embeddings are cached.
+        A tuple containing:
+
+        - dict: A dictionary of cached embeddings for different numbers of spins.
+        - str: A string indicating which embeddings are cached.
     """
 
     embeddings = {}  # Wipe out previous QPU's embeddings
@@ -323,9 +333,10 @@ def add_graph_point_kz(
         kz_data: The existing data points for the kink density graph.
 
     Returns:
-        fig: The updated figure for the sample vs theory graph, with a new point added.
-        kz_data: The data points for the kink density graph, either unchanged or with a new point
-            added.
+        A tuple containing:
+
+        - go.Figure: The updated figure for the sample vs theory graph, with a new point added.
+        - list: Data points for the kink density graph, either unchanged or with a new point added.
     """
     if job_submit_state != "COMPLETED" or problem_type is ProblemType.KZ_NM.value:
         raise PreventUpdate
@@ -407,14 +418,13 @@ def add_graph_point_kz_nm(
         zne_estimates: The existing zero noise extrapolation estimates.
 
     Returns:
-        fig_noise: The updated figure for the kink density vs noise graph, with a new point added.
-        fig_anneal: The updated figure for the kink density vs anneal duration graph, with a new
-            point added.
-        coupling_data: The updated data points for the coupling strength vs kink density graph, with
-            a new point added.
-        zne_estimates: The updated zero noise extrapolation estimates, with a new estimate added.
-        modal_trigger: A boolean indicating whether the ZNE modal should be triggered to open, based
-            on whether a new ZNE estimate was added.
+        A tuple containing:
+
+        - go.Figure: The figure for the kink density vs noise graph, with a new point added.
+        - go.Figure: The figure for the kink density vs anneal duration graph, with a new point added.
+        - dict: Data points for the coupling strength vs kink density graph, with a new point added.
+        - dict: The updated zero noise extrapolation estimates, with a new estimate added.
+        - bool: Whether the ZNE modal should be open, based on whether a new ZNE estimate was added.
     """
     if job_submit_state != "COMPLETED" or problem_type is ProblemType.KZ.value:
         raise PreventUpdate
@@ -491,10 +501,11 @@ def load_new_graph_kz(
         kz_data: The existing data points for the kink density graph.
 
     Returns:
-        fig: The figure for the sample vs theory graph, either initialized or updated with new
-            data point.
-        kz_data: The data points for the kink density graph, either unchanged or with a new point
-            added.
+        A tuple containing:
+
+        - go.Figure: The figure for the sample vs theory graph, either initialized or updated with
+        new data point.
+        - list: Data points for the kink density graph, either unchanged or with new point added.
     """
     if problem_type is ProblemType.KZ_NM.value:
         raise PreventUpdate
@@ -535,10 +546,12 @@ def load_new_graphs_kz_nm(
             KZ_NM (``1`` or ``ProblemType.KZ_NM``).
 
     Returns:
-        fig_noise: The initialized figure for the kink density vs noise graph.
-        fig_anneal: The initialized figure for the kink density vs anneal duration graph.
-        coupling_data: An empty dictionary to store coupling data points.
-        zne_estimates: An empty dictionary to store zero noise extrapolation estimates.
+        A tuple containing:
+
+        - go.Figure: The initialized figure for the kink density vs noise graph.
+        - go.Figure: The initialized figure for the kink density vs anneal duration graph.
+        - dict: An empty dictionary to store coupling data points.
+        - dict: An empty dictionary to store zero noise extrapolation estimates.
     """
     if problem_type is ProblemType.KZ.value:
         raise PreventUpdate
@@ -643,9 +656,12 @@ def submit_job(
             KZ_NM (``1`` or ``ProblemType.KZ_NM``).
         filename: The name of the schedule file being used.
 
-    Returns: A NamedTuple, SubmitJobReturn, containing:
-        job_id: The ID of the job that was submitted.
-        wd_job_n_intervals: The number of intervals that have passed since the simulation started.
+    Returns:
+        A NamedTuple, SubmitJobReturn, containing:
+
+        - job_id: The ID of the job that was submitted.
+        - wd_job_n_intervals: The number of intervals that have passed since the simulation
+        started.
     """
 
     solver = SOLVERS[qpu_name]
@@ -718,12 +734,14 @@ def run_button_click(
         cached_embeddings: A string representation of which embeddings are cached.
         spins: The value of the spins setting.
 
-    Returns: A NamedTuple, RunButtonClickReturn, containing:
-        run_button_disabled: Whether the run button should be disabled.
-        wd_job_disabled: Whether the interval component should be disabled.
-        wd_job_n_intervals: The number of intervals that have passed since the simulation started.
-        job_submit_state: The new state of the job submission process.
-        job_submit_time: The time that the job was submitted.
+    Returns:
+        A NamedTuple, RunButtonClickReturn, containing:
+
+        - run_button_disabled: Whether the run button should be disabled.
+        - wd_job_disabled: Whether the interval component should be disabled.
+        - wd_job_n_intervals: The number of intervals that have passed since the simulation started.
+        - job_submit_state: The new state of the job submission process.
+        - job_submit_time: The time that the job was submitted.
     """
     if str(spins) in cached_embeddings.split(", "):  # If we have a cached embedding
         return RunButtonClickReturn(
@@ -787,15 +805,17 @@ def simulate(
         qpu_name: The name of the quantum processing unit (QPU) to which the job is being submitted.
         embeddings: A dictionary of cached embeddings for different numbers of spins.
 
-    Returns: A NamedTuple, SimulateReturn, containing:
-        run_button_disabled: Whether the run button should be disabled.
-        wd_job_disabled: Whether the interval component should be disabled.
-        wd_job_interval: The number of milliseconds between interval updates.
-        wd_job_n_intervals: The number of intervals that have passed since the simulation started.
-        job_submit_state: The new state of the job submission process.
-        job_submit_time: The time that the job was submitted.
-        embeddings: The dictionary of cached embeddings for different numbers of spins.
-        cached_embeddings: A string representation of which embeddings are cached.
+    Returns:
+        A NamedTuple, SimulateReturn, containing:
+
+        - run_button_disabled: Whether the run button should be disabled.
+        - wd_job_disabled: Whether the interval component should be disabled.
+        - wd_job_interval: The number of milliseconds between interval updates.
+        - wd_job_n_intervals: The number of intervals that have passed since the simulation started.
+        - job_submit_state: The new state of the job submission process.
+        - job_submit_time: The time that the job was submitted.
+        - embeddings: The dictionary of cached embeddings for different numbers of spins.
+        - cached_embeddings: A string representation of which embeddings are cached.
     """
 
     if job_submit_state == "EMBEDDING":

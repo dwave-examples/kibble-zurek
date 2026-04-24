@@ -1,4 +1,4 @@
-# Copyright 2024 D-Wave
+# Copyright 2026 D-Wave
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -226,7 +226,15 @@ def radio(label: str, id: str, options: list, value: str, inline: bool = True) -
     )
 
 
-def get_slider_marks(problem_type: ProblemType) -> tuple[float, dict[float, str]]:
+def get_slider_marks(problem_type: ProblemType) -> tuple[float, list[dict]]:
+    """Get slider marks and default value based on problem type.
+
+    Args:
+        problem_type: Either ProblemType.KZ or ProblemType.KZ_NM.
+
+    Returns:
+        A tuple of the default slider value and a list of dictionaries of slider marks.
+    """
 
     if problem_type is ProblemType.KZ_NM:
         marks = J_OPTIONS
@@ -241,7 +249,15 @@ def get_slider_marks(problem_type: ProblemType) -> tuple[float, dict[float, str]
     return value, [{"value": mark, "label": f"{mark}"} for mark in marks]
 
 
-def get_quench_duration_setting(problem_type):
+def get_quench_duration_setting(problem_type: ProblemType) -> html.Div:
+    """Get quench duration setting based on problem type.
+
+    Args:
+        problem_type: Either ProblemType.KZ or ProblemType.KZ_NM.
+
+    Returns:
+        A Div containing the quench duration setting.
+    """
 
     options = [5, 10, 20, 40, 80, 160, 320, 640, 1280]
     dropdown_options = generate_options([f"{option} ns" for option in options])
@@ -357,7 +373,18 @@ def generate_run_buttons() -> html.Div:
     )
 
 
-def default_graph(title: str, id: str, load_radio: bool = False):
+def default_graph(title: str, id: str, load_radio: bool = False) -> html.Div:
+    """Default graph element with a title and optional radio buttons for graph selection.
+
+    Args:
+        title: The title that goes above the graph.
+        id: A unique selector for this graph element.
+        load_radio: Whether to create radio buttons for graph selection or not.
+
+    Returns:
+        A Div containing the graph and optional radio buttons.
+    """
+
     radio_options = [
         {"label": "Both", "value": "both"},
         {"label": "Kink Density", "value": "kink_density"},
@@ -388,7 +415,13 @@ def default_graph(title: str, id: str, load_radio: bool = False):
     )
 
 
-def show_progress():
+def show_progress() -> html.Div:
+    """Show job submission and progress.
+
+    Returns:
+        A Div containing the job submission status and progress bar.
+    """
+
     init_job_status = "READY"
     job_status_style = {"color": "#AA3A3C"} if init_job_status == "NO SOLVER" else {}
 
@@ -420,7 +453,8 @@ def show_progress():
     )
 
 
-def no_solver_modal():
+def no_solver_modal() -> dmc.Modal:
+    """Modal to alert users that no solvers are available."""
     return dmc.Modal(
         title="Leap's Quantum Computers Inaccessible",
         id="no-solver-modal",
@@ -462,7 +496,8 @@ def no_solver_modal():
     )
 
 
-def error_modal():
+def error_modal() -> dmc.Modal:
+    """Modal to alert users that an error occurred creating a graph."""
     return dmc.Modal(
         title="Error",
         id="error-modal",
@@ -475,7 +510,7 @@ def error_modal():
     )
 
 
-def generate_tooltips(problem_type: ProblemType = ProblemType.KZ):
+def generate_tooltips(problem_type: ProblemType = ProblemType.KZ) -> list[dmc.Tooltip]:
     """Tooltip generator.
 
     Args:
@@ -492,7 +527,7 @@ def generate_tooltips(problem_type: ProblemType = ProblemType.KZ):
     ]
 
 
-def create_interface():
+def create_interface() -> html.Div:
     """Set the application HTML."""
     return html.Div(
         id="app-container",

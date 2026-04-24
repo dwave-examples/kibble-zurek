@@ -50,6 +50,7 @@ JOB_BAR_DISPLAY = {
     "COMPLETED": [100, "#17BEBB"],
     "CANCELLED": [100, "#737373"],
     "FAILED": [100, "#AA3A3C"],
+    "ERROR": [100, "#AA3A3C"],
 }
 
 TOOL_TIPS_KZ_NM = {
