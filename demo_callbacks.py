@@ -14,7 +14,7 @@
 
 import datetime
 import json
-import os
+from pathlib import Path
 from typing import NamedTuple
 
 import dash
@@ -46,6 +46,9 @@ from src.demo_enums import ProblemType
 from src.kz_calcs import *
 from src.plots import *
 from src.qa import *
+
+
+SCHEDULES_EMBEDDINGS_PATH = Path("schedules_and_embeddings")
 
 
 @dash.callback(
@@ -228,16 +231,11 @@ def set_schedule(qpu_name: str) -> tuple[str, str]:
     schedule_filename_class = "no-schedule"
 
     if qpu_name:
-        for filename in [
-            file
-            for file in os.listdir("schedules_and_embeddings")
-            if "schedule.csv" in file.lower()
-        ]:
+        for file in SCHEDULES_EMBEDDINGS_PATH.glob("*_schedule.csv"):  # get schedule files
+            if qpu_name.split(".")[0] in file.name:  # Accepts & reddens older versions
+                schedule_filename = file.name
 
-            if qpu_name.split(".")[0] in filename:  # Accepts & reddens older versions
-                schedule_filename = filename
-
-                if qpu_name in filename:
+                if qpu_name in schedule_filename:
                     schedule_filename_class = ""
 
     return schedule_filename, schedule_filename_class
@@ -264,13 +262,9 @@ def load_cached_embeddings(qpu_name: str) -> tuple[dict, str]:
     embeddings = {}  # Wipe out previous QPU's embeddings
 
     if qpu_name:
-        for filename in [
-            file
-            for file in os.listdir("schedules_and_embeddings")
-            if ".json" in file and "emb_" in file
-        ]:
-            if qpu_name.split(".")[0] in filename:
-                with open(f"schedules_and_embeddings/{filename}", "r") as fp:
+        for file in SCHEDULES_EMBEDDINGS_PATH.glob("emb_*.json"):  # get embedding files
+            if qpu_name.split(".")[0] in file.name:
+                with open(file, "r") as fp:
                     embeddings = json.load(fp)
 
                 embeddings = json_to_dict(embeddings)

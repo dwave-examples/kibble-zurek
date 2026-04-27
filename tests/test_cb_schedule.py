@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 from contextvars import copy_context
+from pathlib import Path
 
 import pytest
 from dash._callback_context import context_value
@@ -39,7 +40,7 @@ parametrize_vals = [
 def test_schedule_selection(mocker, qpu_selection_val, schedule_name, indx, style):
     """Test schedule selection."""
 
-    mocker.patch("demo_callbacks.os.listdir", return_value=schedule_name)
+    mocker.patch("demo_callbacks.Path.glob", return_value=[Path(f) for f in schedule_name])
 
     def run_callback():
         context_value.set(
