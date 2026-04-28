@@ -35,17 +35,20 @@ from demo_configs import (
     MAIN_HEADER_NM,
     RING_LENGTHS,
 )
-from demo_interface import (
-    generate_tooltips,
-    get_quench_duration_setting,
-    get_slider_marks,
-)
+from demo_interface import generate_tooltips, get_quench_duration_setting, get_slider_marks
 from src.demo_enums import ProblemType
 from src.kz_calcs import calclambda_, kink_stats, theoretical_kink_density
-from src.plots import kink_v_anneal_init_graph, kink_v_noise_init_graph, plot_kink_densities_bg, plot_kink_density, plot_spin_orientation, plot_ze_estimates, plot_zne_fitted_line
-from src.qpu_resources import get_client, get_solvers
+from src.plots import (
+    kink_v_anneal_init_graph,
+    kink_v_noise_init_graph,
+    plot_kink_densities_bg,
+    plot_kink_density,
+    plot_spin_orientation,
+    plot_ze_estimates,
+    plot_zne_fitted_line,
+)
 from src.qa import create_bqm, find_one_to_one_embedding, get_job_status, get_samples, json_to_dict
-
+from src.qpu_resources import get_client, get_solvers
 
 SCHEDULES_EMBEDDINGS_PATH = Path("schedules_and_embeddings")
 
