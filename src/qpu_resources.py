@@ -28,6 +28,7 @@ class QPUResources(NamedTuple):
 
 @lru_cache(maxsize=1)
 def get_qpus() -> QPUResources:
+    """Get QPU resources, including client and solvers. Results are cached."""
     try:
         client = Client.from_config(client="qpu")
         solvers = {
@@ -44,12 +45,15 @@ def get_qpus() -> QPUResources:
 
 
 def get_client() -> Client | None:
+    """Get the client, if available. Returns None if no client is available."""
     return get_qpus().client
 
 
 def get_solvers() -> dict:
+    """Get available solvers, if any. Returns an empty dictionary if no solvers are available."""
     return get_qpus().solvers
 
 
 def get_init_job_status() -> str:
+    """Get initial job status. "READY" if solvers are available, "NO SOLVER" otherwise."""
     return get_qpus().init_job_status
