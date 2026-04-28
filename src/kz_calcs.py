@@ -12,24 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from demo_configs import J_BASELINE
 import numpy as np
 import pandas as pd
 
-__all__ = [
-    "kink_stats",
-    "theoretical_kink_density_prefactor",
-    "theoretical_kink_density",
-    "calc_kappa",
-    "calclambda_",
-]
+from demo_configs import J_BASELINE
 
 
 def theoretical_kink_density_prefactor(J, schedule_name=None):
     """Time rescaling factor.
 
     Calculate the rescaling of time necessary to replicate
-    the behaviour of a linearized schedule at coupling strength 1.
+    the behavior of a linearized schedule at coupling strength 1.
     See: "Error Mitigation in Quantum Annealing".
 
     Args:
@@ -46,7 +39,7 @@ def theoretical_kink_density_prefactor(J, schedule_name=None):
     if not schedule_name:
         schedule_name = "FALLBACK_SCHEDULE.csv"
 
-    schedule = pd.read_csv(f"helpers/{schedule_name}")
+    schedule = pd.read_csv(f"schedules_and_embeddings/{schedule_name}")
 
     COMPENSATION_SCHEDULE_ENERGY = 0.8 if "Advantage_system" in schedule_name else 1.0
 

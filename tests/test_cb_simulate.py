@@ -20,7 +20,7 @@ from dash import no_update
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import SimulateReturn, run_button_click, simulate
+from demo_callbacks import SimulateReturn, run_button_click, simulate
 
 before_test = datetime.datetime.now().strftime("%c")
 parametrize_vals = [(512, "512, 1024", "SUBMITTED"), (2048, "512, 1024", "EMBEDDING")]
@@ -34,7 +34,7 @@ def test_simulate_button_press(spins_val, cached_embedding_lengths_val, submit_s
 
     def run_callback():
         context_value.set(
-            AttributeDict(**{"triggered_inputs": [{"prop_id": "btn_simulate.n_clicks"}]})
+            AttributeDict(**{"triggered_inputs": [{"prop_id": "run-button.n_clicks"}]})
         )
 
         return run_button_click(1, cached_embedding_lengths_val, spins_val)
@@ -82,17 +82,17 @@ class mock_qpu(object):
 
 
 def mock_find_embedding(spins, dummy_edges):
-    if spins == "yes":
+    if spins == 1:
         return {1: [10], 2: [20]}
-    if spins == "no":
+    if spins == 0:
         return {}
 
 
 parametrize_names = (
     "job_id_val, job_submit_state_in, "
-    + "spins_val, embeddings_cached_in, btn_simulate_disabled_out, wd_job_disabled_out, "
+    + "spins_val, embeddings_in, run_button_disabled_out, wd_job_disabled_out, "
     + "wd_job_intervals_out, wd_job_n_out, job_submit_state_out, job_submit_time_out, "
-    + "embeddings_cached_out, embedding_is_cached_out"
+    + "embeddings_out, cached_embeddings_out"
 )
 
 parametrize_vals = [
@@ -225,7 +225,7 @@ parametrize_vals = [
     (
         "dummy",
         "EMBEDDING",
-        "yes",
+        1,
         {},
         no_update,
         no_update,
@@ -233,13 +233,13 @@ parametrize_vals = [
         no_update,
         "SUBMITTED",
         no_update,
-        {"yes": {1: [10], 2: [20]}},
-        "yes",
+        {1: {1: [10], 2: [20]}},
+        "1",
     ),
     (
         "dummy",
         "EMBEDDING",
-        "no",
+        0,
         {},
         False,
         True,
@@ -259,25 +259,25 @@ def test_simulate_states(
     job_id_val,
     job_submit_state_in,
     spins_val,
-    embeddings_cached_in,
-    btn_simulate_disabled_out,
+    embeddings_in,
+    run_button_disabled_out,
     wd_job_disabled_out,
     wd_job_intervals_out,
     wd_job_n_out,
     job_submit_state_out,
     job_submit_time_out,
-    embeddings_cached_out,
-    embedding_is_cached_out,
+    embeddings_out,
+    cached_embeddings_out,
 ):
     """Test transitions between states."""
 
-    mocker.patch("app.get_job_status", new=mock_get_status)
-    mocker.patch("app.qpus", new=mock_qpu())
-    mocker.patch("app.find_one_to_one_embedding", new=mock_find_embedding)
+    mocker.patch("demo_callbacks.get_job_status", new=mock_get_status)
+    mocker.patch("demo_callbacks.get_solvers", return_value=mock_qpu())
+    mocker.patch("demo_callbacks.find_one_to_one_embedding", new=mock_find_embedding)
 
     def run_callback():
         context_value.set(
-            AttributeDict(**{"triggered_inputs": [{"prop_id": "wd_job.n_intervals"}]})
+            AttributeDict(**{"triggered_inputs": [{"prop_id": "wd-job.n_intervals"}]})
         )
 
         return simulate(
@@ -287,7 +287,7 @@ def test_simulate_states(
             before_test,
             spins_val,
             "Advantage_system4.3",
-            embeddings_cached_in,
+            embeddings_in,
         )
 
     ctx = copy_context()
@@ -295,14 +295,14 @@ def test_simulate_states(
     output = ctx.run(run_callback)
 
     expected_output = SimulateReturn(
-        btn_simulate_disabled=btn_simulate_disabled_out,
+        run_button_disabled=run_button_disabled_out,
         wd_job_disabled=wd_job_disabled_out,
         wd_job_interval=wd_job_intervals_out,
         wd_job_n_intervals=wd_job_n_out,
         job_submit_state=job_submit_state_out,
         job_submit_time=job_submit_time_out,
-        embeddings_cached=embeddings_cached_out,
-        embedding_is_cached=embedding_is_cached_out,
+        embeddings=embeddings_out,
+        cached_embeddings=cached_embeddings_out,
     )
 
     assert output[0:5] == expected_output[0:5]

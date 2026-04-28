@@ -14,14 +14,54 @@ This example employs quantum annealing in the coherent regime of a D-Wave
 quantum processing unit (QPU), producing samples that align with the theoretical
 predictions.
 
-![Simulation vs Predicted](assets/simulation_vs_predicted.png)
+![Demo Interface](static/demo.png "Image of demo interface")
 
-* [The Kibble-Zurek Mechanism](#The-Kibble-Zurek-Mechanism)
 * [Installation](#Installation)
 * [Usage](#Usage)
+* [The Kibble-Zurek Mechanism](#The-Kibble-Zurek-Mechanism)
 * [Model Overview](#Model-Overview)
 * [Code](#Code)
 * [License](#License)
+
+## <a name="Installation"></a> Installation
+
+You can run this example without installation in cloud-based IDEs that support the
+[Development Containers Specification](https://containers.dev/supporting) (aka "devcontainers")
+such as GitHub Codespaces.
+
+For development environments that do not support `devcontainers`, install requirements:
+
+```bash
+pip install -r requirements.txt
+```
+
+If you are cloning the repo to your local system, working in a
+[virtual environment](https://docs.python.org/3/library/venv.html) is recommended.
+
+## <a name="Usage"></a> Usage
+
+Your development environment should be configured to access the
+[Leap&trade; quantum cloud service](https://docs.dwavequantum.com/en/latest/ocean/sapi_access_basic.html).
+You can see information about supported IDEs and authorizing access to your Leap account
+[here](https://docs.dwavequantum.com/en/latest/ocean/leap_authorization.html).
+
+Run the following terminal command to start the Dash application:
+
+```bash
+python app.py
+```
+
+Access the user interface with your browser at http://127.0.0.1:8050/.
+
+The demo program opens an interface where you can configure problems and submit these problems to
+a solver.
+
+Configuration options can be found in the [demo_configs.py](demo_configs.py) file.
+
+> [!NOTE]\
+> If you plan on editing any files while the application is running, please run the application
+with the `--debug` command-line argument for live reloads and easier debugging:
+`python app.py --debug`
 
 ## <a name="The-Kibble-Zurek-Mechanism"></a> The Kibble-Zurek Mechanism
 
@@ -37,7 +77,7 @@ Some macroscopic phase transitions are familiar: a changing temperature will
 transition water (a liquid) to ice (a solid); it can also change the magnetic
 properties of metal.
 
-<img src='assets/phase_transitions.png' alt='Phase Transitions' width='500'/>
+<img src='static/phase_transitions.png' alt='Phase Transitions' width='500'/>
 
 In both cases, the material transitions between **disorderly** and **orderly**
 states:
@@ -53,7 +93,7 @@ Kibble's original formulation explained the transition of the hot post-Big Bang
 universe from highly symmetric to its current state, with its non-uniform
 distribution of galaxies etc.
 
-<img src='assets/universe.png' alt='Big bang to Current Universe' width='500'/>
+<img src='static/universe.png' alt='Big bang to Current Universe' width='500'/>
 
 Zurek expanded the idea to condensed matter and quantum phase transitions.
 
@@ -65,7 +105,7 @@ from a state of spins in superposition to a state that has alternating segments
 of up/down spins. Switches from one segment to the next are called "kinks" (an
 example of topological defects).
 
-<img src='assets/1D_kinks.jpg' alt='1D Spin Ring Kinks' width='400'/>
+<img src='static/1D_kinks.jpg' alt='1D Spin Ring Kinks' width='400'/>
 
 ### Transition Rate
 
@@ -79,14 +119,14 @@ Consider two extreme cases:
     At the end of a sufficiently slow anneal, the system ends in one of its two
     ground states: all spins up or all spins down.
 
-<img src='assets/1D_adiabatic.jpg' alt='1D Spin Ring Adiabatic' width='400'/>
+<img src='static/1D_adiabatic.jpg' alt='1D Spin Ring Adiabatic' width='400'/>
 
 2.  **Instantaneous quench**.
 
     Each spin independently orients up or down (in an unbiased system, both
-    outcomes have equal probablility).
+    outcomes have equal probability).
 
-<img src='assets/1D_instantaneous.jpg' alt='1D Spin Ring Instantaneous' width='400'/>
+<img src='static/1D_instantaneous.jpg' alt='1D Spin Ring Instantaneous' width='400'/>
 
 In between these two extremes, for fast quenches, the system ends in a state
 of alternating segments of up/down spins. The average length of these segments
@@ -94,49 +134,7 @@ increases with the quench/anneal time. For this example of a quantum phase
 transition (a 1D ring of spins), the Kibble-Zurek mechanism predicts that the
 average length increases as a function of the square root of the anneal time.
 
-<img src='assets/1D_finite.jpg' alt='1D Spin Ring Finite' width='400'/>
-
-## <a name="Installation"></a> Installation
-
-You can run this example without installation in cloud-based IDEs that support the
-[Development Containers specification](https://containers.dev/supporting)
-(aka "devcontainers") such as GitHub Codespaces.
-
-For development environments that do not support `devcontainers`, install
-requirements:
-
-```bash
-pip install -r requirements.txt
-```
-
-If you are cloning the repo to your local system, working in a
-[virtual environment](https://docs.python.org/3/library/venv.html) is
-recommended.
-
-## <a name="Usage"></a> Usage
-
-Your development environment should be configured to access the
-Leap&trade; quantum cloud service. You can see information about supported IDEs
-and authorizing access to your Leap account
-[here](https://docs.dwavequantum.com/en/latest/leap_sapi/dev_env.html) and
-[here](https://docs.dwavequantum.com/en/latest/ocean/sapi_access_basic.html).
-
-Run the following terminal command to start the Dash application:
-
-```bash
-python app.py
-```
-
-Access the user interface with your browser at http://127.0.0.1:8050/.
-
-The demo program opens an interface where you can configure problems and submit
-these problems to a solver.
-
-Configuration options can be found in the [demo_configs.py](demo_configs.py)
-file.
-
-*Hover over an input field to see a description of the input and its range of*
-*supported values.*
+<img src='static/1D_finite.jpg' alt='1D Spin Ring Finite' width='400'/>
 
 ## <a name="Model-Overview"></a> Model Overview
 
@@ -159,10 +157,10 @@ on the quantum computer is done as follows.
 To calculate kink density from samples returned from the quantum computer,
 define a *kink operator*,
 
-![formula kink operator](assets/formula_kink_operator.png),
+![formula kink operator](static/formula_kink_operator.png "Image of formula kink operator"),
 
 where J is the coupling strength between qubits and
-![formula sigma](assets/formula_sigma.png) is the Pauli operator on the i-th
+![formula sigma](static/formula_sigma.png "Image of formula sigma") is the Pauli operator on the i-th
 qubit. Put simply, for any sample returned from the quantum computer, the
 operator gives 1 if there is a kink between qubits i and i+1 (i.e., if the
 pair of qubits at the end of the anneal have different values for negative J
@@ -171,7 +169,7 @@ the operator gives 0.
 
 Define a *kink-density operator* as,
 
-![formula kink densityoperator](assets/formula_kink_density_operator.png),
+![formula kink-density operator](static/formula_kink_density_operator.png "Image of formula kink-density operator"),
 
 where L is the length of the chain of spins (the number of qubits coupled
 together).
@@ -189,7 +187,7 @@ coupling and fast anneals, the kink density is unaffected by temperature and
 agrees quantitatively with closed-system coherent quantum theory, shown as dotted
 green lines.
 
-<img src='assets/experimental_results.png' alt='Experimental results' width='400'/>
+<img src='static/experimental_results.png' alt='Experimental results' width='400'/>
 
 Note that as you increase the anneal time, you move from the coherent regime
 and the returned samples are increasingly affected by thermalization, pushing
@@ -206,16 +204,18 @@ annealing, as described in [[3]](#3).
 A fitting function—quadratic for the Advantage solver can be used to calculate the theoretical
 zero-noise point for various coupling strengths at the same annealing time.
 
-<img src='assets/ZNE_fig2.png' alt='Experimental results' width='400'/>
+<img src='static/ZNE_fig2.png' alt='Experimental results' width='400'/>
+
+![Zero-Noise Extrapolation Demo Interface](static/demo2.png "Image of Zero-Noise Extrapolation demo interface")
 
 
 ## <a name="Code"></a> Code
 
 Most the code related to configuring and analyzing the Ising problem is in the
-[helpers/qa.py](helpers/qa.py) and [helpers/kz_calcs.py](helpers/kz_calcs.py)
+[schedules_and_embeddings/qa.py](schedules_and_embeddings/qa.py) and [schedules_and_embeddings/kz_calcs.py](schedules_and_embeddings/kz_calcs.py)
 files. The remaining files mostly support the user interface.
 
-The [helpers/qa.py](helpers/qa.py) file provides the following functions related
+The [schedules_and_embeddings/qa.py](schedules_and_embeddings/qa.py) file provides the following functions related
 to the use of the quantum computer:
 
 *   ``create_bqm()`` generates a binary quadratic model (BQM) to represent the
@@ -228,7 +228,7 @@ to the use of the quantum computer:
 
 *   Additional convenience functions.
 
-The [helpers/kz_calcs.py](helpers/kz_calcs.py) file provides the following
+The [schedules_and_embeddings/kz_calcs.py](schedules_and_embeddings/kz_calcs.py) file provides the following
 functions related to Kibble-Zurek calculations:
 
 *   ``theoretical_kink_density()`` calculates the kink density predicted for

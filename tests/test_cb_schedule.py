@@ -13,12 +13,13 @@
 #    limitations under the License.
 
 from contextvars import copy_context
+from pathlib import Path
 
 import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import set_schedule
+from demo_callbacks import set_schedule
 
 all_schedules = [
     "09-1263A-B_Advantage_system4.1_fast_annealing_schedule.csv",
@@ -28,10 +29,10 @@ all_schedules = [
 ]
 
 parametrize_vals = [
-    ("Advantage_system4.1", all_schedules, 0, {"color": "white", "fontSize": 12}),
-    ("Advantage_system6.4", all_schedules, 1, {"color": "#FFA143", "fontSize": 12}),
-    ("Advantage2_prototype2.3", all_schedules, 2, {"color": "#FFA143", "fontSize": 12}),
-    ("Advantage25_system7.9", all_schedules, 3, {"color": "#FFA143", "fontSize": 12}),
+    ("Advantage_system4.1", all_schedules, 0, ""),
+    ("Advantage_system6.4", all_schedules, 1, "no-schedule"),
+    ("Advantage2_prototype2.3", all_schedules, 2, "no-schedule"),
+    ("Advantage25_system7", all_schedules, 3, "no-schedule"),
 ]
 
 
@@ -39,11 +40,11 @@ parametrize_vals = [
 def test_schedule_selection(mocker, qpu_selection_val, schedule_name, indx, style):
     """Test schedule selection."""
 
-    mocker.patch("app.os.listdir", return_value=schedule_name)
+    mocker.patch("demo_callbacks.Path.glob", return_value=[Path(f) for f in schedule_name])
 
     def run_callback():
         context_value.set(
-            AttributeDict(**{"triggered_inputs": [{"prop_id": "qpu_selection.value"}]})
+            AttributeDict(**{"triggered_inputs": [{"prop_id": "qpu-selection.value"}]})
         )
 
         return set_schedule(qpu_selection_val)

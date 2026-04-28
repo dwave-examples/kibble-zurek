@@ -18,7 +18,7 @@ import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import alert_no_solver
+from demo_callbacks import alert_no_solver
 
 
 @pytest.mark.parametrize("input_val, output_val", [(0, True), (1, True), (0, False), (1, False)])
@@ -26,13 +26,13 @@ def test_alert_no_solver(mocker, input_val, output_val):
     """Test that a failed cloud-client client is identified."""
 
     if output_val:
-        mocker.patch("app.client", None)
+        mocker.patch("demo_callbacks.get_client", return_value=None)
     else:
-        mocker.patch("app.client", "dummy")
+        mocker.patch("demo_callbacks.get_client", return_value="dummy")
 
     def run_callback():
         context_value.set(
-            AttributeDict(**{"triggered_inputs": [{"prop_id": "btn_simulate.n_clicks"}]})
+            AttributeDict(**{"triggered_inputs": [{"prop_id": "run-button.n_clicks"}]})
         )
 
         return alert_no_solver(input_val)

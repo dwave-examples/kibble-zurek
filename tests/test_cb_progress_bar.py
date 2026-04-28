@@ -18,12 +18,12 @@ import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import set_progress_bar
-from helpers.layouts_components import job_bar_display
+from demo_callbacks import set_progress_bar
+from demo_configs import JOB_BAR_DISPLAY
 
 parametrize_vals = [
-    (f"{status}", job_bar_display[status][0], job_bar_display[status][1])
-    for status in job_bar_display.keys()
+    (f"{status}", JOB_BAR_DISPLAY[status][0], JOB_BAR_DISPLAY[status][1])
+    for status in JOB_BAR_DISPLAY.keys()
 ]
 parametrize_vals.extend([tuple(["BREAK FUNCTION", "exception", "exception"])])
 
@@ -45,6 +45,8 @@ def test_set_progress_bar(job_submit_state_val, bar_job_status_value, bar_job_st
 
     try:
         output = ctx.run(run_callback)
-        assert output == (bar_job_status_value, bar_job_status_color)
+        assert output["width"] == f"{bar_job_status_value}%"
+        assert output["backgroundColor"] == bar_job_status_color
+
     except KeyError:
         assert job_submit_state_val == "BREAK FUNCTION"

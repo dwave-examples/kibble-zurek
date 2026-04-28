@@ -14,12 +14,13 @@
 
 from contextvars import copy_context
 from io import StringIO
+from pathlib import Path
 
 import pytest
 from dash._callback_context import context_value
 from dash._utils import AttributeDict
 
-from app import load_cached_embeddings
+from demo_callbacks import load_cached_embeddings
 
 embedding_filenames = [
     "emb_Advantage_system4.1.json",
@@ -66,9 +67,9 @@ parametrize_vals = [
 def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_emb_file):
     """Test the caching of embeddings: triggered by QPU selection."""
 
-    mocker.patch("app.os.listdir", return_value=embeddings)
+    mocker.patch("demo_callbacks.Path.glob", return_value=[Path(f) for f in embeddings])
     mocker.patch("builtins.open", return_value=StringIO(json_emb_file))
-    mocker.patch("app.qpus", new=mock_qpu())
+    mocker.patch("demo_callbacks.get_solvers", return_value=mock_qpu())
 
     def run_callback():
         context_value.set(

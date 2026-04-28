@@ -1,6 +1,6 @@
 # Copyright 2025 D-Wave
 #
-#    Licensed under the A_ghzpache License, Version 2.0 (the "License");
+#    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
 #
@@ -12,25 +12,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from demo_configs import J_OPTIONS
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from helpers.kz_calcs import theoretical_kink_density
-from helpers.qa import fitted_function
+from demo_configs import J_OPTIONS
 from src.demo_enums import ProblemType
-
-__all__ = [
-    "kink_v_anneal_init_graph",
-    "kink_v_noise_init_graph",
-    "plot_kink_densities_bg",
-    "plot_kink_density",
-    "plot_spin_orientation",
-    "plot_zne_fitted_line",
-    "plot_ze_estimates",
-]
+from src.kz_calcs import theoretical_kink_density
+from src.qa import fitted_function
 
 ta_values = [5, 10, 20, 40, 80, 160, 320, 640, 1280]
 
@@ -48,6 +38,7 @@ colors_coupling = px.colors.sample_colorscale(
 )
 
 coupling_color_theme = {j: colors_coupling[i] for i, j in enumerate(J_OPTIONS)}
+
 
 def add_conherent_thermalized_labels(fig, time_range, n):
     """Adds Conherent and Thermalized annotations to a Plotly fig."""
@@ -78,6 +69,7 @@ def add_conherent_thermalized_labels(fig, time_range, n):
     )
 
     return fig
+
 
 def plot_predicted_area(time_range, n):
     """Returns predicted area scatter plots."""
@@ -124,8 +116,7 @@ def plot_ze_estimates(fig, zne_estimates):
     """Plots zero noise estimate points."""
     # Remove existing estimates
     fig["data"] = tuple(
-        trace for trace in fig["data"]
-        if "name" not in trace or trace["name"] != "ZNE Estimate"
+        trace for trace in fig["data"] if "name" not in trace or trace["name"] != "ZNE Estimate"
     )
 
     for ta_str, a in zne_estimates.items():
@@ -180,7 +171,7 @@ def plot_kink_densities_bg(
     if not schedule_name:
         schedule_name = "FALLBACK_SCHEDULE.csv"
 
-    schedule = pd.read_csv(f"helpers/{schedule_name}")
+    schedule = pd.read_csv(f"schedules_and_embeddings/{schedule_name}")
 
     A_ghz = schedule["A(s) (GHz)"]
     B_ghz = schedule["B(s) (GHz)"]
@@ -312,20 +303,19 @@ def kink_v_noise_init_graph(n):
         plotly.graph_objs.Figure: A Plotly figure object.
     """
     fig_layout = go.Layout(
-        xaxis3=dict(title="<b>Noise ratio (t<sub>programmed</sub>/t<sub>target</sub>)</b>", type="linear", range=[0, 3]),
+        xaxis3=dict(
+            title="<b>Noise ratio (t<sub>programmed</sub>/t<sub>target</sub>)</b>",
+            type="linear",
+            range=[0, 3],
+        ),
         yaxis1=get_kink_density_axis(n),
     )
 
     fig = go.Figure(data=[], layout=fig_layout)
 
     fig.update_layout(
-        legend=dict(
-            yanchor="bottom",
-            y=0.05,
-            xanchor="right",
-            x=0.97
-        ),
-        margin=dict(b=5, l=5, r=20, t=10)
+        legend=dict(yanchor="bottom", y=0.05, xanchor="right", x=0.97),
+        margin=dict(b=5, l=5, r=20, t=10),
     )
 
     return fig
@@ -432,9 +422,10 @@ def plot_kink_density(
         # Remove duplicate legend values
         names = set()
         fig.for_each_trace(
-            lambda trace:
-                trace.update(showlegend=False)
-                if (trace.name in names) else names.add(trace.name))
+            lambda trace: (
+                trace.update(showlegend=False) if (trace.name in names) else names.add(trace.name)
+            )
+        )
 
         fig.update_layout(
             xaxis3=fig.layout.xaxis3,
@@ -465,9 +456,10 @@ def plot_kink_density(
     # Remove duplicate legend values
     names = set()
     fig.for_each_trace(
-        lambda trace:
-            trace.update(showlegend=False)
-            if (trace.name in names) else names.add(trace.name))
+        lambda trace: (
+            trace.update(showlegend=False) if (trace.name in names) else names.add(trace.name)
+        )
+    )
 
     return fig
 
@@ -543,7 +535,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
         data=[spins_up, spins_down],
         layout=go.Layout(
             showlegend=False,
-            margin=dict(b=0, l=0, r=0, t=40),
+            margin=dict(b=0, l=0, r=0, t=0),
             scene=dict(
                 xaxis=dict(
                     showticklabels=False,
@@ -564,7 +556,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
 
     fig.add_layout_image(
         dict(
-            source="assets/spin_states.png",
+            source="static/spin_states.png",
             xref="paper",
             yref="paper",
             x=0.95,
@@ -579,7 +571,7 @@ def plot_spin_orientation(num_spins=512, sample=None):
     return fig
 
 
-def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, ta_str):
+def plot_zne_fitted_line(fig, coupling_data, zne_estimates, ta_str):
     """
     Fit a curve to the coupling data and plot the Zero-Noise Extrapolation (ZNE) estimate.
 
@@ -594,8 +586,6 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, ta_str):
         coupling_data (dict): A dictionary containing coupling-related data
             structured as {ta_str: [data_points]}, where each data point
             includes "lambda" and "kink_density".
-        qpu_name (str): The name of the Quantum Processing Unit (QPU) used.
-            Determines the fitting method.
         zne_estimates (dict): A dictionary to store Zero-Noise Extrapolation
             (ZNE) estimates structured as {ta_str: estimate}.
         kz_graph_display (str): The type of graph display. Typically aligns with
@@ -632,8 +622,7 @@ def plot_zne_fitted_line(fig, coupling_data, qpu_name, zne_estimates, ta_str):
         trace
         for trace in fig.data
         if not (
-            trace.name in ["Fitting Curve", "ZNE Estimate"]
-            and trace.legendgroup == f"ta_{ta_str}"
+            trace.name in ["Fitting Curve", "ZNE Estimate"] and trace.legendgroup == f"ta_{ta_str}"
         )
     ]
 
