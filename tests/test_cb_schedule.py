@@ -32,7 +32,7 @@ parametrize_vals = [
     ("Advantage_system4.1", all_schedules, 0, ""),
     ("Advantage_system6.4", all_schedules, 1, "no-schedule"),
     ("Advantage2_prototype2.3", all_schedules, 2, "no-schedule"),
-    ("Advantage25_system7.9", all_schedules, 3, "no-schedule"),
+    ("Advantage25_system7", all_schedules, 3, "no-schedule"),
 ]
 
 
