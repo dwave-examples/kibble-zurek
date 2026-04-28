@@ -18,7 +18,7 @@ import dimod
 import pandas as pd
 import pytest
 
-from src.kz_calcs import *
+from src.kz_calcs import kink_stats, theoretical_kink_density
 
 project_dir = Path(__file__).resolve().parents[1]
 schedule = pd.read_csv(project_dir / "schedules_and_embeddings" / "FALLBACK_SCHEDULE.csv")

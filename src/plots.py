@@ -22,16 +22,6 @@ from src.demo_enums import ProblemType
 from src.kz_calcs import theoretical_kink_density
 from src.qa import fitted_function
 
-__all__ = [
-    "kink_v_anneal_init_graph",
-    "kink_v_noise_init_graph",
-    "plot_kink_densities_bg",
-    "plot_kink_density",
-    "plot_spin_orientation",
-    "plot_zne_fitted_line",
-    "plot_ze_estimates",
-]
-
 ta_values = [5, 10, 20, 40, 80, 160, 320, 640, 1280]
 
 colorscale = "Portland"

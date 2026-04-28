@@ -41,10 +41,10 @@ from demo_interface import (
     get_slider_marks,
 )
 from src.demo_enums import ProblemType
-from src.kz_calcs import *
-from src.plots import *
+from src.kz_calcs import calclambda_, kink_stats, theoretical_kink_density
+from src.plots import kink_v_anneal_init_graph, kink_v_noise_init_graph, plot_kink_densities_bg, plot_kink_density, plot_spin_orientation, plot_ze_estimates, plot_zne_fitted_line
 from src.qpu_resources import get_client, get_solvers
-from src.qa import *
+from src.qa import create_bqm, find_one_to_one_embedding, get_job_status, get_samples, json_to_dict
 
 
 SCHEDULES_EMBEDDINGS_PATH = Path("schedules_and_embeddings")

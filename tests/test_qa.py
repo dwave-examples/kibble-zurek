@@ -12,12 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import dimod
 import numpy as np
-import pandas as pd
 import pytest
 
-from src.qa import *
+from src.qa import create_bqm, find_one_to_one_embedding, fitted_function, json_to_dict
 
 
 def test_create_bqm():
