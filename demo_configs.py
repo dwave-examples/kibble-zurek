@@ -26,9 +26,9 @@ of spins undergoing a phase transition, described by the Kibble-Zurek mechanism.
 # config settings for ZNE tab
 MAIN_HEADER_NM = "Zero-Noise Extrapolation"
 DESCRIPTION_NM = """
-    Statistics of a target J=-1.8 chain can be inferred by running with weaker
-    coupling and longer quench duration, however, these runs are subject to more noise.
-    Extrapolation to a denoised result is possible by collecting data at several noise levels.
+    The statistics of a target J chain can be inferred using weaker coupling and longer quench
+    durations, though this increases noise. By collecting data at multiple noise levels, it is
+    possible to extrapolate to a denoised result.
     """
 
 J_BASELINE = -1.8

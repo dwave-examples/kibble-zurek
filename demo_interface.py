@@ -292,11 +292,12 @@ def generate_settings_form() -> html.Div:
     qpu_options = generate_options(solvers)
     slider_value, slider_marks = get_slider_marks(ProblemType.KZ)
 
-    default_value = "No Leap Access"
     if DEFAULT_QPU in solvers:
         default_value = DEFAULT_QPU
     elif len(solvers):
         default_value = list(solvers.keys())[0]
+    else:
+        default_value = "No Leap Access"
 
     return html.Div(
         className="settings",

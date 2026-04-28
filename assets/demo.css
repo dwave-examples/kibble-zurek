@@ -113,12 +113,11 @@ custom CSS can be added below.
     color: var(--orange);
 }
 
-@media screen and (max-width: 1300px) {
-    .banner {
-        padding-left: 0;
-        padding-right: 0;
-    }
+.mantine-Modal-body h2 {
+    margin-top: 1rem;
+}
 
+@media screen and (max-width: 1300px) {
     .banner button {
         padding-left: 0.5rem;
         padding-right: 0.5rem;
@@ -126,5 +125,12 @@ custom CSS can be added below.
 
     .banner img {
         display: none;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    .banner {
+        padding-left: 0;
+        padding-right: 0;
     }
 }

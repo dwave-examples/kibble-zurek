@@ -124,7 +124,7 @@ Consider two extreme cases:
 2.  **Instantaneous quench**.
 
     Each spin independently orients up or down (in an unbiased system, both
-    outcomes have equal probablility).
+    outcomes have equal probability).
 
 <img src='static/1D_instantaneous.jpg' alt='1D Spin Ring Instantaneous' width='400'/>
 
