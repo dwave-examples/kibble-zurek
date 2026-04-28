@@ -36,8 +36,6 @@ from demo_configs import (
     RING_LENGTHS,
 )
 from demo_interface import (
-    CLIENT,
-    SOLVERS,
     generate_tooltips,
     get_quench_duration_setting,
     get_slider_marks,
@@ -45,6 +43,7 @@ from demo_interface import (
 from src.demo_enums import ProblemType
 from src.kz_calcs import *
 from src.plots import *
+from src.qpu_resources import get_client, get_solvers
 from src.qa import *
 
 
@@ -260,6 +259,7 @@ def load_cached_embeddings(qpu_name: str) -> tuple[dict, str]:
     """
 
     embeddings = {}  # Wipe out previous QPU's embeddings
+    solvers = get_solvers()
 
     if qpu_name:
         for file in SCHEDULES_EMBEDDINGS_PATH.glob("emb_*.json"):  # get embedding files
@@ -272,7 +272,7 @@ def load_cached_embeddings(qpu_name: str) -> tuple[dict, str]:
                 # Validate that loaded embeddings' edges are still available on the selected QPU
                 for length in list(embeddings.keys()):
                     source_graph = dimod.to_networkx_graph(create_bqm(num_spins=length)).edges
-                    target_graph = SOLVERS[qpu_name].edges
+                    target_graph = solvers[qpu_name].edges
                     emb = embeddings[length]
 
                     if not is_valid_embedding(emb, source_graph, target_graph):
@@ -338,7 +338,7 @@ def add_graph_point_kz(
     spins = int(spins)
     ta = int(ta.split(" ")[0]) if isinstance(ta, str) else ta
     embeddings = json_to_dict(embeddings)
-    sampleset_unembedded = get_samples(CLIENT, job_id, spins, J, embeddings[spins])
+    sampleset_unembedded = get_samples(get_client(), job_id, spins, J, embeddings[spins])
     _, kink_density = kink_stats(sampleset_unembedded, J)
 
     # Append the new data point
@@ -426,7 +426,7 @@ def add_graph_point_kz_nm(
     spins = int(spins)
     ta = int(ta.split(" ")[0]) if isinstance(ta, str) else ta
     embeddings = json_to_dict(embeddings)
-    sampleset_unembedded = get_samples(CLIENT, job_id, spins, J, embeddings[spins])
+    sampleset_unembedded = get_samples(get_client(), job_id, spins, J, embeddings[spins])
     _, kink_density = kink_stats(sampleset_unembedded, J)
 
     # Calculate lambda (previously kappa)
@@ -596,7 +596,7 @@ def display_graphics_spin_ring(
             raise PreventUpdate
 
         embeddings = json_to_dict(embeddings)
-        sampleset_unembedded = get_samples(CLIENT, job_id, spins, J, embeddings[spins])
+        sampleset_unembedded = get_samples(get_client(), job_id, spins, J, embeddings[spins])
         kinks_per_sample, kink_density = kink_stats(sampleset_unembedded, J)
         best_indx = np.abs(kinks_per_sample - kink_density).argmin()
         best_sample = sampleset_unembedded.record.sample[best_indx]
@@ -658,7 +658,7 @@ def submit_job(
         started.
     """
 
-    solver = SOLVERS[qpu_name]
+    solver = get_solvers()[qpu_name]
     spins = int(spins)
     ta = int(ta.split(" ")[0]) if isinstance(ta, str) else ta
 
@@ -815,7 +815,7 @@ def simulate(
     if job_submit_state == "EMBEDDING":
         try:
             spins = int(spins)
-            embedding = find_one_to_one_embedding(spins, SOLVERS[qpu_name].edges)
+            embedding = find_one_to_one_embedding(spins, get_solvers()[qpu_name].edges)
             if embedding:
                 embeddings = json_to_dict(embeddings)
                 embeddings.update({spins: embedding})
@@ -841,7 +841,7 @@ def simulate(
             )
 
     if job_submit_state in ["SUBMITTED", "PENDING", "IN_PROGRESS"]:
-        job_submit_state = get_job_status(CLIENT, job_id, job_submit_time)
+        job_submit_state = get_job_status(get_client(), job_id, job_submit_time)
         wd_time = 1000
 
         if not job_submit_state:
@@ -908,7 +908,7 @@ def reset_progress(
 )
 def alert_no_solver(run_btn: int) -> bool:
     """Show modal if no quantum computer is accessible."""
-    return not CLIENT
+    return get_client() is None
 
 
 @dash.callback(

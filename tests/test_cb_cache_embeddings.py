@@ -69,7 +69,7 @@ def test_cache_embeddings_qpu_selection(mocker, qpu_name_val, embeddings, json_e
 
     mocker.patch("demo_callbacks.Path.glob", return_value=[Path(f) for f in embeddings])
     mocker.patch("builtins.open", return_value=StringIO(json_emb_file))
-    mocker.patch("demo_callbacks.SOLVERS", new=mock_qpu())
+    mocker.patch("demo_callbacks.get_solvers", return_value=mock_qpu())
 
     def run_callback():
         context_value.set(

@@ -21,7 +21,6 @@ from itertools import chain
 
 import dash_mantine_components as dmc
 from dash import dcc, html
-from dwave.cloud import Client
 
 from demo_configs import (
     DEFAULT_QPU,
@@ -35,25 +34,9 @@ from demo_configs import (
     TOOL_TIPS_KZ_NM,
 )
 from src.demo_enums import ProblemType
+from src.qpu_resources import get_init_job_status, get_solvers
 
 THEME_COLOR = "#2d4376"
-
-# Initialize: available QPUs, initial progress-bar status
-try:
-    CLIENT = Client.from_config(client="qpu")
-    SOLVERS = {
-        qpu.name: qpu for qpu in CLIENT.get_solvers(fast_anneal_time_range__covers=[0.005, 0.1])
-    }
-
-    if len(SOLVERS) < 1:
-        raise Exception
-
-    init_job_status = "READY"
-
-except Exception:
-    SOLVERS = {}
-    CLIENT = None
-    init_job_status = "NO SOLVER"
 
 
 def slider(label: str, id: str, config: dict, marks: list | None = None) -> html.Div:
@@ -305,14 +288,15 @@ def generate_settings_form() -> html.Div:
         html.Div: A Div containing the settings for selecting the scenario, model, and solver.
     """
     spin_options = generate_options(RING_LENGTHS)
-    qpu_options = generate_options(SOLVERS)
+    solvers = get_solvers()
+    qpu_options = generate_options(solvers)
     slider_value, slider_marks = get_slider_marks(ProblemType.KZ)
 
     default_value = "No Leap Access"
-    if DEFAULT_QPU in SOLVERS:
+    if DEFAULT_QPU in solvers:
         default_value = DEFAULT_QPU
-    elif len(SOLVERS):
-        default_value = list(SOLVERS.keys())[0]
+    elif len(solvers):
+        default_value = list(solvers.keys())[0]
 
     return html.Div(
         className="settings",
@@ -422,7 +406,7 @@ def show_progress() -> html.Div:
         A Div containing the job submission status and progress bar.
     """
 
-    init_job_status = "READY"
+    init_job_status = get_init_job_status()
     job_status_style = {"color": "#AA3A3C"} if init_job_status == "NO SOLVER" else {}
 
     return html.Div(

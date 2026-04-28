@@ -272,7 +272,7 @@ def test_simulate_states(
     """Test transitions between states."""
 
     mocker.patch("demo_callbacks.get_job_status", new=mock_get_status)
-    mocker.patch("demo_callbacks.SOLVERS", new=mock_qpu())
+    mocker.patch("demo_callbacks.get_solvers", return_value=mock_qpu())
     mocker.patch("demo_callbacks.find_one_to_one_embedding", new=mock_find_embedding)
 
     def run_callback():

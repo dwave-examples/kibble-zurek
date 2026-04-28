@@ -60,7 +60,7 @@ def test_job_submission(
 ):
     """Test job submission."""
 
-    mocker.patch("demo_callbacks.SOLVERS", new=mock_qpus())
+    mocker.patch("demo_callbacks.get_solvers", return_value=mock_qpus())
     mocker.patch("demo_callbacks.DWaveSampler", new=dwave_sampler)
 
     def run_callback():
